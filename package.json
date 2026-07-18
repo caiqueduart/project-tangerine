@@ -1,20 +1,29 @@
 {
   "name": "project-tangerine",
-  "version": "1.0.0",
-  "description": "",
-  "homepage": "https://github.com/caiqueduart/project-tangerine#readme",
-  "bugs": {
-    "url": "https://github.com/caiqueduart/project-tangerine/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/caiqueduart/project-tangerine.git"
-  },
-  "license": "ISC",
-  "author": "Caique Duarte",
-  "type": "commonjs",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4",
+    "turbo": "^2.10.5",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "11.5.1"
+    }
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
