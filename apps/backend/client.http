@@ -1,0 +1,6 @@
+### Variáveis de ambiente locais
+@baseUrl = http://localhost:3000
+
+### Home
+GET {{baseUrl}}
+Accept: application/json
