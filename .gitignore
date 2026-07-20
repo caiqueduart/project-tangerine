@@ -9,6 +9,9 @@
 .settings/
 *.sublime-workspace
 
+# Draw io
+**.bkp
+
 # Dependencies
 node_modules
 .pnp
