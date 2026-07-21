@@ -1,6 +1,6 @@
 import {Body, Controller, Get, Param, Post} from '@nestjs/common';
 import {HouseService} from "./house.service";
-import {CreateHouseDto} from "../dtos/house.dto";
+import {CreateHouseDto} from "./house.dto";
 
 @Controller('house')
 export class HouseController {
@@ -11,8 +11,8 @@ export class HouseController {
         this._houseService.register(house);
     }
 
-    @Get(':id')
-    getOne(@Param('id') id: string) {
-        this._houseService.getOne(Number(id));
+    @Get(':houseId')
+    getOne(@Param('houseId') id: string) {
+        return this._houseService.getOne(Number(id));
     }
 }

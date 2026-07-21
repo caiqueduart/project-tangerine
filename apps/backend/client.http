@@ -1,5 +1,5 @@
 ### Variáveis de ambiente locais
-@baseUrl = http://localhost:3000
+@baseUrl = http://localhost:3000/townhouse/100
 
 ### Home
 GET {{baseUrl}}

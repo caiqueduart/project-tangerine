@@ -1,4 +1,5 @@
-import {ContributionStatus} from "../enums/contribution-status.enum";
+import {ContributionStatus} from "../contribution-status.enum";
+
 
 export class Contribution {
     id: number;
