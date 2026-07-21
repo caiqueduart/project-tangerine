@@ -2,18 +2,18 @@ import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, U
 import {Townhouse} from "./townhouse.entity";
 
 @Entity()
-@Unique(['townhouseId', 'identifier'])
+@Unique(['townhouse', 'identifier'])
 export class House {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
-    @ManyToOne(() => Townhouse)
-    @JoinColumn({name: 'townhouseId'})
-    townhouseId: number;
+    @ManyToOne(() => Townhouse, { nullable: false})
+    @JoinColumn({ name: 'townhouseId' })
+    townhouse: Townhouse;
 
     @Column({nullable: false, type: 'varchar', length: 50 }) /* unica em relaçao ao condominio */
     identifier: string;
 
-    @UpdateDateColumn({type: 'timestamp'})
+    @UpdateDateColumn()
     updatedAt: Date;
 }

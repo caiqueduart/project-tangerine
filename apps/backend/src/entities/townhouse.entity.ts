@@ -9,6 +9,6 @@ export class Townhouse {
     @Column({type: 'varchar', length: 100})
     name: string;
 
-    @OneToMany(() => House, (house) => house.townhouseId)
+    @OneToMany(() => House, (house) => house.townhouse)
     houses: House[];
 }

@@ -7,7 +7,7 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 @Module({
   imports: [HouseModule, TypeOrmModule.forRoot({
     type: 'sqlite',
-    database: ':memory:',
+    database: 'db.sqlite',
     autoLoadEntities: true,
     synchronize: true,
   })],
