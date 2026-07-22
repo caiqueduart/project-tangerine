@@ -25,4 +25,13 @@ GET {{baseUrl}}/townhouse
 
 ###
 # Delete condomínio
-DELETE {{baseUrl}}/townhouse/1
+DELETE {{baseUrl}}/townhouse/2
+
+###
+# Update condomínio
+PATCH {{baseUrl}}/townhouse/3
+Content-Type: application/json
+
+{
+    "name": "Corumbá 2"
+}

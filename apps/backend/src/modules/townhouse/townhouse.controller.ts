@@ -1,6 +1,6 @@
-import {Body, Controller, Delete, Get, Param, Post} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
 import {TownhouseService} from "./townhouse.service";
-import {CreateTownhouseDto} from "./townhouse.dto";
+import {CreateTownhouseDto, UpdateTownhouseDto} from "./townhouse.dto";
 import {Townhouse} from "./townhouse.entity";
 
 @Controller('townhouse')
@@ -20,6 +20,11 @@ export class TownhouseController {
   @Post()
   post(@Body() data: CreateTownhouseDto): Promise<Townhouse> {
     return this._townhouseService.post(data);
+  }
+
+  @Patch(':thId')
+  updateOne(@Param('thId') id: number, @Body() data: UpdateTownhouseDto) {
+    return this._townhouseService.updateOne(id, data)
   }
 
   @Delete(':thId')
