@@ -1,6 +1,28 @@
-### Variáveis de ambiente locais
-@baseUrl = http://localhost:3000/townhouse/100
+# Variáveis de ambiente locais
+@baseUrl = http://localhost:3000/
 
-### Home
+
+###
+# Home
 GET {{baseUrl}}
 Accept: application/json
+
+
+###
+# Post condomínio
+POST {{baseUrl}}/townhouse
+Content-Type: application/json
+
+{
+  "name": "Corumbá 2"
+}
+
+
+###
+# Get condomínio
+GET {{baseUrl}}/townhouse
+
+
+###
+# Delete condomínio
+DELETE {{baseUrl}}/townhouse/1
