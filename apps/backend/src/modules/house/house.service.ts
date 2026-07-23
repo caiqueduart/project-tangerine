@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import {CreateHouseDto, GetHouseDto} from "./house.dto";
+import { CreateHouseDto, GetHouseDto } from './house.dto';
 
 @Injectable()
 export class HouseService {
-    register(house: CreateHouseDto): void { }
+    register(house: CreateHouseDto): void {}
 
-    getOne(id: number): GetHouseDto { return {id: 0, identifier: '', townhouseId: 1} }
+    getOne(id: number): GetHouseDto {
+        return { id: 0, identifier: '', townhouseId: 1 };
+    }
 
-    getAll(): GetHouseDto[] { return [] }
+    getAll(): GetHouseDto[] {
+        return [];
+    }
 }

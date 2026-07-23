@@ -1,5 +1,5 @@
-import {IsNotEmpty, IsString, MaxLength} from "class-validator";
-import {PartialType} from "@nestjs/mapped-types";
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateTownhouseDto {
     @IsString()

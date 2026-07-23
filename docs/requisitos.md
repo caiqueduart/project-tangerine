@@ -438,5 +438,3 @@ O sistema deve respeitar privacidade, consentimento e boas práticas de uso dos 
 
 - Definir quem será o primeiro administrador do sistema.
 - Definir quem será o primeiro morador com acesso administrativo.
-
-

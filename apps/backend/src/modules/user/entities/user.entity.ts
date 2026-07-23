@@ -1,5 +1,4 @@
-import {UserSituation} from "../user-situation";
-
+import { UserSituation } from '../user-situation';
 
 export class User {
     private _passwordHash: string;

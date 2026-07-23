@@ -108,5 +108,3 @@ Critérios de aceite:
 - O sistema pode manter a sessão ativa por um período definido.
 - O usuário deve ser solicitado a fazer login novamente quando a sessão expirar.
 - O sistema deve proteger áreas internas caso a sessão esteja inválida ou expirada.
-
-
