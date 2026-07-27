@@ -2,14 +2,12 @@
 @baseUrl = http://localhost:3000/
 
 
-###
-# Home
+### Home
 GET {{baseUrl}}
 Accept: application/json
 
 
-###
-# Post condomínio
+### Post condomínio
 POST {{baseUrl}}/townhouse
 Content-Type: application/json
 
@@ -18,20 +16,17 @@ Content-Type: application/json
 }
 
 
-###
-# Get condomínio
+### Get condomínio
 GET {{baseUrl}}/townhouse
 
 
-###
-# Delete condomínio
+### Delete condomínio
 DELETE {{baseUrl}}/townhouse/2
 
-###
-# Update condomínio
+### Update condomínio
 PATCH {{baseUrl}}/townhouse/3
 Content-Type: application/json
 
 {
-    "name": "Corumbá 2"
+    "name": "Corumbá 3"
 }
