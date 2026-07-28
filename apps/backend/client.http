@@ -2,6 +2,8 @@
 @baseUrl = http://localhost:3000/
 
 
+
+
 ### Login
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
@@ -10,6 +12,11 @@ Content-Type: application/json
     "uid": "email@email.com",
     "password": "1234567a"
 }
+
+> {%
+    // Salva o token da resposta em uma variável global
+    client.global.set("auth_token", response.body);
+%}
 
 
 
@@ -30,6 +37,7 @@ Content-Type: application/json
 
 ### Get user
 GET {{baseUrl}}/user/0ba344b5-a639-43c8-92d1-f476397a0322
+Authorization: Barer {{auth_token}}
 
 
 ### Get all users

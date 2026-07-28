@@ -6,11 +6,13 @@ import { AuthService } from './services/auth.service';
 import { ConfigModule } from '@nestjs/config';
 import jwtConfig from './jwt.config';
 import { JwtModule } from '@nestjs/jwt';
+import { ValidTokenGuard } from './valid-token.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
     imports: [CommonModule, UserModule, ConfigModule.forFeature(jwtConfig), JwtModule.registerAsync(jwtConfig.asProvider())],
+    providers: [AuthService, ValidTokenGuard, { provide: APP_GUARD, useExisting: ValidTokenGuard }],
     controllers: [AuthController],
-    exports: [],
-    providers: [AuthService],
+    exports: [ValidTokenGuard],
 })
 export class AuthModule {}
