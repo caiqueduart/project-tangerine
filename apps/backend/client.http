@@ -2,9 +2,38 @@
 @baseUrl = http://localhost:3000/
 
 
-### Home
-GET {{baseUrl}}
-Accept: application/json
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "uid": "caique",
+    "password": "123456a"
+}
+
+
+
+
+
+### Register user
+POST {{baseUrl}}/user/register
+Content-Type: application/json
+
+{
+    "firstName": "Caique",
+    "lastName": "Duarte",
+    "password": "1234567a",
+    "email": "email@email.com",
+    "phone": "+55 (62) 33333-3333"
+}
+
+
+### Get user
+GET {{baseUrl}}/user/0ba344b5-a639-43c8-92d1-f476397a0322
+
+
+### Get all users
+GET {{baseUrl}}/user/all
 
 
 ### Post condomínio
@@ -16,12 +45,16 @@ Content-Type: application/json
 }
 
 
+
+
+
 ### Get condomínio
 GET {{baseUrl}}/townhouse
 
 
 ### Delete condomínio
 DELETE {{baseUrl}}/townhouse/2
+
 
 ### Update condomínio
 PATCH {{baseUrl}}/townhouse/3
