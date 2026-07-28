@@ -8,7 +8,6 @@ export class AuthController {
 
     @Post('login')
     login(@Body() credentials: LoginDto) {
-        console.log(credentials);
         return this._authService.login(credentials);
     }
 }
