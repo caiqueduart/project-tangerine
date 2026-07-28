@@ -6,7 +6,7 @@ import { BcryptService } from './services/bcrypt.service';
 
 @Module({
     controllers: [AuthController],
-    exports: [BcryptService],
+    exports: [BcryptService, HashServiceProtocol],
     providers: [
         AuthService,
         BcryptService,
