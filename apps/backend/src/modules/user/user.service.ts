@@ -2,7 +2,7 @@ import { HttpException, Injectable, InternalServerErrorException, NotFoundExcept
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserDto, GetUserDto } from './user.dto';
+import { CreateUserDto, GetUserDto } from './dtos/user.dto';
 import { HashService } from '../common/services/hash.service';
 
 @Injectable()

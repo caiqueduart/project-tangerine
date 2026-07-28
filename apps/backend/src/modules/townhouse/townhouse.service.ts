@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTownhouseDto, UpdateTownhouseDto } from './townhouse.dto';
+import { CreateTownhouseDto, UpdateTownhouseDto } from './dtos/townhouse.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Townhouse } from './townhouse.entity';
+import { Townhouse } from './entities/townhouse.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

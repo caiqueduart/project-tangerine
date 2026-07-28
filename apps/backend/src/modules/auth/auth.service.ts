@@ -1,8 +1,8 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { LoginDto } from '../dto/login.dto';
-import { UserService } from '../../user/user.service';
-import { HashService } from '../../common/services/hash.service';
-import jwtConfig from '../jwt.config';
+import { LoginDto } from './dtos/login.dto';
+import { UserService } from '../user/user.service';
+import { HashService } from '../common/services/hash.service';
+import jwtConfig from './configs/jwt.config';
 import * as config from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 

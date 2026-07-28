@@ -1,4 +1,4 @@
-import { UserSituation } from '../user-situation';
+import { UserSituation } from '../enums/user-situation';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

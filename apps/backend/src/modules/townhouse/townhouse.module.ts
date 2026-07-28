@@ -3,7 +3,7 @@ import { TownhouseController } from './townhouse.controller';
 import { TownhouseService } from './townhouse.service';
 import { HouseModule } from '../house/house.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Townhouse } from './townhouse.entity';
+import { Townhouse } from './entities/townhouse.entity';
 
 @Module({
     imports: [HouseModule, TypeOrmModule.forFeature([Townhouse])],

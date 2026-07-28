@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString } from 'class-validator';
-import { UserSituation } from '../../user/user-situation';
+import { UserSituation } from '../../user/enums/user-situation';
 
 export class LoginDto {
     @IsString()

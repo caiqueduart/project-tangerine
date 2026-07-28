@@ -1,10 +1,10 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import jwtConfig from './jwt.config';
+import jwtConfig from '../configs/jwt.config';
 import * as config from '@nestjs/config';
-import { LoginUserInfoDto } from './dto/login.dto';
+import { LoginUserInfoDto } from '../dtos/login.dto';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from './decorators/public.decorator';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class ValidTokenGuard implements CanActivate {

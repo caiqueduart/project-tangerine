@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
-import { Townhouse } from '../townhouse/townhouse.entity';
+import { Townhouse } from '../../townhouse/entities/townhouse.entity';
 
 @Entity()
 @Unique(['townhouse', 'identifier'])

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { TownhouseService } from './townhouse.service';
-import { CreateTownhouseDto, UpdateTownhouseDto } from './townhouse.dto';
-import { Townhouse } from './townhouse.entity';
+import { CreateTownhouseDto, UpdateTownhouseDto } from './dtos/townhouse.dto';
+import { Townhouse } from './entities/townhouse.entity';
 
 @Controller('townhouse')
 export class TownhouseController {
