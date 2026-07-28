@@ -13,7 +13,7 @@ export class HashService extends HashServiceProtocol {
         return bcrypt.hash(password, salt);
     }
 
-    async compare(password: string): Promise<boolean> {
-        return bcrypt.compare(password, password);
+    async compare(password: string, passwordHash: string): Promise<boolean> {
+        return bcrypt.compare(password, passwordHash);
     }
 }

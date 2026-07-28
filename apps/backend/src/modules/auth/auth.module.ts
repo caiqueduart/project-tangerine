@@ -1,19 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './services/auth.service';
 import { AuthController } from './auth.controller';
-import { HashServiceProtocol } from './hash.model';
-import { BcryptService } from './services/bcrypt.service';
+import { UserModule } from '../user/user.module';
+import { CommonModule } from '../common/common.module';
+import { AuthService } from './services/auth.service';
 
 @Module({
+    imports: [CommonModule, UserModule],
     controllers: [AuthController],
-    exports: [BcryptService, HashServiceProtocol],
-    providers: [
-        AuthService,
-        BcryptService,
-        {
-            provide: HashServiceProtocol,
-            useClass: BcryptService,
-        },
-    ],
+    exports: [],
+    providers: [AuthService],
 })
 export class AuthModule {}

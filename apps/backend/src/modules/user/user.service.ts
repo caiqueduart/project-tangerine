@@ -3,14 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto, GetUserDto } from './user.dto';
-import { BcryptService } from '../auth/services/bcrypt.service';
-import { NotFoundError } from 'rxjs';
+import { HashService } from '../common/services/hash.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User) private _userRepository: Repository<User>,
-        private _bCryptService: BcryptService,
+        private _hashService: HashService,
     ) {}
 
     async register(dto: CreateUserDto): Promise<GetUserDto> {
@@ -18,7 +17,7 @@ export class UserService {
             const user = {
                 firstName: dto.firstName,
                 lastName: dto.lastName,
-                passwordHash: await this._bCryptService.hash(dto.password),
+                passwordHash: await this._hashService.hash(dto.password),
                 email: dto.email,
                 phone: dto.phone,
             };
@@ -53,6 +52,18 @@ export class UserService {
             return await this._userRepository.find();
         } catch (error) {
             throw new InternalServerErrorException('Erro ao consultar usuários.');
+        }
+    }
+
+    async findUserByLogin(login: string): Promise<User | null> {
+        try {
+            return await this._userRepository.findOne({ where: [{ email: login }, { phone: login }] });
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
+            throw new InternalServerErrorException('Erro ao consultar usuário.');
         }
     }
 }
