@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { LoginDto } from '../dto/login.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { LoginDto, LoginUserInfoDto } from '../dto/login.dto';
 import { UserService } from '../../user/user.service';
 import { HashService } from '../../common/services/hash.service';
 
@@ -10,23 +10,21 @@ export class AuthService {
         private _userService: UserService,
     ) {}
 
-    async login(credentials: LoginDto) {
+    async login(credentials: LoginDto): Promise<LoginUserInfoDto> {
         const user = await this._userService.findUserByLogin(credentials.uid);
-        let throwException = false;
+        const unauthorizedMessage = 'Usuário ou senha inválidos.';
 
-        if (!user) throwException = true;
-
-        if (user) {
-            const isPasswordValid = await this._hashService.compare(credentials.password, user.passwordHash);
-            if (!isPasswordValid) throwException = true;
+        if (!user) {
+            throw new UnauthorizedException(unauthorizedMessage);
         }
 
-        if (throwException) {
-            return new UnauthorizedException('Usuário ou senha não inválidos.');
-        } else if (user) {
-            const { firstName, lastName, email, phone, situation } = user;
+        const isPasswordValid = await this._hashService.compare(credentials.password, user.passwordHash);
 
-            return { firstName, lastName, email, phone, situation };
+        if (!isPasswordValid) {
+            throw new UnauthorizedException(unauthorizedMessage);
         }
+
+        const { firstName, lastName, email, phone, situation } = user;
+        return { firstName, lastName, email, phone, situation };
     }
 }
