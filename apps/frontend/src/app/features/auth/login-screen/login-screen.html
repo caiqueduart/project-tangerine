@@ -9,10 +9,6 @@
             <h1 id="login-title">{{ currentTownhouse.name }}</h1>
 
             <p>{{ currentTownhouse.subtitle }}</p>
-
-            <h1 id="login-title">Condomínio não encontrado</h1>
-
-            <p>Confira o endereço informado</p>
         </header>
 
         <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
@@ -63,8 +59,8 @@
         } @else {
         <div class="context-error" role="alert">
             <mat-icon aria-hidden="true">location_off</mat-icon>
-            <p>Não encontramos um condomínio para esta URL.</p>
-            <span>Verifique o slug na URL e tente novamente.</span>
+            <h1 id="login-title">Condomínio não encontrado</h1>
+            <p>Não encontramos um condomínio para esta URL. Verifique o slug na URL e tente novamente.</p>
         </div>
         }
     </mat-card>
