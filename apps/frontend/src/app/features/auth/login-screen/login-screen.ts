@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { TownhouseContextService } from '../../../core/townhouse/townhouse-context.service';
 
 @Component({
     selector: 'app-login-screen',
@@ -13,7 +14,10 @@ import { MatInputModule } from '@angular/material/input';
     styleUrl: './login-screen.scss',
 })
 export class LoginScreen {
+    private readonly townhouseContextService = inject(TownhouseContextService);
+
     passwordVisible = false;
+    readonly townhouse = this.townhouseContextService.currentTownhouse;
 
     readonly loginForm = new FormGroup({
         identifier: new FormControl('', {
@@ -31,7 +35,7 @@ export class LoginScreen {
     }
 
     submit(): void {
-        if (this.loginForm.invalid) {
+        if (!this.townhouse() || this.loginForm.invalid) {
             this.loginForm.markAllAsTouched();
             return;
         }

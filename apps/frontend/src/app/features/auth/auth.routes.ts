@@ -4,7 +4,8 @@ import { LoginScreen } from './login-screen/login-screen';
 export const routes: Routes = [
     {
         path: '',
-        component: LoginScreen,
+        redirectTo: 'login',
+        pathMatch: 'full',
     },
     {
         path: 'login',

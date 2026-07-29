@@ -18,7 +18,9 @@
     box-sizing: border-box;
     min-height: min(948px, 100vh);
     padding: 32px 24px;
+    justify-content: center;
     width: min(430px, 100%);
+    transition: 0.2s;
 }
 
 .brand {
@@ -152,6 +154,37 @@
 
     b {
         font-weight: 700;
+    }
+}
+
+.context-error {
+    align-items: center;
+    color: var(--color-text-secondary);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+    text-align: center;
+    height: 100%;
+
+    mat-icon {
+        color: var(--color-primary);
+        font-size: 64px;
+        height: 64px;
+        width: 64px;
+    }
+
+    p {
+        color: var(--color-text-primary);
+        font:
+            700 16px/24px 'Nunito',
+            sans-serif;
+        margin: 40px 0 4px;
+    }
+
+    span {
+        font:
+            400 13px/20px 'Inter',
+            sans-serif;
     }
 }
 

@@ -1,13 +1,18 @@
 <main class="login-page">
     <mat-card class="login-card" aria-labelledby="login-title">
+        @if (townhouse(); as currentTownhouse) {
         <header class="brand">
             <div class="brand__avatar" aria-hidden="true">
                 <mat-icon>apartment</mat-icon>
             </div>
 
-            <h1 id="login-title">Corumbá II</h1>
+            <h1 id="login-title">{{ currentTownhouse.name }}</h1>
 
-            <p>Gestão do condomínio</p>
+            <p>{{ currentTownhouse.subtitle }}</p>
+
+            <h1 id="login-title">Condomínio não encontrado</h1>
+
+            <p>Confira o endereço informado</p>
         </header>
 
         <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
@@ -55,5 +60,12 @@
                 Solicitar cadastro
             </button>
         </section>
+        } @else {
+        <div class="context-error" role="alert">
+            <mat-icon aria-hidden="true">location_off</mat-icon>
+            <p>Não encontramos um condomínio para esta URL.</p>
+            <span>Verifique o slug na URL e tente novamente.</span>
+        </div>
+        }
     </mat-card>
 </main>
