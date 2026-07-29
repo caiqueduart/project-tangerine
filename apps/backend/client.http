@@ -42,6 +42,7 @@ Authorization: Barer {{auth_token}}
 
 ### Get all users
 GET {{baseUrl}}/user/all
+Authorization: Barer {{auth_token}}
 
 
 ### Post condomínio

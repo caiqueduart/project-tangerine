@@ -2,9 +2,10 @@ import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedExceptio
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../configs/jwt.config';
 import * as config from '@nestjs/config';
-import { LoginUserInfoDto } from '../dtos/login.dto';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { TOKEN_PAYLOAD_KEY } from '../auth.constants';
+import { TokenPayloadDto } from '../dtos/token-payload.dto';
 
 @Injectable()
 export class ValidTokenGuard implements CanActivate {
@@ -27,7 +28,7 @@ export class ValidTokenGuard implements CanActivate {
         const token = authorization.split(' ')[1];
 
         try {
-            const payload: LoginUserInfoDto = await this._jwtService.verifyAsync(token, this._jwtConfiguration);
+            request[TOKEN_PAYLOAD_KEY] = (await this._jwtService.verifyAsync(token, this._jwtConfiguration)) as TokenPayloadDto;
         } catch {
             throw new UnauthorizedException();
         }
