@@ -10,26 +10,26 @@ $surface: #ffffff;
 $neutral-track: #e3e3e3;
 
 :root {
-  // Tokens-base
-  --color-primary: #{$primary};
-  --color-secondary: #{$secondary};
-  --color-success: #{$success};
-  --color-text-primary: #{$text-primary};
-  --color-text-secondary: #{$text-secondary};
-  --color-background: #{$background};
-  --color-surface: #{$surface};
-  --color-neutral-track: #{$neutral-track};
+    // Tokens-base
+    --color-primary: #{$primary};
+    --color-secondary: #{$secondary};
+    --color-success: #{$success};
+    --color-text-primary: #{$text-primary};
+    --color-text-secondary: #{$text-secondary};
+    --color-background: #{$background};
+    --color-surface: #{$surface};
+    --color-neutral-track: #{$neutral-track};
 
-  // Tokens semânticos
-  --color-navigation: var(--color-primary);
-  --color-information: var(--color-primary);
-  --color-value: var(--color-primary);
-  --color-link: var(--color-primary);
-  --color-action: var(--color-secondary);
-  --color-pending: var(--color-secondary);
-  --color-successful: var(--color-success);
-  --color-confirmation: var(--color-success);
-  --color-page-background: var(--color-background);
-  --color-card-background: var(--color-surface);
-  --color-progress-track: var(--color-neutral-track);
+    // Tokens semânticos
+    --color-navigation: var(--color-primary);
+    --color-information: var(--color-primary);
+    --color-value: var(--color-primary);
+    --color-link: var(--color-primary);
+    --color-action: var(--color-secondary);
+    --color-pending: var(--color-secondary);
+    --color-successful: var(--color-success);
+    --color-confirmation: var(--color-success);
+    --color-page-background: var(--color-background);
+    --color-card-background: var(--color-surface);
+    --color-progress-track: var(--color-neutral-track);
 }

@@ -1,1 +1,59 @@
-<p>login-screen works!</p>
+<main class="login-page">
+    <mat-card class="login-card" aria-labelledby="login-title">
+        <header class="brand">
+            <div class="brand__avatar" aria-hidden="true">
+                <mat-icon>apartment</mat-icon>
+            </div>
+
+            <h1 id="login-title">Corumbá II</h1>
+
+            <p>Gestão do condomínio</p>
+        </header>
+
+        <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
+            <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Telefone ou e-mail</mat-label>
+
+                <input matInput type="text" inputmode="email" autocomplete="username" formControlName="identifier" placeholder="Ex: 11999990001 ou seu@email.com" />
+
+                <mat-error>Telefone ou e-mail é obrigatório</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Senha</mat-label>
+
+                <input matInput [type]="passwordVisible ? 'text' : 'password'" autocomplete="current-password" formControlName="password" placeholder="Digite sua senha" />
+
+                <button
+                    mat-icon-button
+                    matSuffix
+                    class="password-toggle"
+                    type="button"
+                    (click)="togglePasswordVisibility()"
+                    [attr.aria-label]="passwordVisible ? 'Ocultar senha' : 'Mostrar senha'"
+                    [attr.aria-pressed]="passwordVisible"
+                >
+                    <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+
+                <mat-error>Senha é obrigatória</mat-error>
+            </mat-form-field>
+
+            <button mat-flat-button class="primary-action" type="submit" [disabled]="loginForm.invalid">Entrar</button>
+
+            <button mat-button class="text-action" type="button">
+                <mat-icon>lock_reset</mat-icon>
+                Esqueci minha senha
+            </button>
+        </form>
+
+        <section class="access-request" aria-label="Solicitação de acesso">
+            <p>Ainda não tem acesso?</p>
+
+            <button mat-stroked-button type="button">
+                <mat-icon>person_add</mat-icon>
+                Solicitar cadastro
+            </button>
+        </section>
+    </mat-card>
+</main>

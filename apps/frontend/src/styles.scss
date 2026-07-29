@@ -2,52 +2,52 @@
 @use 'styles/palette';
 
 html {
-  height: 100%;
+    height: 100%;
 
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$blue-palette,
-        tertiary: mat.$orange-palette,
-      ),
-      typography: Nunito,
-      density: 0,
-    )
-  );
+    @include mat.theme(
+        (
+            color: (
+                primary: mat.$blue-palette,
+                tertiary: mat.$orange-palette,
+            ),
+            typography: Nunito,
+            density: 0,
+        )
+    );
 
-  // Mantém os componentes Material na paleta oficial do produto.
-  --mat-sys-primary: var(--color-primary);
-  --mat-sys-on-primary: var(--color-surface);
-  --mat-sys-primary-container: var(--color-background);
-  --mat-sys-on-primary-container: var(--color-text-primary);
-  --mat-sys-secondary: var(--color-secondary);
-  --mat-sys-on-secondary: var(--color-surface);
-  --mat-sys-secondary-container: var(--color-neutral-track);
-  --mat-sys-on-secondary-container: var(--color-text-primary);
-  --mat-sys-tertiary: var(--color-success);
-  --mat-sys-on-tertiary: var(--color-surface);
-  --mat-sys-tertiary-container: var(--color-background);
-  --mat-sys-on-tertiary-container: var(--color-text-primary);
-  --mat-sys-error: var(--color-secondary);
-  --mat-sys-on-error: var(--color-surface);
-  --mat-sys-error-container: var(--color-neutral-track);
-  --mat-sys-on-error-container: var(--color-text-primary);
-  --mat-sys-surface: var(--color-surface);
-  --mat-sys-surface-container: var(--color-surface);
-  --mat-sys-surface-container-low: var(--color-background);
-  --mat-sys-surface-container-high: var(--color-neutral-track);
-  --mat-sys-on-surface: var(--color-text-primary);
-  --mat-sys-on-surface-variant: var(--color-text-secondary);
-  --mat-sys-outline: var(--color-text-secondary);
-  --mat-sys-outline-variant: var(--color-neutral-track);
+    // Mantém os componentes Material na paleta oficial do produto.
+    --mat-sys-primary: var(--color-primary);
+    --mat-sys-on-primary: var(--color-surface);
+    --mat-sys-primary-container: var(--color-background);
+    --mat-sys-on-primary-container: var(--color-text-primary);
+    --mat-sys-secondary: var(--color-secondary);
+    --mat-sys-on-secondary: var(--color-surface);
+    --mat-sys-secondary-container: var(--color-neutral-track);
+    --mat-sys-on-secondary-container: var(--color-text-primary);
+    --mat-sys-tertiary: var(--color-success);
+    --mat-sys-on-tertiary: var(--color-surface);
+    --mat-sys-tertiary-container: var(--color-background);
+    --mat-sys-on-tertiary-container: var(--color-text-primary);
+    --mat-sys-error: var(--color-secondary);
+    --mat-sys-on-error: var(--color-surface);
+    --mat-sys-error-container: var(--color-neutral-track);
+    --mat-sys-on-error-container: var(--color-text-primary);
+    --mat-sys-surface: var(--color-surface);
+    --mat-sys-surface-container: var(--color-surface);
+    --mat-sys-surface-container-low: var(--color-background);
+    --mat-sys-surface-container-high: var(--color-neutral-track);
+    --mat-sys-on-surface: var(--color-text-primary);
+    --mat-sys-on-surface-variant: var(--color-text-secondary);
+    --mat-sys-outline: var(--color-text-secondary);
+    --mat-sys-outline-variant: var(--color-neutral-track);
 }
 
 body {
-  color-scheme: light;
-  background-color: var(--color-page-background);
-  color: var(--color-text-primary);
-  font: var(--mat-sys-body-medium);
-  margin: 0;
-  min-height: 100%;
-  height: 100%;
+    color-scheme: light;
+    background-color: var(--color-page-background);
+    color: var(--color-text-primary);
+    font: var(--mat-sys-body-medium);
+    margin: 0;
+    min-height: 100%;
+    height: 100%;
 }

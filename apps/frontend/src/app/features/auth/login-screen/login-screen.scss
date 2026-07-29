@@ -1,0 +1,193 @@
+:host {
+    display: block;
+    min-height: 100%;
+}
+
+.login-page {
+    align-items: center;
+    background: var(--color-page-background);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-card {
+    background: var(--color-background);
+    box-shadow: 0 0 20px rgb(0 0 0 / 12%);
+    box-sizing: border-box;
+    min-height: min(948px, 100vh);
+    padding: 32px 24px;
+    width: min(430px, 100%);
+}
+
+.brand {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    padding: 117px 0 40px;
+    text-align: center;
+}
+
+.brand__avatar {
+    align-items: center;
+    background: var(--color-primary);
+    border-radius: 50%;
+    color: var(--color-surface);
+    display: flex;
+    height: 64px;
+    justify-content: center;
+    width: 64px;
+
+    mat-icon {
+        font-size: 36px;
+        height: 36px;
+        width: 36px;
+    }
+}
+
+.brand h1 {
+    color: var(--color-text-primary);
+    font-family: 'Nunito', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 32px;
+    margin: 16px 0 0;
+}
+
+.brand p {
+    color: var(--color-text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    margin: 0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.field {
+    --mat-form-field-outlined-container-shape: 14px;
+    --mat-form-field-outlined-focus-label-text-color: var(--color-primary);
+    --mat-form-field-outlined-focus-outline-color: var(--color-primary);
+    --mat-form-field-outlined-input-text-color: var(--color-text-primary);
+    --mat-form-field-outlined-input-text-placeholder-color: var(--color-text-secondary);
+    --mat-form-field-outlined-label-text-color: var(--color-text-secondary);
+    --mat-form-field-outlined-outline-color: rgb(0 0 0 / 23%);
+    width: 100%;
+}
+
+.password-toggle {
+    color: #757575;
+}
+
+.primary-action {
+    --mat-button-filled-container-height: 48px;
+    --mat-button-filled-container-shape: 28px;
+    --mat-button-filled-label-text-size: 15px;
+    --mat-button-filled-label-text-weight: 700;
+    text-transform: uppercase;
+    width: 100%;
+}
+
+.text-action {
+    --mat-button-text-container-height: 37px;
+    --mat-button-text-label-text-color: var(--color-primary);
+    --mat-button-text-label-text-size: 14px;
+    --mat-button-text-label-text-weight: 600;
+    align-self: stretch;
+    text-transform: uppercase;
+}
+
+.access-request {
+    padding-top: 42px;
+    text-align: center;
+
+    p {
+        color: var(--color-text-secondary);
+        font:
+            400 12px/20px 'Inter',
+            sans-serif;
+        margin: 0 0 12px;
+    }
+
+    button {
+        --mat-button-outlined-container-height: 37px;
+        --mat-button-outlined-container-shape: 28px;
+        --mat-button-outlined-label-text-color: var(--color-primary);
+        --mat-button-outlined-label-text-size: 14px;
+        --mat-button-outlined-label-text-weight: 700;
+        --mat-button-outlined-outline-color: rgb(64 110 183 / 50%);
+        text-transform: uppercase;
+        width: 100%;
+    }
+}
+
+.test-access {
+    background: rgb(64 110 183 / 6%);
+    border: 1px dashed var(--color-primary);
+    border-radius: 12px;
+    box-sizing: border-box;
+    color: var(--color-text-secondary);
+    font:
+        400 12px/20px 'Inter',
+        sans-serif;
+    margin-top: 28px;
+    min-height: 90px;
+    padding: 12px;
+    box-shadow: none;
+
+    strong {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    b {
+        font-weight: 700;
+    }
+}
+
+@media (max-height: 820px) {
+    .login-card {
+        min-height: 100vh;
+    }
+
+    .brand {
+        padding-top: 32px;
+    }
+}
+
+@media (max-width: 429px) {
+    .login-card {
+        box-shadow: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .login-page {
+        padding: 40px;
+    }
+
+    .login-card {
+        border-radius: 24px;
+        min-height: 0;
+        padding: 40px;
+        width: 462px;
+    }
+
+    .brand {
+        padding: 8px 0 40px;
+    }
+
+    .access-request {
+        padding-top: 36px;
+    }
+}
