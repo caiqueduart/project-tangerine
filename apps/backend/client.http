@@ -15,7 +15,7 @@ Content-Type: application/json
 
 > {%
     // Salva o token da resposta em uma variável global
-    client.global.set("auth_token", response.body);
+    client.global.set("auth_token", response.body['accessToken']);
 %}
 
 

@@ -5,6 +5,7 @@ import { HashService } from '../common/services/hash.service';
 import jwtConfig from './configs/jwt.config';
 import * as config from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { RefreshTokenDTO } from './dtos/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,7 @@ export class AuthService {
         private readonly _userService: UserService,
     ) {}
 
-    async login(credentials: LoginDto): Promise<string> {
+    async login(credentials: LoginDto): Promise<object> {
         const user = await this._userService.findUserByLogin(credentials.uid);
         const unauthorizedMessage = 'Usuário ou senha inválidos.';
 
@@ -29,19 +30,29 @@ export class AuthService {
             throw new UnauthorizedException(unauthorizedMessage);
         }
 
-        return this._jwtService.signAsync(
-            {
-                id: user.id,
-                situation: user.situation,
-                firstName: user.firstName,
-                lastName: user.lastName,
-            },
-            {
-                audience: this._jwtConfiguration.audience,
-                issuer: this._jwtConfiguration.issuer,
-                secret: this._jwtConfiguration.secret,
-                expiresIn: this._jwtConfiguration.jwtTtl,
-            },
-        );
+        const accessToken = await this._generateToken(this._jwtConfiguration.ttl, {
+            id: user.id,
+            situation: user.situation,
+            firstName: user.firstName,
+        });
+
+        const refreshToken = await this._generateToken(this._jwtConfiguration.refreshTtl, {
+            id: user.id,
+        });
+
+        return { accessToken, refreshToken };
+    }
+
+    async refreshTokens(token: RefreshTokenDTO) {
+        return;
+    }
+
+    private async _generateToken(expiresIn: number, payload: object): Promise<string> {
+        return this._jwtService.signAsync(payload, {
+            audience: this._jwtConfiguration.audience,
+            issuer: this._jwtConfiguration.issuer,
+            secret: this._jwtConfiguration.secret,
+            expiresIn: expiresIn,
+        });
     }
 }
