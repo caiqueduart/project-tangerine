@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { CreateTownhouseDto, UpdateTownhouseDto } from './dtos/townhouse.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateTownhouseDto, GetTownhouseDto, UpdateTownhouseDto } from './dtos/townhouse.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Townhouse } from './entities/townhouse.entity';
 import { Repository } from 'typeorm';
@@ -16,6 +16,22 @@ export class TownhouseService {
 
     getOne(id: number): Promise<Townhouse | null> {
         return this._townhouseRepository.findOne({ where: { id: id } });
+    }
+
+    async getOneBySlug(slug: string): Promise<GetTownhouseDto> {
+        const townhouse = await this._townhouseRepository.findOne({
+            where: { slug: slug.toLowerCase() },
+        });
+
+        if (!townhouse) {
+            throw new NotFoundException('Condomínio não encontrado.');
+        }
+
+        return {
+            id: townhouse.id,
+            name: townhouse.name,
+            slug: townhouse.slug,
+        };
     }
 
     getAll(): Promise<Townhouse[]> {

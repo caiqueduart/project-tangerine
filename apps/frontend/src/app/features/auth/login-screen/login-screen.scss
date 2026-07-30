@@ -93,6 +93,19 @@
     --mat-button-filled-label-text-weight: 700;
     text-transform: uppercase;
     width: 100%;
+
+    mat-spinner {
+        --mat-progress-spinner-active-indicator-color: var(--color-surface);
+    }
+}
+
+.login-error {
+    color: var(--mat-sys-error);
+    font:
+        500 13px/18px 'Inter',
+        sans-serif;
+    margin: -8px 4px 0;
+    text-align: center;
 }
 
 .text-action {

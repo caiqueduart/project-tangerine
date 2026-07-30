@@ -9,6 +9,9 @@ export class Townhouse {
     @Column({ type: 'varchar', length: 100 })
     name: string;
 
+    @Column({ type: 'varchar', length: 30, unique: true })
+    slug: string;
+
     @OneToMany(() => House, (house) => house.townhouse)
     houses: House[];
 }

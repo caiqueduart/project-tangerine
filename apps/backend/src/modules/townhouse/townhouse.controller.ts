@@ -1,7 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { TownhouseService } from './townhouse.service';
-import { CreateTownhouseDto, UpdateTownhouseDto } from './dtos/townhouse.dto';
+import { CreateTownhouseDto, GetTownhouseDto, UpdateTownhouseDto } from './dtos/townhouse.dto';
 import { Townhouse } from './entities/townhouse.entity';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('townhouse')
 export class TownhouseController {
@@ -10,6 +11,12 @@ export class TownhouseController {
     @Get()
     getAll(): Promise<Townhouse[]> {
         return this._townhouseService.getAll();
+    }
+
+    @Public()
+    @Get('by-slug/:slug')
+    getOneBySlug(@Param('slug') slug: string): Promise<GetTownhouseDto> {
+        return this._townhouseService.getOneBySlug(slug);
     }
 
     @Get(':thId')

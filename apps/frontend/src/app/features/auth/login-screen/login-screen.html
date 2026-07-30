@@ -1,67 +1,83 @@
 <main class="login-page">
     <mat-card class="login-card" aria-labelledby="login-title">
         @if (townhouse(); as currentTownhouse) {
-        <header class="brand">
-            <div class="brand__avatar" aria-hidden="true">
-                <mat-icon>apartment</mat-icon>
-            </div>
+            <header class="brand">
+                <div class="brand__avatar" aria-hidden="true">
+                    <mat-icon>apartment</mat-icon>
+                </div>
 
-            <h1 id="login-title">{{ currentTownhouse.name }}</h1>
+                <h1 id="login-title">{{ currentTownhouse.name }}</h1>
 
-            <p>{{ currentTownhouse.subtitle }}</p>
-        </header>
+                <p>{{ currentTownhouse.subtitle }}</p>
+            </header>
 
-        <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
-            <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Telefone ou e-mail</mat-label>
+            <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
+                <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Telefone ou e-mail</mat-label>
 
-                <input matInput type="text" inputmode="email" autocomplete="username" formControlName="identifier" placeholder="Ex: 11999990001 ou seu@email.com" />
+                    <input matInput type="text" inputmode="email" autocomplete="username" formControlName="identifier" placeholder="Ex: 11999990001 ou seu@email.com" />
 
-                <mat-error>Telefone ou e-mail é obrigatório</mat-error>
-            </mat-form-field>
+                    <mat-error>Telefone ou e-mail é obrigatório</mat-error>
+                </mat-form-field>
 
-            <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Senha</mat-label>
+                <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Senha</mat-label>
 
-                <input matInput [type]="passwordVisible ? 'text' : 'password'" autocomplete="current-password" formControlName="password" placeholder="Digite sua senha" />
+                    <input matInput [type]="passwordVisible ? 'text' : 'password'" autocomplete="current-password" formControlName="password" placeholder="Digite sua senha" />
 
-                <button
-                    mat-icon-button
-                    matSuffix
-                    class="password-toggle"
-                    type="button"
-                    (click)="togglePasswordVisibility()"
-                    [attr.aria-label]="passwordVisible ? 'Ocultar senha' : 'Mostrar senha'"
-                    [attr.aria-pressed]="passwordVisible"
-                >
-                    <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    <button
+                        mat-icon-button
+                        matSuffix
+                        class="password-toggle"
+                        type="button"
+                        (click)="togglePasswordVisibility()"
+                        [attr.aria-label]="passwordVisible ? 'Ocultar senha' : 'Mostrar senha'"
+                        [attr.aria-pressed]="passwordVisible"
+                    >
+                        <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+
+                    <mat-error>Senha é obrigatória</mat-error>
+                </mat-form-field>
+
+                @if (submitError(); as errorMessage) {
+                    <p class="login-error" role="alert">{{ errorMessage }}</p>
+                }
+
+                <button mat-flat-button class="primary-action" type="submit" [disabled]="loginForm.invalid || submitting()">
+                    @if (submitting()) {
+                        <mat-spinner diameter="20" aria-label="Entrando" />
+                        <span>Entrando</span>
+                    } @else {
+                        <span>Entrar</span>
+                    }
                 </button>
 
-                <mat-error>Senha é obrigatória</mat-error>
-            </mat-form-field>
+                <button mat-button class="text-action" type="button">
+                    <mat-icon>lock_reset</mat-icon>
+                    Esqueci minha senha
+                </button>
+            </form>
 
-            <button mat-flat-button class="primary-action" type="submit" [disabled]="loginForm.invalid">Entrar</button>
+            <section class="access-request" aria-label="Solicitação de acesso">
+                <p>Ainda não tem acesso?</p>
 
-            <button mat-button class="text-action" type="button">
-                <mat-icon>lock_reset</mat-icon>
-                Esqueci minha senha
-            </button>
-        </form>
-
-        <section class="access-request" aria-label="Solicitação de acesso">
-            <p>Ainda não tem acesso?</p>
-
-            <button mat-stroked-button type="button">
-                <mat-icon>person_add</mat-icon>
-                Solicitar cadastro
-            </button>
-        </section>
+                <button mat-stroked-button type="button">
+                    <mat-icon>person_add</mat-icon>
+                    Solicitar cadastro
+                </button>
+            </section>
         } @else {
-        <div class="context-error" role="alert">
-            <mat-icon aria-hidden="true">location_off</mat-icon>
-            <h1 id="login-title">Condomínio não encontrado</h1>
-            <p>Não encontramos um condomínio para esta URL. Verifique o slug na URL e tente novamente.</p>
-        </div>
+            <div class="context-error" role="alert">
+                <mat-icon aria-hidden="true">location_off</mat-icon>
+                @if (townhouseError() === 'not-found') {
+                    <h1 id="login-title">Condomínio não encontrado</h1>
+                    <p>Não encontramos um condomínio para este endereço.</p>
+                } @else {
+                    <h1 id="login-title">Não foi possível carregar</h1>
+                    <p> Não conseguimos consultar o condomínio agora. Tente novamente em instantes. </p>
+                }
+            </div>
         }
     </mat-card>
 </main>

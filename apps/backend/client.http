@@ -28,8 +28,8 @@ Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-    "identifier": "Casa 1",
-    "townhouseId": 1
+    "identifier": "Casa 15",
+    "townhouseId": 2
 }
 
 
@@ -63,10 +63,12 @@ Authorization: Bearer {{auth_token}}
 
 ### Post condomínio
 POST {{baseUrl}}/townhouse
+Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-  "name": "Corumbá 2"
+  "name": "Corumbá 2",
+    "slug": "corumba-2"
 }
 
 
