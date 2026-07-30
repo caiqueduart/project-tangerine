@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { LoginScreen } from './login-screen/login-screen';
+import { LoginPage } from './login-page/login-page';
 
 export const routes: Routes = [
     {
@@ -9,6 +9,6 @@ export const routes: Routes = [
     },
     {
         path: 'login',
-        component: LoginScreen,
+        component: LoginPage,
     },
 ];

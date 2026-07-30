@@ -8,23 +8,21 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthService } from '../../../core/auth/auth.service';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { TownhouseContextService } from '../../../core/townhouse/townhouse-context.service';
-import { AuthSessionService } from '../../../core/auth/auth-session.service';
+import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
 
 @Component({
-    selector: 'app-login-screen',
-    imports: [ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSnackBarModule],
-    templateUrl: './login-screen.html',
-    styleUrl: './login-screen.scss',
+    selector: 'app-login-page',
+    imports: [ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule],
+    templateUrl: './login-page.html',
+    styleUrl: './login-page.scss',
 })
-export class LoginScreen {
+export class LoginPage {
     private readonly townhouseContextService = inject(TownhouseContextService);
     private readonly authService = inject(AuthService);
-    private readonly snackBar = inject(MatSnackBar);
     private readonly destroyRef = inject(DestroyRef);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
@@ -32,15 +30,15 @@ export class LoginScreen {
     passwordVisible = false;
     readonly townhouse = this.townhouseContextService.currentTownhouse;
     readonly townhouseError = this.townhouseContextService.error;
-    readonly submitting = signal(false);
     readonly submitError = signal<string | null>(null);
+    readonly submitting = signal(false);
 
     readonly loginForm = new FormGroup({
-        identifier: new FormControl('', {
+        identifier: new FormControl('email@email.com', {
             nonNullable: true,
             validators: [Validators.required],
         }),
-        password: new FormControl('', {
+        password: new FormControl('1234567a', {
             nonNullable: true,
             validators: [Validators.required],
         }),
@@ -86,11 +84,7 @@ export class LoginScreen {
                         return;
                     }
 
-                    this.snackBar.open('Login realizado com sucesso.', 'Fechar', {
-                        duration: 3000,
-                    });
-
-                    // TODO: redirecionar para a tela inicial do condomínio quando essa rota for implementada.
+                    void this.router.navigate(['/', townhouse.slug]);
                 },
                 error: (error: unknown) => {
                     this.submitError.set(this.getLoginErrorMessage(error));

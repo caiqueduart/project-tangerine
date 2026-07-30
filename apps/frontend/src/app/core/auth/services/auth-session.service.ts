@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { AuthTokens } from './auth.model';
+import { AuthTokens } from '../models/auth.model';
 
-const ACCESS_TOKEN_KEY = 'tangerine.accessToken';
-const REFRESH_TOKEN_KEY = 'tangerine.refreshToken';
-const TOWNHOUSE_SLUG_KEY = 'tangerine.townhouseSlug';
+const ACCESS_TOKEN_KEY = 'tangerine.act';
+const REFRESH_TOKEN_KEY = 'tangerine.rfst';
+const TOWNHOUSE_SLUG_KEY = 'tangerine.slug';
 
 @Injectable({ providedIn: 'root' })
 export class AuthSessionService {

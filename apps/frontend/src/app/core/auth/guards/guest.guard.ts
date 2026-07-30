@@ -1,34 +1,35 @@
 import { inject } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateFn, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
-import { AuthService } from './auth.service';
-import { AuthSessionService } from './auth-session.service';
+import { AuthSessionService } from '../services/auth-session.service';
+import { AuthService } from '../services/auth.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const guestGuard: CanActivateFn = (route) => {
     const authService = inject(AuthService);
     const authSessionService = inject(AuthSessionService);
     const router = inject(Router);
     const slug = getTownhouseSlug(route);
-    const loginUrl = createLoginUrl(router, slug, state);
 
     if (!slug || authSessionService.townhouseSlug !== slug) {
-        return loginUrl;
+        return true;
     }
 
+    const homeUrl = router.createUrlTree(['/', slug]);
+
     if (authSessionService.hasValidAccessToken()) {
-        return true;
+        return homeUrl;
     }
 
     if (!authSessionService.hasValidRefreshToken()) {
         authService.logout();
-        return loginUrl;
+        return true;
     }
 
     return authService.refreshAccessToken().pipe(
-        map(() => true),
+        map(() => homeUrl),
         catchError(() => {
             authService.logout();
-            return of(loginUrl);
+            return of(true);
         }),
     );
 };
@@ -47,14 +48,4 @@ function getTownhouseSlug(route: ActivatedRouteSnapshot): string | null {
     }
 
     return null;
-}
-
-function createLoginUrl(router: Router, slug: string | null, state: RouterStateSnapshot): UrlTree {
-    if (!slug) {
-        return router.parseUrl('/404');
-    }
-
-    return router.createUrlTree(['/', slug, 'auth', 'login'], {
-        queryParams: { returnUrl: state.url },
-    });
 }

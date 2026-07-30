@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { finalize, Observable, shareReplay, tap, throwError } from 'rxjs';
-import { API_BASE_URL } from '../config/api.config';
+import { API_BASE_URL } from '../../config/api.config';
 import { AuthSessionService } from './auth-session.service';
-import { AccessToken, AuthTokens, LoginCredentials } from './auth.model';
+import { AccessToken, AuthTokens, LoginCredentials } from '../models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
