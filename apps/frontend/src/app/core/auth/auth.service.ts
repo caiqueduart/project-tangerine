@@ -7,50 +7,43 @@ import { AccessToken, AuthTokens, LoginCredentials } from './auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly _httpClient = inject(HttpClient);
-  private readonly _authSessionService = inject(AuthSessionService);
-  private _refreshRequest: Observable<AccessToken> | null = null;
+    private readonly _httpClient = inject(HttpClient);
+    private readonly _authSessionService = inject(AuthSessionService);
+    private _refreshRequest: Observable<AccessToken> | null = null;
 
-  login(
-    credentials: LoginCredentials,
-    townhouseSlug: string,
-  ): Observable<AuthTokens> {
-    return this._httpClient
-      .post<AuthTokens>(`${API_BASE_URL}/auth/login`, credentials)
-      .pipe(
-        tap((tokens) => {
-          this._authSessionService.save(tokens, townhouseSlug);
-        }),
-      );
-  }
-
-  refreshAccessToken(): Observable<AccessToken> {
-    if (this._refreshRequest) {
-      return this._refreshRequest;
+    login(credentials: LoginCredentials, townhouseSlug: string): Observable<AuthTokens> {
+        return this._httpClient.post<AuthTokens>(`${API_BASE_URL}/auth/login`, credentials).pipe(
+            tap((tokens) => {
+                this._authSessionService.save(tokens, townhouseSlug);
+            }),
+        );
     }
 
-    const refreshToken = this._authSessionService.refreshToken;
+    refreshAccessToken(): Observable<AccessToken> {
+        if (this._refreshRequest) {
+            return this._refreshRequest;
+        }
 
-    if (!refreshToken) {
-      return throwError(() => new Error('Refresh token não encontrado.'));
+        const refreshToken = this._authSessionService.refreshToken;
+
+        if (!refreshToken) {
+            return throwError(() => new Error('Refresh token não encontrado.'));
+        }
+
+        this._refreshRequest = this._httpClient.post<AccessToken>(`${API_BASE_URL}/auth/refresh`, { refreshToken }).pipe(
+            tap(({ accessToken }) => {
+                this._authSessionService.updateAccessToken(accessToken);
+            }),
+            finalize(() => {
+                this._refreshRequest = null;
+            }),
+            shareReplay({ bufferSize: 1, refCount: false }),
+        );
+
+        return this._refreshRequest;
     }
 
-    this._refreshRequest = this._httpClient
-      .post<AccessToken>(`${API_BASE_URL}/auth/refresh`, { refreshToken })
-      .pipe(
-        tap(({ accessToken }) => {
-          this._authSessionService.updateAccessToken(accessToken);
-        }),
-        finalize(() => {
-          this._refreshRequest = null;
-        }),
-        shareReplay({ bufferSize: 1, refCount: false }),
-      );
-
-    return this._refreshRequest;
-  }
-
-  logout(): void {
-    this._authSessionService.clear();
-  }
+    logout(): void {
+        this._authSessionService.clear();
+    }
 }
