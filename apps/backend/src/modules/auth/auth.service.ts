@@ -9,7 +9,7 @@ import { RefreshTokenDTO } from './dtos/refresh-token.dto';
 import { AccessTokenPayloadDto, AuthTokenType, RefreshTokenPayloadDto } from './dtos/token-payload.dto';
 import { AuthTokensDto } from './dtos/auth-tokens.dto';
 import { User } from '../user/entities/user.entity';
-import { GetUserDto } from '../user/dtos/user.dto';
+import { GetUserDto } from '../user/dtos/get-user.dto';
 import { AccessTokenDto } from './dtos/access-token.dto';
 
 @Injectable()

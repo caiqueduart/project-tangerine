@@ -1,5 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
-import { UserSituation } from '../enums/user-situation';
+import { IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateUserDto {
     @IsNotEmpty()
@@ -26,13 +25,10 @@ export class CreateUserDto {
     @MaxLength(255)
     @IsString()
     @IsOptional()
-    email: string;
-}
+    email?: string;
 
-export class GetUserDto {
-    firstName: string;
-    lastName: string;
-    phone: string;
-    email: string;
-    situation: UserSituation;
+    @IsInt()
+    @IsPositive()
+    @IsOptional()
+    houseId?: number;
 }

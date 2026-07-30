@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 import { Townhouse } from '../../townhouse/entities/townhouse.entity';
+import { Resident } from '../../user/entities/resident.entity';
 
 @Entity()
 @Unique(['townhouse', 'identifier'])
@@ -15,4 +16,7 @@ export class House {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @OneToMany(() => Resident, (resident) => resident.house)
+    residents: Resident[];
 }

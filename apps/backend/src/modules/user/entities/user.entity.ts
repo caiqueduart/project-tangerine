@@ -1,5 +1,6 @@
 import { UserSituation } from '../enums/user-situation';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Resident } from './resident.entity';
 
 @Entity()
 export class User {
@@ -19,8 +20,11 @@ export class User {
     phone: string;
 
     @Column({ type: 'varchar', nullable: true, length: 255, unique: true })
-    email: string;
+    email: string | null;
 
     @Column({ type: 'enum', enum: UserSituation, nullable: false, default: UserSituation.INACTIVE })
     situation: UserSituation;
+
+    @OneToOne(() => Resident, (resident) => resident.user)
+    resident?: Resident;
 }

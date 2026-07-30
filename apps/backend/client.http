@@ -22,27 +22,43 @@ Content-Type: application/json
 
 
 
+### Register house
+POST {{baseUrl}}/house
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+    "identifier": "Casa 1",
+    "townhouseId": 1
+}
+
+
+
+
+
 ### Register user
 POST {{baseUrl}}/user/register
+Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
     "firstName": "Caique",
     "lastName": "Duarte",
     "password": "1234567a",
-    "email": "email@email.com",
-    "phone": "+55 (62) 33333-3333"
+    "email": "",
+    "phone": "0",
+    "houseId": 1
 }
 
 
 ### Get user
-GET {{baseUrl}}/user/0ba344b5-a639-43c8-92d1-f476397a0322
-Authorization: Barer {{auth_token}}
+GET {{baseUrl}}/user/bcf0b5e3-6d85-4726-8552-7ac4e424d81f
+Authorization: Bearer {{auth_token}}
 
 
 ### Get all users
 GET {{baseUrl}}/user/all
-Authorization: Barer {{auth_token}}
+Authorization: Bearer {{auth_token}}
 
 
 ### Post condomínio
