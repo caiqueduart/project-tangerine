@@ -1,0 +1,6 @@
+/*
+    Aplica transparência proporcional a uma cor
+*/
+@function color-percent($color, $percent: 100%) {
+    @return color-mix(in srgb, $color $percent, transparent);
+}

@@ -1,0 +1,18 @@
+@use '@angular/material' as mat;
+@use 'functions' as *;
+
+@include mat.button-overrides(
+    (
+        outlined-outline-color: color-percent(var(--color-primary), 50%),
+    )
+);
+
+mat-form-field {
+    --mat-form-field-outlined-container-shape: 15px;
+    --mat-form-field-outlined-focus-label-text-color: var(--color-primary);
+    --mat-form-field-outlined-focus-outline-color: var(--color-primary);
+    --mat-form-field-outlined-input-text-color: var(--color-text-primary);
+    --mat-form-field-outlined-input-text-placeholder-color: var(--color-text-secondary);
+    --mat-form-field-outlined-label-text-color: var(--color-text-secondary);
+    --mat-form-field-outlined-outline-color: rgb(0 0 0 / 23%);
+}

@@ -1,4 +1,4 @@
-<main class="login-page">
+<div class="login-page">
     <mat-card class="login-card" aria-labelledby="login-title">
         @if (townhouse(); as currentTownhouse) {
             <header class="brand">
@@ -12,7 +12,7 @@
             </header>
 
             <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
-                <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Telefone ou e-mail</mat-label>
 
                     <input
@@ -27,7 +27,7 @@
                     <mat-error>Telefone ou e-mail é obrigatório</mat-error>
                 </mat-form-field>
 
-                <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Senha</mat-label>
 
                     <input
@@ -98,4 +98,4 @@
             </div>
         }
     </mat-card>
-</main>
+</div>
