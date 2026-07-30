@@ -1,8 +1,18 @@
 import { UserSituation } from '../../user/enums/user-situation';
 
-export class TokenPayloadDto {
+export enum AuthTokenType {
+    ACCESS = 'access',
+    REFRESH = 'refresh',
+}
+
+export class AccessTokenPayloadDto {
     id: string;
-    phone: string;
-    email: string;
     situation: UserSituation;
+    firstName: string;
+    tokenType: AuthTokenType.ACCESS;
+}
+
+export class RefreshTokenPayloadDto {
+    id: string;
+    tokenType: AuthTokenType.REFRESH;
 }
