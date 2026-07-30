@@ -5,8 +5,12 @@ export function buildFromTownhouse<TSegments extends readonly RouteSegment[]>(sl
     return ['/', slug, ...segments] as const;
 }
 
+export const TOWNHOUSE_PARAMS = {
+    slug: 'townhouseSlug',
+} as const;
+
 export const TOWNHOUSE_SEGMENTS = {
-    root: ':townhouseSlug',
+    root: `:${TOWNHOUSE_PARAMS.slug}`,
     home: '',
     edit: 'editar',
 } as const;

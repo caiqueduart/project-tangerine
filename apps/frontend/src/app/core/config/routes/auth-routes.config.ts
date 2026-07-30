@@ -9,6 +9,7 @@ export const AUTH_SEGMENTS = {
 } as const;
 
 export const AUTH_ROUTES = {
+    root: (slug: string) => buildFromTownhouse(slug, AUTH_SEGMENTS.root),
     login: (slug: string) => buildFromTownhouse(slug, AUTH_SEGMENTS.root, AUTH_SEGMENTS.login),
     register: (slug: string) => buildFromTownhouse(slug, AUTH_SEGMENTS.root, AUTH_SEGMENTS.register),
     forgotPassword: (slug: string) => buildFromTownhouse(slug, AUTH_SEGMENTS.root, AUTH_SEGMENTS.forgotPassword),

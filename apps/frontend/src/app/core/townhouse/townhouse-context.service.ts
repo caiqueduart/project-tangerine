@@ -2,8 +2,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { catchError, map, Observable, of, tap } from 'rxjs';
-import { API_BASE_URL } from '../config/api.config';
 import { TownhouseContextModel } from '../config/models/townhouse-context.model';
+import { TOWNHOUSE_API_ROUTES } from '../config/routes/townhouse-routes.config';
 
 interface TownhouseResponse {
     id: number;
@@ -35,7 +35,7 @@ export class TownhouseContextService {
         this._loading.set(true);
         this._error.set(null);
 
-        return this.http.get<TownhouseResponse>(`${API_BASE_URL}/townhouse/by-slug/${encodeURIComponent(normalizedSlug)}`).pipe(
+        return this.http.get<TownhouseResponse>(TOWNHOUSE_API_ROUTES.bySlug(normalizedSlug)).pipe(
             map((townhouse) => ({
                 ...townhouse,
                 subtitle: 'Gestão do condomínio',

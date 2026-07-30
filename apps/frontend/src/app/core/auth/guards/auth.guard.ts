@@ -1,6 +1,9 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
+import { APP_ROUTES } from '../../config/routes/app-routes.config';
+import { AUTH_ROUTES } from '../../config/routes/auth-routes.config';
+import { TOWNHOUSE_PARAMS } from '../../config/routes/townhouse-routes.config';
 import { AuthService } from '../services/auth.service';
 import { AuthSessionService } from '../services/auth-session.service';
 
@@ -37,7 +40,7 @@ function getTownhouseSlug(route: ActivatedRouteSnapshot): string | null {
     let currentRoute: ActivatedRouteSnapshot | null = route;
 
     while (currentRoute) {
-        const slug = currentRoute.paramMap.get('slug');
+        const slug = currentRoute.paramMap.get(TOWNHOUSE_PARAMS.slug);
 
         if (slug) {
             return slug.trim().toLowerCase();
@@ -51,10 +54,10 @@ function getTownhouseSlug(route: ActivatedRouteSnapshot): string | null {
 
 function createLoginUrl(router: Router, slug: string | null, state: RouterStateSnapshot): UrlTree {
     if (!slug) {
-        return router.parseUrl('/404');
+        return router.createUrlTree(APP_ROUTES.notFound);
     }
 
-    return router.createUrlTree(['/', slug, 'auth', 'login'], {
+    return router.createUrlTree(AUTH_ROUTES.login(slug), {
         queryParams: { returnUrl: state.url },
     });
 }

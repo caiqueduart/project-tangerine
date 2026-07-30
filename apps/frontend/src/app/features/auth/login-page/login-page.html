@@ -15,7 +15,14 @@
                 <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Telefone ou e-mail</mat-label>
 
-                    <input matInput type="text" inputmode="email" autocomplete="username" formControlName="identifier" placeholder="Ex: 11999990001 ou seu@email.com" />
+                    <input
+                        matInput
+                        type="text"
+                        inputmode="email"
+                        autocomplete="username"
+                        formControlName="identifier"
+                        placeholder="Ex: 11999990001 ou seu@email.com"
+                    />
 
                     <mat-error>Telefone ou e-mail é obrigatório</mat-error>
                 </mat-form-field>
@@ -23,7 +30,13 @@
                 <mat-form-field class="field" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Senha</mat-label>
 
-                    <input matInput [type]="passwordVisible ? 'text' : 'password'" autocomplete="current-password" formControlName="password" placeholder="Digite sua senha" />
+                    <input
+                        matInput
+                        [type]="passwordVisible ? 'text' : 'password'"
+                        autocomplete="current-password"
+                        formControlName="password"
+                        placeholder="Digite sua senha"
+                    />
 
                     <button
                         mat-icon-button
@@ -44,7 +57,12 @@
                     <p class="login-error" role="alert">{{ errorMessage }}</p>
                 }
 
-                <button mat-flat-button class="primary-action" type="submit" [disabled]="loginForm.invalid || submitting()">
+                <button
+                    mat-flat-button
+                    class="primary-action"
+                    type="submit"
+                    [disabled]="loginForm.invalid || submitting()"
+                >
                     @if (submitting()) {
                         <mat-spinner diameter="20" aria-label="Entrando" />
                         <span>Entrando</span>

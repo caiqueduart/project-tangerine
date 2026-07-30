@@ -1,4 +1,5 @@
 export const APP_SEGMENTS = {
+    empty: '',
     notFound: '404',
     wildcard: '**',
 } as const;

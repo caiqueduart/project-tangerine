@@ -12,7 +12,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { TownhouseContextService } from '../../../core/townhouse/townhouse-context.service';
-import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
+import { AUTH_ROUTES } from '../../../core/config/routes/auth-routes.config';
+import { TOWNHOUSE_ROUTES } from '../../../core/config/routes/townhouse-routes.config';
 
 @Component({
     selector: 'app-login-page',
@@ -78,13 +79,15 @@ export class LoginPage {
                     this.loginForm.controls.password.reset();
 
                     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+                    const townhouseRootUrl = this.router.serializeUrl(this.router.createUrlTree(TOWNHOUSE_ROUTES.home(townhouse.slug)));
+                    const authenticationRootUrl = this.router.serializeUrl(this.router.createUrlTree(AUTH_ROUTES.root(townhouse.slug)));
 
-                    if (returnUrl?.startsWith(`/${townhouse.slug}/`) && !returnUrl.startsWith(`/${townhouse.slug}/auth/`)) {
+                    if (returnUrl && this.isWithinRoute(returnUrl, townhouseRootUrl) && !this.isWithinRoute(returnUrl, authenticationRootUrl)) {
                         void this.router.navigateByUrl(returnUrl);
                         return;
                     }
 
-                    void this.router.navigate(['/', townhouse.slug]);
+                    void this.router.navigate(TOWNHOUSE_ROUTES.home(townhouse.slug));
                 },
                 error: (error: unknown) => {
                     this.submitError.set(this.getLoginErrorMessage(error));
@@ -102,5 +105,9 @@ export class LoginPage {
         }
 
         return 'Não foi possível entrar. Tente novamente.';
+    }
+
+    private isWithinRoute(url: string, routeRootUrl: string): boolean {
+        return url === routeRootUrl || url.startsWith(`${routeRootUrl}/`) || url.startsWith(`${routeRootUrl}?`);
     }
 }

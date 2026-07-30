@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { finalize, Observable, shareReplay, tap, throwError } from 'rxjs';
-import { API_BASE_URL } from '../../config/api.config';
+import { AUTH_API_ROUTES } from '../../config/routes/auth-routes.config';
 import { AuthSessionService } from './auth-session.service';
 import { AccessToken, AuthTokens, LoginCredentials } from '../models/auth.model';
 
@@ -12,7 +12,7 @@ export class AuthService {
     private _refreshRequest: Observable<AccessToken> | null = null;
 
     login(credentials: LoginCredentials, townhouseSlug: string): Observable<AuthTokens> {
-        return this._httpClient.post<AuthTokens>(`${API_BASE_URL}/auth/login`, credentials).pipe(
+        return this._httpClient.post<AuthTokens>(AUTH_API_ROUTES.login, credentials).pipe(
             tap((tokens) => {
                 this._authSessionService.save(tokens, townhouseSlug);
             }),
@@ -30,7 +30,7 @@ export class AuthService {
             return throwError(() => new Error('Refresh token não encontrado.'));
         }
 
-        this._refreshRequest = this._httpClient.post<AccessToken>(`${API_BASE_URL}/auth/refresh`, { refreshToken }).pipe(
+        this._refreshRequest = this._httpClient.post<AccessToken>(AUTH_API_ROUTES.refresh, { refreshToken }).pipe(
             tap(({ accessToken }) => {
                 this._authSessionService.updateAccessToken(accessToken);
             }),
