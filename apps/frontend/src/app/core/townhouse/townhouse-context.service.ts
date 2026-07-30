@@ -3,7 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { TownhouseContextModel } from './townhouse-context.model';
+import { TownhouseContextModel } from '../config/models/townhouse-context.model';
 
 interface TownhouseResponse {
     id: number;
