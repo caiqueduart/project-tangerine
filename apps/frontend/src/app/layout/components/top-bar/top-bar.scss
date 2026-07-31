@@ -1,4 +1,5 @@
 @use '../../../../styles/mixins' as glass;
+@use '../../../../styles/functions' as *;
 
 :host {
     position: fixed;
@@ -33,7 +34,7 @@
     .mat-icon {
         width: 18px;
         height: 18px;
-        font-size: 18px;
+        font-size: pxToRem(18);
     }
 }
 
@@ -52,14 +53,14 @@
     p:first-child {
         color: var(--color-text-secondary);
         font:
-            400 12px/1.5 Inter,
+            400 #{pxToRem(12)}/ 1.5 Inter,
             sans-serif;
     }
 
     p:last-child {
         color: var(--color-text-primary);
         font:
-            700 14px/1.5 Nunito,
+            700 #{pxToRem(14)}/ 1.5 Nunito,
             sans-serif;
     }
 }

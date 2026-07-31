@@ -107,7 +107,7 @@
     }
 
     .bottom-bar__label {
-        font-size: 14px;
+        font-size: pxToRem(14);
         text-align: left;
         transform: translateX(-4px);
         transition: var(--navigation-motion-duration, 180ms) ease;
