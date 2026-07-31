@@ -10,15 +10,16 @@
 
     &__content {
         width: min(100%, $system-container-max-width);
-        padding: 75px 16px 100px;
+        padding: 90px 16px 100px;
         box-sizing: border-box;
         margin: auto;
+        height: 100vh;
     }
 }
 
 @media (width >= $breakpoint-lg) {
     .main-layout__content {
         padding-bottom: 50px;
-        padding-top: 90px;
+        padding-top: 100px;
     }
 }

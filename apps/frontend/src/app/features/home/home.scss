@@ -1,0 +1,17 @@
+@use '../../../styles/functions' as *;
+
+.page {
+    &__title {
+        margin: 0;
+        line-height: pxToRem(32);
+        font-size: pxToRem(24);
+    }
+
+    &__subtitle {
+        margin: 0;
+        font-size: pxToRem(14);
+        line-height: pxToRem(20);
+        color: var(--color-text-secondary);
+        font-family: Inter, sans-serif;
+    }
+}
