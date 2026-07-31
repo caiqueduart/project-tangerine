@@ -1,12 +1,17 @@
-import { Injectable } from '@angular/core';
-import { AuthTokens } from '../models/auth.model';
+import { Injectable, signal } from '@angular/core';
+import { AuthSession, LoginResponse } from '../models/auth.model';
 
 const ACCESS_TOKEN_KEY = 'tangerine.act';
 const REFRESH_TOKEN_KEY = 'tangerine.rfst';
 const TOWNHOUSE_SLUG_KEY = 'tangerine.slug';
+const AUTH_SESSION_KEY = 'tangerine.sson';
 
 @Injectable({ providedIn: 'root' })
 export class AuthSessionService {
+    private readonly _session = signal<AuthSession | null>(this._restoreSession());
+
+    readonly session = this._session.asReadonly();
+
     get accessToken(): string | null {
         return localStorage.getItem(ACCESS_TOKEN_KEY);
     }
@@ -19,10 +24,13 @@ export class AuthSessionService {
         return localStorage.getItem(TOWNHOUSE_SLUG_KEY);
     }
 
-    save(tokens: AuthTokens, townhouseSlug: string): void {
-        localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
-        localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
-        localStorage.setItem(TOWNHOUSE_SLUG_KEY, townhouseSlug);
+    save(response: LoginResponse, townhouseSlug: string): void {
+        localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
+        localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
+        localStorage.setItem(TOWNHOUSE_SLUG_KEY, response.session.house?.townhouse.slug ?? townhouseSlug);
+        localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(response.session));
+
+        this._session.set(response.session);
     }
 
     updateAccessToken(accessToken: string): void {
@@ -41,6 +49,24 @@ export class AuthSessionService {
         localStorage.removeItem(ACCESS_TOKEN_KEY);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
         localStorage.removeItem(TOWNHOUSE_SLUG_KEY);
+        localStorage.removeItem(AUTH_SESSION_KEY);
+
+        this._session.set(null);
+    }
+
+    private _restoreSession(): AuthSession | null {
+        const storedSession = localStorage.getItem(AUTH_SESSION_KEY);
+
+        if (!storedSession) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(storedSession) as AuthSession;
+        } catch {
+            localStorage.removeItem(AUTH_SESSION_KEY);
+            return null;
+        }
     }
 
     private _hasValidToken(token: string | null, expectedType: 'access' | 'refresh'): boolean {

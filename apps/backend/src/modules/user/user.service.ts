@@ -96,7 +96,10 @@ export class UserService {
 
     async findUserByLogin(login: string): Promise<User | null> {
         try {
-            return await this._userRepository.findOne({ where: [{ email: login }, { phone: login }] });
+            return await this._userRepository.findOne({
+                where: [{ email: login }, { phone: login }],
+                relations: { resident: { house: { townhouse: true } } },
+            });
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;

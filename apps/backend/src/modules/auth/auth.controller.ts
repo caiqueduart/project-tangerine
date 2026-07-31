@@ -3,8 +3,8 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { Public } from './decorators/public.decorator';
 import { RefreshTokenDTO } from './dtos/refresh-token.dto';
-import { AuthTokensDto } from './dtos/auth-tokens.dto';
 import { AccessTokenDto } from './dtos/access-token.dto';
+import { LoginResponseDto } from './dtos/login-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -12,7 +12,7 @@ export class AuthController {
 
     @Public()
     @Post('login')
-    login(@Body() credentials: LoginDto): Promise<AuthTokensDto> {
+    login(@Body() credentials: LoginDto): Promise<LoginResponseDto> {
         return this._authService.login(credentials);
     }
 

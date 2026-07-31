@@ -1,7 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthTokenType } from './dtos/token-payload.dto';
-import { UserSituation } from '../user/enums/user-situation';
 import { JwtService } from '@nestjs/jwt';
 import { HashService } from '../common/services/hash.service';
 import { UserService } from '../user/user.service';
@@ -32,15 +31,31 @@ describe('AuthService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        service = new AuthService(jwtConfiguration, jwtService as unknown as JwtService, hashService as unknown as HashService, userService as unknown as UserService);
+        service = new AuthService(
+            jwtConfiguration,
+            jwtService as unknown as JwtService,
+            hashService as unknown as HashService,
+            userService as unknown as UserService,
+        );
     });
 
     it('retorna access e refresh tokens no login', async () => {
         userService.findUserByLogin.mockResolvedValue({
             id: 'user-id',
             firstName: 'Maria',
-            situation: UserSituation.ACTIVE,
+            lastName: 'Silva',
             passwordHash: 'password-hash',
+            resident: {
+                house: {
+                    id: 7,
+                    identifier: 'Casa 7',
+                    townhouse: {
+                        id: 2,
+                        name: 'Condomínio Corumbá II',
+                        slug: 'corumba-ii',
+                    },
+                },
+            },
         });
         hashService.compare.mockResolvedValue(true);
         jwtService.signAsync.mockResolvedValueOnce('access-token').mockResolvedValueOnce('refresh-token');
@@ -53,8 +68,50 @@ describe('AuthService', () => {
         expect(result).toEqual({
             accessToken: 'access-token',
             refreshToken: 'refresh-token',
+            session: {
+                user: {
+                    id: 'user-id',
+                    firstName: 'Maria',
+                    lastName: 'Silva',
+                },
+                house: {
+                    id: 7,
+                    identifier: 'Casa 7',
+                    townhouse: {
+                        id: 2,
+                        name: 'Condomínio Corumbá II',
+                        slug: 'corumba-ii',
+                    },
+                },
+            },
         });
         expect(jwtService.signAsync).toHaveBeenCalledTimes(2);
+        expect(jwtService.signAsync).toHaveBeenNthCalledWith(
+            1,
+            {
+                id: 'user-id',
+                tokenType: AuthTokenType.ACCESS,
+            },
+            {
+                audience: jwtConfiguration.audience,
+                issuer: jwtConfiguration.issuer,
+                secret: jwtConfiguration.secret,
+                expiresIn: jwtConfiguration.ttl,
+            },
+        );
+        expect(jwtService.signAsync).toHaveBeenNthCalledWith(
+            2,
+            {
+                id: 'user-id',
+                tokenType: AuthTokenType.REFRESH,
+            },
+            {
+                audience: jwtConfiguration.audience,
+                issuer: jwtConfiguration.issuer,
+                secret: jwtConfiguration.refreshSecret,
+                expiresIn: jwtConfiguration.refreshTtl,
+            },
+        );
     });
 
     it('gera somente um novo access token quando o refresh token é válido', async () => {
@@ -62,10 +119,7 @@ describe('AuthService', () => {
             id: 'user-id',
             tokenType: AuthTokenType.REFRESH,
         });
-        userService.get.mockResolvedValue({
-            firstName: 'Maria',
-            situation: UserSituation.ACTIVE,
-        });
+        userService.get.mockResolvedValue({ id: 'user-id' });
         jwtService.signAsync.mockResolvedValueOnce('new-access-token');
 
         const result = await service.refreshAccessToken({ refreshToken: 'valid-refresh-token' });
@@ -79,8 +133,6 @@ describe('AuthService', () => {
         expect(jwtService.signAsync).toHaveBeenCalledWith(
             {
                 id: 'user-id',
-                situation: UserSituation.ACTIVE,
-                firstName: 'Maria',
                 tokenType: AuthTokenType.ACCESS,
             },
             {
@@ -100,7 +152,9 @@ describe('AuthService', () => {
             tokenType: AuthTokenType.ACCESS,
         });
 
-        await expect(service.refreshAccessToken({ refreshToken: 'access-token' })).rejects.toThrow(UnauthorizedException);
+        await expect(service.refreshAccessToken({ refreshToken: 'access-token' })).rejects.toThrow(
+            UnauthorizedException,
+        );
         expect(userService.get).not.toHaveBeenCalled();
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
@@ -108,7 +162,9 @@ describe('AuthService', () => {
     it('rejeita refresh token inválido ou expirado', async () => {
         jwtService.verifyAsync.mockRejectedValue(new Error('invalid token'));
 
-        await expect(service.refreshAccessToken({ refreshToken: 'invalid-refresh-token' })).rejects.toThrow(UnauthorizedException);
+        await expect(service.refreshAccessToken({ refreshToken: 'invalid-refresh-token' })).rejects.toThrow(
+            UnauthorizedException,
+        );
         expect(userService.get).not.toHaveBeenCalled();
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
@@ -120,7 +176,9 @@ describe('AuthService', () => {
         });
         userService.get.mockRejectedValue(new Error('user not found'));
 
-        await expect(service.refreshAccessToken({ refreshToken: 'valid-refresh-token' })).rejects.toThrow(UnauthorizedException);
+        await expect(service.refreshAccessToken({ refreshToken: 'valid-refresh-token' })).rejects.toThrow(
+            UnauthorizedException,
+        );
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 });

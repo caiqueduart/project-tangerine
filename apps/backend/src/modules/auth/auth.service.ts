@@ -9,8 +9,9 @@ import { RefreshTokenDTO } from './dtos/refresh-token.dto';
 import { AccessTokenPayloadDto, AuthTokenType, RefreshTokenPayloadDto } from './dtos/token-payload.dto';
 import { AuthTokensDto } from './dtos/auth-tokens.dto';
 import { User } from '../user/entities/user.entity';
-import { GetUserDto } from '../user/dtos/get-user.dto';
 import { AccessTokenDto } from './dtos/access-token.dto';
+import { AuthSessionDto } from './dtos/auth-session.dto';
+import { LoginResponseDto } from './dtos/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +22,7 @@ export class AuthService {
         private readonly _userService: UserService,
     ) {}
 
-    async login(credentials: LoginDto): Promise<AuthTokensDto> {
+    async login(credentials: LoginDto): Promise<LoginResponseDto> {
         const user = await this._userService.findUserByLogin(credentials.uid);
         const unauthorizedMessage = 'Usuário ou senha inválidos.';
 
@@ -35,7 +36,12 @@ export class AuthService {
             throw new UnauthorizedException(unauthorizedMessage);
         }
 
-        return this._generateRefreshAndAccessTokens(user);
+        const tokens = await this._generateRefreshAndAccessTokens(user);
+
+        return {
+            ...tokens,
+            session: this._toAuthSessionDto(user),
+        };
     }
 
     async refreshAccessToken(token: RefreshTokenDTO): Promise<AccessTokenDto> {
@@ -56,31 +62,29 @@ export class AuthService {
             throw new UnauthorizedException(unauthorizedMessage);
         }
 
-        let user: GetUserDto;
-
         try {
-            user = await this._userService.get(payload.id);
+            await this._userService.get(payload.id);
         } catch {
             throw new UnauthorizedException(unauthorizedMessage);
         }
 
         const accessTokenPayload: AccessTokenPayloadDto = {
             id: payload.id,
-            firstName: user.firstName,
-            situation: user.situation,
             tokenType: AuthTokenType.ACCESS,
         };
 
-        const accessToken = await this._generateToken(this._jwtConfiguration.ttl, accessTokenPayload, this._jwtConfiguration.secret);
+        const accessToken = await this._generateToken(
+            this._jwtConfiguration.ttl,
+            accessTokenPayload,
+            this._jwtConfiguration.secret,
+        );
 
         return { accessToken };
     }
 
-    private async _generateRefreshAndAccessTokens(user: Pick<User, 'id' | 'firstName' | 'situation'>): Promise<AuthTokensDto> {
+    private async _generateRefreshAndAccessTokens(user: Pick<User, 'id'>): Promise<AuthTokensDto> {
         const accessTokenPayload: AccessTokenPayloadDto = {
             id: user.id,
-            situation: user.situation,
-            firstName: user.firstName,
             tokenType: AuthTokenType.ACCESS,
         };
 
@@ -91,13 +95,44 @@ export class AuthService {
 
         const [accessToken, refreshToken] = await Promise.all([
             this._generateToken(this._jwtConfiguration.ttl, accessTokenPayload, this._jwtConfiguration.secret),
-            this._generateToken(this._jwtConfiguration.refreshTtl, refreshTokenPayload, this._jwtConfiguration.refreshSecret),
+            this._generateToken(
+                this._jwtConfiguration.refreshTtl,
+                refreshTokenPayload,
+                this._jwtConfiguration.refreshSecret,
+            ),
         ]);
 
         return { accessToken, refreshToken };
     }
 
-    private async _generateToken(expiresIn: number, payload: AccessTokenPayloadDto | RefreshTokenPayloadDto, secret: string): Promise<string> {
+    private _toAuthSessionDto(user: User): AuthSessionDto {
+        const house = user.resident?.house;
+
+        return {
+            user: {
+                id: user.id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+            },
+            house: house
+                ? {
+                      id: house.id,
+                      identifier: house.identifier,
+                      townhouse: {
+                          id: house.townhouse.id,
+                          name: house.townhouse.name,
+                          slug: house.townhouse.slug,
+                      },
+                  }
+                : null,
+        };
+    }
+
+    private async _generateToken(
+        expiresIn: number,
+        payload: AccessTokenPayloadDto | RefreshTokenPayloadDto,
+        secret: string,
+    ): Promise<string> {
         return this._jwtService.signAsync(payload, {
             audience: this._jwtConfiguration.audience,
             issuer: this._jwtConfiguration.issuer,

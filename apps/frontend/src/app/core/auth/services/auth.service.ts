@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { finalize, Observable, shareReplay, tap, throwError } from 'rxjs';
 import { AUTH_API_ROUTES } from '../../config/routes/auth-routes.config';
 import { AuthSessionService } from './auth-session.service';
-import { AccessToken, AuthTokens, LoginCredentials } from '../models/auth.model';
+import { AccessToken, LoginCredentials, LoginResponse } from '../models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -11,10 +11,10 @@ export class AuthService {
     private readonly _authSessionService = inject(AuthSessionService);
     private _refreshRequest: Observable<AccessToken> | null = null;
 
-    login(credentials: LoginCredentials, townhouseSlug: string): Observable<AuthTokens> {
-        return this._httpClient.post<AuthTokens>(AUTH_API_ROUTES.login, credentials).pipe(
-            tap((tokens) => {
-                this._authSessionService.save(tokens, townhouseSlug);
+    login(credentials: LoginCredentials, townhouseSlug: string): Observable<LoginResponse> {
+        return this._httpClient.post<LoginResponse>(AUTH_API_ROUTES.login, credentials).pipe(
+            tap((response) => {
+                this._authSessionService.save(response, townhouseSlug);
             }),
         );
     }
