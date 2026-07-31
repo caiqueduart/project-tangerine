@@ -5,13 +5,12 @@ import { HashService } from '../common/services/hash.service';
 import jwtConfig from './configs/jwt.config';
 import * as config from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { RefreshTokenDTO } from './dtos/refresh-token.dto';
 import { AccessTokenPayloadDto, AuthTokenType, RefreshTokenPayloadDto } from './dtos/token-payload.dto';
 import { AuthTokensDto } from './dtos/auth-tokens.dto';
 import { User } from '../user/entities/user.entity';
 import { AccessTokenDto } from './dtos/access-token.dto';
 import { AuthSessionDto } from './dtos/auth-session.dto';
-import { LoginResponseDto } from './dtos/login-response.dto';
+import { LoginResultDto } from './dtos/login-result.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +21,7 @@ export class AuthService {
         private readonly _userService: UserService,
     ) {}
 
-    async login(credentials: LoginDto): Promise<LoginResponseDto> {
+    async login(credentials: LoginDto): Promise<LoginResultDto> {
         const user = await this._userService.findUserByLogin(credentials.uid);
         const unauthorizedMessage = 'Usuário ou senha inválidos.';
 
@@ -44,12 +43,16 @@ export class AuthService {
         };
     }
 
-    async refreshAccessToken(token: RefreshTokenDTO): Promise<AccessTokenDto> {
+    async refreshAccessToken(refreshToken: string | undefined): Promise<AccessTokenDto> {
         const unauthorizedMessage = 'Refresh token inválido ou expirado.';
         let payload: RefreshTokenPayloadDto;
 
+        if (!refreshToken) {
+            throw new UnauthorizedException(unauthorizedMessage);
+        }
+
         try {
-            payload = await this._jwtService.verifyAsync<RefreshTokenPayloadDto>(token.refreshToken, {
+            payload = await this._jwtService.verifyAsync<RefreshTokenPayloadDto>(refreshToken, {
                 audience: this._jwtConfiguration.audience,
                 issuer: this._jwtConfiguration.issuer,
                 secret: this._jwtConfiguration.refreshSecret,

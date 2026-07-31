@@ -22,11 +22,6 @@ export const authGuard: CanActivateFn = (route, state) => {
         return true;
     }
 
-    if (!authSessionService.hasValidRefreshToken()) {
-        authService.logout();
-        return loginUrl;
-    }
-
     return authService.refreshAccessToken().pipe(
         map(() => true),
         catchError(() => {

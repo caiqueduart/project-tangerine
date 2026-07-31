@@ -122,7 +122,7 @@ describe('AuthService', () => {
         userService.get.mockResolvedValue({ id: 'user-id' });
         jwtService.signAsync.mockResolvedValueOnce('new-access-token');
 
-        const result = await service.refreshAccessToken({ refreshToken: 'valid-refresh-token' });
+        const result = await service.refreshAccessToken('valid-refresh-token');
 
         expect(jwtService.verifyAsync).toHaveBeenCalledWith('valid-refresh-token', {
             audience: jwtConfiguration.audience,
@@ -152,9 +152,7 @@ describe('AuthService', () => {
             tokenType: AuthTokenType.ACCESS,
         });
 
-        await expect(service.refreshAccessToken({ refreshToken: 'access-token' })).rejects.toThrow(
-            UnauthorizedException,
-        );
+        await expect(service.refreshAccessToken('access-token')).rejects.toThrow(UnauthorizedException);
         expect(userService.get).not.toHaveBeenCalled();
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
@@ -162,9 +160,7 @@ describe('AuthService', () => {
     it('rejeita refresh token inválido ou expirado', async () => {
         jwtService.verifyAsync.mockRejectedValue(new Error('invalid token'));
 
-        await expect(service.refreshAccessToken({ refreshToken: 'invalid-refresh-token' })).rejects.toThrow(
-            UnauthorizedException,
-        );
+        await expect(service.refreshAccessToken('invalid-refresh-token')).rejects.toThrow(UnauthorizedException);
         expect(userService.get).not.toHaveBeenCalled();
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
@@ -176,9 +172,12 @@ describe('AuthService', () => {
         });
         userService.get.mockRejectedValue(new Error('user not found'));
 
-        await expect(service.refreshAccessToken({ refreshToken: 'valid-refresh-token' })).rejects.toThrow(
-            UnauthorizedException,
-        );
+        await expect(service.refreshAccessToken('valid-refresh-token')).rejects.toThrow(UnauthorizedException);
         expect(jwtService.signAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejeita refresh sem cookie', async () => {
+        await expect(service.refreshAccessToken(undefined)).rejects.toThrow(UnauthorizedException);
+        expect(jwtService.verifyAsync).not.toHaveBeenCalled();
     });
 });

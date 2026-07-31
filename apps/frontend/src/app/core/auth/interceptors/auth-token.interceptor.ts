@@ -21,11 +21,6 @@ export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
                 return throwError(() => error);
             }
 
-            if (!authSessionService.hasValidRefreshToken()) {
-                redirectToLogin(authService, authSessionService, router);
-                return throwError(() => error);
-            }
-
             return authService.refreshAccessToken().pipe(
                 catchError((refreshError: unknown) => {
                     redirectToLogin(authService, authSessionService, router);

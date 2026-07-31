@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { AuthSession, LoginResponse } from '../models/auth.model';
 
 const ACCESS_TOKEN_KEY = 'tangerine.act';
-const REFRESH_TOKEN_KEY = 'tangerine.rfst';
+const LEGACY_REFRESH_TOKEN_KEY = 'tangerine.rfst';
 const TOWNHOUSE_SLUG_KEY = 'tangerine.slug';
 const AUTH_SESSION_KEY = 'tangerine.sson';
 
@@ -12,12 +12,12 @@ export class AuthSessionService {
 
     readonly session = this._session.asReadonly();
 
-    get accessToken(): string | null {
-        return localStorage.getItem(ACCESS_TOKEN_KEY);
+    constructor() {
+        localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY);
     }
 
-    get refreshToken(): string | null {
-        return localStorage.getItem(REFRESH_TOKEN_KEY);
+    get accessToken(): string | null {
+        return localStorage.getItem(ACCESS_TOKEN_KEY);
     }
 
     get townhouseSlug(): string | null {
@@ -26,7 +26,6 @@ export class AuthSessionService {
 
     save(response: LoginResponse, townhouseSlug: string): void {
         localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
-        localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
         localStorage.setItem(TOWNHOUSE_SLUG_KEY, response.session.house?.townhouse.slug ?? townhouseSlug);
         localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(response.session));
 
@@ -41,13 +40,9 @@ export class AuthSessionService {
         return this._hasValidToken(this.accessToken, 'access');
     }
 
-    hasValidRefreshToken(): boolean {
-        return this._hasValidToken(this.refreshToken, 'refresh');
-    }
-
     clear(): void {
         localStorage.removeItem(ACCESS_TOKEN_KEY);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
+        localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY);
         localStorage.removeItem(TOWNHOUSE_SLUG_KEY);
         localStorage.removeItem(AUTH_SESSION_KEY);
 

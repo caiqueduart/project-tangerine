@@ -21,11 +21,6 @@ export const guestGuard: CanActivateFn = (route) => {
         return homeUrl;
     }
 
-    if (!authSessionService.hasValidRefreshToken()) {
-        authService.logout();
-        return true;
-    }
-
     return authService.refreshAccessToken().pipe(
         map(() => homeUrl),
         catchError(() => {

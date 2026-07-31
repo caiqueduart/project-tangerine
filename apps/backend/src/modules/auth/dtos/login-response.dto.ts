@@ -1,6 +1,6 @@
 import { AuthSessionDto } from './auth-session.dto';
-import { AuthTokensDto } from './auth-tokens.dto';
+import { AccessTokenDto } from './access-token.dto';
 
-export class LoginResponseDto extends AuthTokensDto {
+export class LoginResponseDto extends AccessTokenDto {
     session: AuthSessionDto;
 }

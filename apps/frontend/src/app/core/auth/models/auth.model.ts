@@ -3,11 +3,6 @@ export interface LoginCredentials {
     password: string;
 }
 
-export interface AuthTokens {
-    accessToken: string;
-    refreshToken: string;
-}
-
 export interface AuthSessionUser {
     id: string;
     firstName: string;
@@ -31,7 +26,7 @@ export interface AuthSession {
     house: AuthSessionHouse | null;
 }
 
-export interface LoginResponse extends AuthTokens {
+export interface LoginResponse extends AccessToken {
     session: AuthSession;
 }
 
