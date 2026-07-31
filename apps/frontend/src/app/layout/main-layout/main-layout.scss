@@ -1,0 +1,25 @@
+.main-layout {
+    background: linear-gradient(
+        129deg,
+        var(--color-page-gradient-start) 8%,
+        var(--color-page-gradient-middle) 46%,
+        var(--color-page-gradient-end) 92%
+    );
+
+    &__content {
+        width: min(100%, 1200px);
+        padding: 75px 16px 100px;
+        box-sizing: border-box;
+        margin: auto;
+    }
+}
+
+@media (min-width: 900px) {
+    .main-layout__content {
+        &__content {
+            width: min(calc(100% - 120px), 900px);
+            padding-bottom: 50px;
+            padding-top: 90px;
+        }
+    }
+}

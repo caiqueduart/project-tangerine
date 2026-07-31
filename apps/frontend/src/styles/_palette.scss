@@ -5,9 +5,10 @@ $secondary: #e95623;
 $success: #2e7d5e;
 $text-primary: #0d1846;
 $text-secondary: #5a6480;
-$background: #f5f5f5;
+$background: #f4f3f0;
 $surface: #ffffff;
 $neutral-track: #e3e3e3;
+$error: #d32f2f;
 
 :root {
     // Tokens-base
@@ -19,6 +20,7 @@ $neutral-track: #e3e3e3;
     --color-background: #{$background};
     --color-surface: #{$surface};
     --color-neutral-track: #{$neutral-track};
+    --color-error: #{$error};
 
     // Tokens semânticos
     --color-navigation: var(--color-primary);
@@ -32,4 +34,13 @@ $neutral-track: #e3e3e3;
     --color-page-background: var(--color-background);
     --color-card-background: var(--color-surface);
     --color-progress-track: var(--color-neutral-track);
+
+    // Superfícies redesenhadas — barras e overlays
+    --color-glass-surface: rgb(252 250 247 / 72%);
+    --color-glass-border: rgb(255 253 250 / 78%);
+    --color-navigation-active: rgb(64 110 183 / 10%);
+    --color-page-gradient-start: #e4e1dc;
+    --color-page-gradient-middle: #eceae6;
+    --color-page-gradient-end: #f4f3f0;
+    --shadow-glass: 0 8px 28px rgb(13 24 70 / 9%);
 }

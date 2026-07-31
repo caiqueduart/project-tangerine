@@ -1,0 +1,13 @@
+@mixin surface(
+    $radius: 20px,
+    $shadow: var(--shadow-glass),
+    $background: var(--color-glass-surface),
+    $border: var(--color-glass-border)
+) {
+    background: $background;
+    border: 1px solid $border;
+    border-radius: $radius;
+    box-shadow: $shadow;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+}

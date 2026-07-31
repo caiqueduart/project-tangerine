@@ -1,0 +1,75 @@
+@use '../../../../styles/mixins' as glass;
+
+:host {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    padding: 12px;
+    display: block;
+    height: fit-content;
+}
+
+.top-bar {
+    @include glass.surface(18px, 0 4px 20px rgb(0 0 0 / 7%));
+
+    display: flex;
+    margin-inline: auto;
+    padding: 6px 12px;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.top-bar__residence-icon {
+    display: grid;
+    width: fit-content;
+    height: fit-content;
+    flex: 0 0 fit-content;
+    place-items: center;
+    padding: 8px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+
+    .mat-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+    }
+}
+
+.top-bar__residence {
+    flex: 1;
+    padding-inline: 12px;
+
+    p {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0;
+    }
+
+    p:first-child {
+        color: var(--color-text-secondary);
+        font:
+            400 12px/1.5 Inter,
+            sans-serif;
+    }
+
+    p:last-child {
+        color: var(--color-text-primary);
+        font:
+            700 14px/1.5 Nunito,
+            sans-serif;
+    }
+}
+
+@media (min-width: 900px) {
+    :host {
+        padding-top: 16px;
+    }
+
+    .top-bar {
+        width: min(100%, 720px);
+    }
+}

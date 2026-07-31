@@ -1,0 +1,18 @@
+@use 'mixins' as *;
+@use 'functions' as *;
+@use '@angular/material' as mat;
+
+.red-outlined-button {
+    color: var(--color-error);
+
+    @include mat.button-overrides(
+        (
+            outlined-outline-color: color-percent(var(--color-error), 50%),
+            outlined-label-text-color: var(--color-error),
+        )
+    );
+}
+
+.glass-surface {
+    @include surface;
+}

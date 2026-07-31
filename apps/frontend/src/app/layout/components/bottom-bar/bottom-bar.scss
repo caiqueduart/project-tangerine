@@ -1,0 +1,121 @@
+@use '../../../../styles/mixins' as glass;
+@use '../../../../styles/functions' as *;
+
+:host {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 20;
+    display: block;
+    padding: 12px;
+}
+
+.bottom-bar {
+    @include glass.surface(20px, 0 8px 28px rgb(0 0 0 / 9%));
+
+    display: grid;
+    width: min(100%, 430px);
+    margin-inline: auto;
+    padding: 4px;
+    box-sizing: border-box;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: hidden;
+}
+
+.bottom-bar__item {
+    display: flex;
+    min-width: 0;
+    height: 50px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 14px;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-family: Nunito, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    gap: 2px;
+}
+
+.bottom-bar__icon {
+    display: inline-flex;
+}
+
+.bottom-bar__label {
+    overflow: hidden;
+    max-width: 100%;
+    font-size: pxToRem(10);
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bottom-bar__item--active {
+    background: var(--color-navigation-active);
+    color: var(--color-primary);
+}
+
+@media (min-width: 900px) {
+    :host {
+        top: 8%;
+        right: auto;
+        height: 100%;
+    }
+
+    .bottom-bar {
+        width: 64px;
+        height: 80%;
+        margin: 0;
+        padding: 6px;
+        grid-template-columns: 1fr;
+        grid-auto-rows: 50px;
+        gap: 4px;
+
+        transition: width var(--navigation-motion-duration, 180ms) ease;
+    }
+
+    :host(:hover),
+    :host(:focus-within) {
+        width: 220px;
+
+        .bottom-bar {
+            width: 220px;
+        }
+
+        .bottom-bar__label {
+            width: auto;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .bottom-bar__item {
+            &:hover {
+                background: var(--color-navigation-active);
+            }
+        }
+    }
+
+    .bottom-bar__item {
+        padding: 0 12px;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 16px;
+    }
+
+    .bottom-bar__label {
+        font-size: 14px;
+        text-align: left;
+        transform: translateX(-4px);
+        transition: var(--navigation-motion-duration, 180ms) ease;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :host {
+        --navigation-motion-duration: 0ms;
+    }
+}

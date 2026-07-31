@@ -1,6 +1,15 @@
+@use 'sass:math';
+
 /*
     Aplica transparência proporcional a uma cor
 */
 @function color-percent($color, $percent: 100%) {
     @return color-mix(in srgb, $color $percent, transparent);
+}
+
+/*
+    Converte um valor em pixels para rem, com base na variável global de tamanho base da aplicação.
+*/
+@function pxToRem($px) {
+    @return math.div($px, 16) * 1rem;
 }

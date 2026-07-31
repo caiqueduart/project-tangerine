@@ -1,0 +1,37 @@
+<nav class="bottom-bar" aria-label="Navegação principal">
+    @for (item of navigationItems; track item.label) {
+        @if (item.segment !== undefined) {
+            <a
+                matRipple
+                class="bottom-bar__item"
+                [routerLink]="['/', townhouseContext.slug()]"
+                routerLinkActive="bottom-bar__item--active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                [attr.aria-label]="item.label"
+            >
+                <span
+                    class="bottom-bar__icon"
+                    [matBadge]="item.badge"
+                    [matBadgeHidden]="!item.badge"
+                    matBadgeSize="medium"
+                >
+                    <mat-icon>{{ item.icon }}</mat-icon>
+                </span>
+
+                <span class="bottom-bar__label">{{ item.label }}</span>
+            </a>
+        } @else {
+            <button matRipple class="bottom-bar__item" type="button" [attr.aria-label]="item.label">
+                <span
+                    class="bottom-bar__icon"
+                    [matBadge]="item.badge"
+                    [matBadgeHidden]="!item.badge"
+                    matBadgeSize="small"
+                >
+                    <mat-icon>{{ item.icon }}</mat-icon>
+                </span>
+                <span class="bottom-bar__label">{{ item.label }}</span>
+            </button>
+        }
+    }
+</nav>

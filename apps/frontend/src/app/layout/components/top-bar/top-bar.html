@@ -1,0 +1,25 @@
+<header class="top-bar" aria-label="Residência atual">
+    <span class="top-bar__residence-icon" aria-hidden="true">
+        <mat-icon>apartment</mat-icon>
+    </span>
+
+    <span class="top-bar__residence">
+        <p>{{ townhouseContext.currentTownhouse()?.name ?? 'Condomínio' }}</p>
+        <p>{{ selectedHouse }}</p>
+    </span>
+
+    <button
+        mat-icon-button
+        class="top-bar__account"
+        #accountMenuTrigger="matMenuTrigger"
+        [matMenuTriggerFor]="isDesktop() ? accountMenu : null"
+        (click)="openAccountSheet()"
+        aria-label="Abrir menu do usuário"
+    >
+        <mat-icon>account_circle</mat-icon>
+    </button>
+</header>
+
+<mat-menu #accountMenu="matMenu" class="account-menu-panel" xPosition="before">
+    <app-account-menu-content (closed)="accountMenuTrigger.closeMenu()" />
+</mat-menu>

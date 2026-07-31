@@ -1,0 +1,25 @@
+<section class="account-menu-content" aria-label="Minha conta">
+    <header class="account-menu-content__header">
+        <h2>Minha conta</h2>
+
+        <button mat-icon-button aria-label="Fechar" (click)="close()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </header>
+
+    <div class="account-menu-content__resident">
+        <span class="account-menu-content__avatar" aria-hidden="true">
+            <mat-icon>person</mat-icon>
+        </span>
+
+        <span>
+            <p>{{ residentName }}</p>
+            <p>{{ selectedHouse }} · Morador</p>
+        </span>
+    </div>
+
+    <button mat-stroked-button class="account-menu-content__logout red-outlined-button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Sair da conta
+    </button>
+</section>
