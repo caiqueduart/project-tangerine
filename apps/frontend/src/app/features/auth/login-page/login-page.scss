@@ -1,3 +1,5 @@
+@use '../../../../styles/variables' as *;
+
 :host {
     display: block;
     min-height: 100%;
@@ -134,7 +136,7 @@
     }
 }
 
-@media (max-height: 820px) {
+@media (height <= $breakpoint-compact-height) {
     .login-card {
         min-height: 100vh;
     }
@@ -144,13 +146,13 @@
     }
 }
 
-@media (max-width: 429px) {
+@media (width < $breakpoint-sm) {
     .login-card {
         box-shadow: none;
     }
 }
 
-@media (min-width: 768px) {
+@media (width >= $breakpoint-md) {
     .login-page {
         padding: 40px;
     }

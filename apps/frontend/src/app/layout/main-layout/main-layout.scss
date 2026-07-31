@@ -1,3 +1,5 @@
+@use '../../../styles/variables' as *;
+
 .main-layout {
     background: linear-gradient(
         129deg,
@@ -7,19 +9,16 @@
     );
 
     &__content {
-        width: min(100%, 1200px);
+        width: min(100%, $system-container-max-width);
         padding: 75px 16px 100px;
         box-sizing: border-box;
         margin: auto;
     }
 }
 
-@media (min-width: 900px) {
+@media (width >= $breakpoint-lg) {
     .main-layout__content {
-        &__content {
-            width: min(calc(100% - 120px), 900px);
-            padding-bottom: 50px;
-            padding-top: 90px;
-        }
+        padding-bottom: 50px;
+        padding-top: 90px;
     }
 }

@@ -1,5 +1,6 @@
 @use '../../../../styles/mixins' as glass;
 @use '../../../../styles/functions' as *;
+@use '../../../../styles/variables' as *;
 
 :host {
     position: fixed;
@@ -59,7 +60,7 @@
     color: var(--color-primary);
 }
 
-@media (min-width: 900px) {
+@media (width >= $breakpoint-lg) {
     :host {
         top: 8%;
         right: auto;

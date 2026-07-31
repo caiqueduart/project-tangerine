@@ -1,5 +1,6 @@
 @use '../../../../styles/mixins' as glass;
 @use '../../../../styles/functions' as *;
+@use '../../../../styles/variables' as *;
 
 :host {
     position: fixed;
@@ -65,7 +66,7 @@
     }
 }
 
-@media (min-width: 900px) {
+@media (width >= $breakpoint-lg) {
     :host {
         padding-top: 16px;
     }
