@@ -3,6 +3,7 @@ import { authGuard } from './core/auth/guards/auth.guard';
 import { guestGuard } from './core/auth/guards/guest.guard';
 import { APP_SEGMENTS } from './core/config/routes/app-routes.config';
 import { AUTH_SEGMENTS } from './core/config/routes/auth-routes.config';
+import { SYSTEM_ADMIN_SEGMENTS } from './core/config/routes/system-admin-routes.config';
 import { TOWNHOUSE_SEGMENTS } from './core/config/routes/townhouse-routes.config';
 
 export const routes: Routes = [
@@ -10,6 +11,10 @@ export const routes: Routes = [
         path: APP_SEGMENTS.notFound,
         loadComponent: () =>
             import('./features/errors/not-found-screen/not-found-screen').then((m) => m.NotFoundScreen),
+    },
+    {
+        path: SYSTEM_ADMIN_SEGMENTS.root,
+        loadChildren: () => import('./features/system-admin/system-admin.routes').then((r) => r.routes),
     },
     {
         path: TOWNHOUSE_SEGMENTS.root,
