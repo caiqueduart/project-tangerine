@@ -2,10 +2,6 @@
 @use '../../../../styles/variables' as *;
 
 .system-admin-townhouses {
-    margin: 0 auto;
-    max-width: $system-container-max-width;
-    padding: 24px 16px 40px;
-
     &__header {
         align-items: flex-start;
         flex-direction: column;
@@ -13,12 +9,6 @@
         gap: 20px;
         justify-content: space-between;
         margin-bottom: 24px;
-
-        h1 {
-            font-size: pxToRem(30);
-            line-height: pxToRem(38);
-            margin: 4px 0 2px;
-        }
 
         p {
             color: var(--color-text-secondary);
@@ -112,8 +102,6 @@
 
 @media (width >= $breakpoint-md) {
     .system-admin-townhouses {
-        padding: 40px 32px 56px;
-
         &__header {
             align-items: center;
             flex-direction: row;

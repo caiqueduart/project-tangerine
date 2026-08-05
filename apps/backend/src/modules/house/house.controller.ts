@@ -1,18 +1,34 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { HouseService } from './house.service';
-import { CreateHouseDto } from './dtos/house.dto';
+import { CreateHouseDto, CreateHousesBatchDto, GetHouseDto, UpdateHouseDto } from './dtos/house.dto';
 
 @Controller('house')
 export class HouseController {
     constructor(private _houseService: HouseService) {}
 
     @Post()
-    post(@Body() house: CreateHouseDto) {
-        this._houseService.register(house);
+    post(@Body() house: CreateHouseDto): Promise<GetHouseDto> {
+        return this._houseService.register(house);
+    }
+
+    @Post('batch')
+    postBatch(@Body() houses: CreateHousesBatchDto): Promise<GetHouseDto[]> {
+        return this._houseService.registerBatch(houses);
     }
 
     @Get(':houseId')
-    getOne(@Param('houseId') id: string) {
-        return this._houseService.getOne(Number(id));
+    getOne(@Param('houseId', ParseIntPipe) id: number): Promise<GetHouseDto> {
+        return this._houseService.getOne(id);
+    }
+
+    @Patch(':houseId')
+    updateOne(@Param('houseId', ParseIntPipe) id: number, @Body() house: UpdateHouseDto): Promise<GetHouseDto> {
+        return this._houseService.updateOne(id, house);
+    }
+
+    @Delete(':houseId')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    deleteOne(@Param('houseId', ParseIntPipe) id: number): Promise<void> {
+        return this._houseService.deleteOne(id);
     }
 }

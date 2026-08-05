@@ -69,7 +69,6 @@ Estas instruções valem para todo o repositório. Antes de alterar qualquer arq
 - Evite conteúdo encoberto por barras fixas; reserve o espaçamento necessário no container principal.
 - Use a escala padrão de breakpoints definida em `_variables.scss`: `sm` em `640px`, `md` em `768px`, `lg` em `1024px`, `xl` em `1280px` e `2xl` em `1536px`.
 - Declare os valores dos breakpoints em pixels.
-- Use `$breakpoint-compact-height` em `800px` para adaptações relacionadas à altura reduzida da viewport.
 - Importe e reutilize os tokens `$breakpoint-sm`, `$breakpoint-md`, `$breakpoint-lg`, `$breakpoint-xl` e `$breakpoint-2xl`; não declare breakpoints avulsos diretamente nos componentes.
 - Use a sintaxe moderna de intervalos nas media queries, como `(width >= $breakpoint-md)` e `(width < $breakpoint-sm)`.
 - Use `$system-container-max-width`, definido em `1280px`, como limite de largura do container principal do sistema.

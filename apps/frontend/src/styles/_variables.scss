@@ -3,6 +3,17 @@ $breakpoint-md: 768px;
 $breakpoint-lg: 1024px;
 $breakpoint-xl: 1280px;
 $breakpoint-2xl: 1536px;
-$breakpoint-compact-height: 800px;
-
 $system-container-max-width: 1280px;
+
+:root {
+    /* SIZES */
+    --system-container-max-width: 1280px;
+    --system-content-padding: clamp(20px, 3vw, 60px) clamp(20px, 3vw, 40px);
+
+    /* BREAKPOINTS */
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+}

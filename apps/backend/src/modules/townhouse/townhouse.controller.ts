@@ -1,7 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { TownhouseService } from './townhouse.service';
-import { CreateTownhouseDto, GetTownhouseDto, UpdateTownhouseDto } from './dtos/townhouse.dto';
-import { Townhouse } from './entities/townhouse.entity';
+import {
+    CreateTownhouseDto,
+    GetTownhouseDto,
+    TownhouseDetailsDto,
+    TownhouseListItemDto,
+    UpdateTownhouseDto,
+} from './dtos/townhouse.dto';
 import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('townhouse')
@@ -9,7 +14,7 @@ export class TownhouseController {
     constructor(private readonly _townhouseService: TownhouseService) {}
 
     @Get()
-    getAll(): Promise<Townhouse[]> {
+    getAll(): Promise<TownhouseListItemDto[]> {
         return this._townhouseService.getAll();
     }
 
@@ -20,22 +25,23 @@ export class TownhouseController {
     }
 
     @Get(':thId')
-    getOne(@Param('thId') id: number): Promise<Townhouse | null> {
+    getOne(@Param('thId', ParseIntPipe) id: number): Promise<TownhouseDetailsDto> {
         return this._townhouseService.getOne(id);
     }
 
     @Post()
-    post(@Body() data: CreateTownhouseDto): Promise<Townhouse> {
+    post(@Body() data: CreateTownhouseDto): Promise<TownhouseDetailsDto> {
         return this._townhouseService.post(data);
     }
 
     @Patch(':thId')
-    updateOne(@Param('thId') id: number, @Body() data: UpdateTownhouseDto) {
+    updateOne(@Param('thId', ParseIntPipe) id: number, @Body() data: UpdateTownhouseDto): Promise<TownhouseDetailsDto> {
         return this._townhouseService.updateOne(id, data);
     }
 
     @Delete(':thId')
-    deleteOne(@Param('thId') id: number) {
+    @HttpCode(HttpStatus.NO_CONTENT)
+    deleteOne(@Param('thId', ParseIntPipe) id: number): Promise<void> {
         return this._townhouseService.deleteOne(id);
     }
 }

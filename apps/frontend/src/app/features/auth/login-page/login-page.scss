@@ -136,27 +136,7 @@
     }
 }
 
-@media (height <= $breakpoint-compact-height) {
-    .login-card {
-        min-height: 100vh;
-    }
-
-    .brand {
-        padding-top: 32px;
-    }
-}
-
-@media (width < $breakpoint-sm) {
-    .login-card {
-        box-shadow: none;
-    }
-}
-
-@media (width >= $breakpoint-md) {
-    .login-page {
-        padding: 40px;
-    }
-
+@media (height >= $breakpoint-md) {
     .login-card {
         border-radius: 24px;
         min-height: 0;
@@ -170,5 +150,11 @@
 
     .access-request {
         padding-top: 36px;
+    }
+}
+
+@media (width < $breakpoint-sm) {
+    .login-card {
+        box-shadow: none;
     }
 }

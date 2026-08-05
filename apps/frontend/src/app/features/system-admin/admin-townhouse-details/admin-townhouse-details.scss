@@ -2,9 +2,6 @@
 @use '../../../../styles/variables' as *;
 
 .system-admin-townhouse-details {
-    max-width: $system-container-max-width;
-    padding: 16px 16px 48px;
-
     &__header {
         align-items: flex-start;
         display: flex;
@@ -189,8 +186,6 @@
 
 @media (width >= $breakpoint-md) {
     .system-admin-townhouse-details {
-        padding: 32px 32px 56px;
-
         &__header {
             align-items: center;
             flex-direction: row;
