@@ -8,6 +8,39 @@
     )
 );
 
+.app-snackbar {
+    --snackbar-container-color: color-mix(in srgb, var(--color-information) 10%, var(--color-surface));
+    --snackbar-content-color: var(--color-text-primary);
+    --snackbar-action-color: var(--color-information);
+
+    @include mat.snack-bar-overrides(
+        (
+            container-color: var(--snackbar-container-color),
+            supporting-text-color: var(--snackbar-content-color),
+            button-color: var(--snackbar-action-color),
+        )
+    );
+
+    &--error {
+        --snackbar-container-color: color-mix(in srgb, var(--color-error) 10%, var(--color-surface));
+        --snackbar-action-color: var(--color-error);
+    }
+
+    &--success {
+        --snackbar-container-color: color-mix(in srgb, var(--color-successful) 10%, var(--color-surface));
+        --snackbar-action-color: var(--color-successful);
+    }
+
+    &--warning {
+        --snackbar-container-color: color-mix(in srgb, var(--color-pending) 10%, var(--color-surface));
+        --snackbar-action-color: var(--color-pending);
+    }
+}
+
+body .app-snackbar:is(.app-snackbar--error, .app-snackbar--info, .app-snackbar--success, .app-snackbar--warning) {
+    margin-block-start: 18%;
+}
+
 mat-form-field {
     --mat-form-field-outlined-container-shape: 15px;
     --mat-form-field-outlined-focus-label-text-color: var(--color-primary);

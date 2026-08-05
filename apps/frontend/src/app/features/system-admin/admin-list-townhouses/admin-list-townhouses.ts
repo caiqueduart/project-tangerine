@@ -6,9 +6,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import { SYSTEM_ADMIN_ROUTES } from '../../../core/config/routes/system-admin-routes.config';
+import { LabelComponent } from '../../../shared/components/label/label.component';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { TownhouseFormDialog } from '../components/townhouse-form-dialog/townhouse-form-dialog';
 import { SystemAdminTownhouseListItem } from '../models/admin-townhouse.model';
 import { AdminTownhouseService } from '../services/admin-townhouse.service';
@@ -22,8 +23,8 @@ import { AdminTownhouseService } from '../services/admin-townhouse.service';
         MatIconModule,
         MatInputModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         RouterLink,
+        LabelComponent,
     ],
     templateUrl: './admin-list-townhouses.html',
     styleUrl: './admin-list-townhouses.scss',
@@ -31,7 +32,7 @@ import { AdminTownhouseService } from '../services/admin-townhouse.service';
 export class AdminListTownhouses {
     private readonly _dialog = inject(MatDialog);
     private readonly _router = inject(Router);
-    private readonly _snackBar = inject(MatSnackBar);
+    private readonly _snackbar = inject(SnackbarService);
     private readonly _townhouseService = inject(AdminTownhouseService);
 
     protected readonly SYSTEM_ADMIN_ROUTES = SYSTEM_ADMIN_ROUTES;
@@ -67,7 +68,7 @@ export class AdminListTownhouses {
                 this.loading.set(false);
             },
             error: (error: HttpErrorResponse) => {
-                this._snackBar.open(error.message);
+                this._snackbar.error(error.message);
                 this.loading.set(false);
             },
         });
@@ -88,14 +89,12 @@ export class AdminListTownhouses {
 
                 this._townhouseService.create(value).subscribe({
                     next: (townhouse) => {
-                        this._snackBar.open('Condomínio cadastrado.', 'Fechar', { duration: 3500 });
+                        this._snackbar.success('Condomínio cadastrado.');
                         void this._router.navigate(SYSTEM_ADMIN_ROUTES.townhouseDetails(townhouse.id));
                     },
 
                     error: (error: HttpErrorResponse) => {
-                        this._snackBar.open(error.message, 'fechar', {
-                            duration: 5000,
-                        });
+                        this._snackbar.error(error.message);
                     },
                 });
             });

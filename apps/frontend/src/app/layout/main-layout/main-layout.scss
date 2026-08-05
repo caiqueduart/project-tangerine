@@ -9,7 +9,7 @@
     );
 
     &__content {
-        width: min(100%, $system-container-max-width);
+        width: min(100%, var(--system-container-max-width));
         padding: 90px 16px 100px;
         box-sizing: border-box;
         margin: auto;

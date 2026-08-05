@@ -50,14 +50,11 @@
                             <td>{{ townhouse.houseCount }}</td>
                             <td>{{ townhouse.residentCount }}</td>
                             <td>
-                                <span
-                                    class="system-admin-townhouses__status"
-                                    [class.system-admin-townhouses__status--inactive]="
-                                        townhouse.situation === 'INACTIVE'
-                                    "
-                                >
-                                    {{ townhouse.situation === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
-                                </span>
+                                <app-label
+                                    [theme]="townhouse.situation === 'ACTIVE' ? 'green' : 'opaque'"
+                                    [icon]="townhouse.situation === 'ACTIVE' ? 'check_circle' : 'pause_circle'"
+                                    [text]="townhouse.situation === 'ACTIVE' ? 'Ativo' : 'Inativo'"
+                                />
                             </td>
                             <td class="system-admin-townhouses__action-cell">
                                 <a

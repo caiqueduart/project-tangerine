@@ -14,7 +14,7 @@
     @include glass.surface(20px, 0 8px 28px rgb(0 0 0 / 9%));
 
     display: grid;
-    width: min(100%, 430px);
+    width: min(100%, var(--system-navigation-max-width));
     margin-inline: auto;
     padding: 4px;
     box-sizing: border-box;
@@ -68,7 +68,7 @@
     }
 
     .bottom-bar {
-        width: 64px;
+        width: var(--system-navigation-compact-width);
         height: 80%;
         margin: 0;
         padding: 6px;
@@ -81,10 +81,10 @@
 
     :host(:hover),
     :host(:focus-within) {
-        width: 220px;
+        width: var(--system-navigation-expanded-width);
 
         .bottom-bar {
-            width: 220px;
+            width: var(--system-navigation-expanded-width);
         }
 
         .bottom-bar__label {

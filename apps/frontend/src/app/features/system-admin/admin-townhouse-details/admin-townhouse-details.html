@@ -15,12 +15,11 @@
                 <div class="system-admin-townhouse-details__title-row">
                     <h1 id="townhouse-details-title">{{ townhouse.name }}</h1>
 
-                    <span
-                        class="system-admin-townhouse-details__status"
-                        [class.system-admin-townhouse-details__status--inactive]="townhouse.situation === 'INACTIVE'"
-                    >
-                        {{ townhouse.situation === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
-                    </span>
+                    <app-label
+                        [theme]="townhouse.situation === 'ACTIVE' ? 'green' : 'opaque'"
+                        [icon]="townhouse.situation === 'ACTIVE' ? 'check_circle' : 'pause_circle'"
+                        [text]="townhouse.situation === 'ACTIVE' ? 'Ativo' : 'Inativo'"
+                    />
                 </div>
 
                 <p>Criado em {{ townhouse.createdAt | date: 'dd/MM/yyyy' }}</p>

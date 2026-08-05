@@ -72,6 +72,6 @@
     }
 
     .top-bar {
-        width: min(100%, 720px);
+        width: min(100%, var(--system-top-bar-max-width));
     }
 }

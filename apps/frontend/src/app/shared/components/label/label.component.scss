@@ -1,0 +1,46 @@
+:host {
+    display: inline-flex;
+}
+
+.label {
+    --label-color: var(--color-text-secondary);
+    --label-background: var(--color-neutral-track);
+
+    align-items: center;
+    background: var(--label-background);
+    border: 1px solid color-mix(in srgb, var(--label-color) 16%, transparent);
+    border-radius: 999px;
+    color: var(--label-color);
+    display: inline-flex;
+    font-size: var(--text-caption);
+    font-weight: 800;
+    gap: 5px;
+    line-height: 1;
+    padding: 5px 10px;
+
+    mat-icon {
+        font-size: 14px;
+        height: 14px;
+        width: 14px;
+    }
+
+    &--blue {
+        --label-color: var(--color-information);
+        --label-background: color-mix(in srgb, var(--color-information) 12%, transparent);
+    }
+
+    &--green {
+        --label-color: var(--color-successful);
+        --label-background: color-mix(in srgb, var(--color-successful) 12%, transparent);
+    }
+
+    &--orange {
+        --label-color: var(--color-pending);
+        --label-background: color-mix(in srgb, var(--color-pending) 12%, transparent);
+    }
+
+    &--red {
+        --label-color: var(--color-error);
+        --label-background: color-mix(in srgb, var(--color-error) 12%, transparent);
+    }
+}

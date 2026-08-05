@@ -1,17 +1,23 @@
-<div class="login-page">
-    <mat-card class="login-card" aria-labelledby="login-title">
-        @if (townhouse(); as currentTownhouse) {
-            <header class="brand">
-                <div class="brand__avatar" aria-hidden="true">
-                    <mat-icon>apartment</mat-icon>
-                </div>
+<main class="login-page">
+    <mat-card class="login-page__card" aria-labelledby="login-title">
+        @if (canDisplayLogin()) {
+            <header class="login-page__brand">
+                <span class="login-page__brand-icon" aria-hidden="true">
+                    <mat-icon>{{ config.icon }}</mat-icon>
+                </span>
 
-                <h1 id="login-title">{{ currentTownhouse.name }}</h1>
+                @if (config.eyebrow) {
+                    <p class="login-page__eyebrow">{{ config.eyebrow }}</p>
+                }
 
-                <p>{{ currentTownhouse.subtitle }}</p>
+                <h1 id="login-title">{{ title() }}</h1>
+
+                @if (subtitle(); as loginSubtitle) {
+                    <p class="login-page__subtitle">{{ loginSubtitle }}</p>
+                }
             </header>
 
-            <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
+            <form class="login-page__form" [formGroup]="loginForm" (ngSubmit)="submit()">
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Telefone ou e-mail</mat-label>
 
@@ -21,10 +27,12 @@
                         inputmode="email"
                         autocomplete="username"
                         formControlName="identifier"
-                        placeholder="Ex: 11999990001 ou seu@email.com"
+                        [placeholder]="config.identifierPlaceholder"
                     />
 
-                    <mat-error>Telefone ou e-mail é obrigatório</mat-error>
+                    @if (loginForm.controls.identifier.hasError('required')) {
+                        <mat-error>Informe seu telefone ou e-mail.</mat-error>
+                    }
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -32,7 +40,7 @@
 
                     <input
                         matInput
-                        [type]="passwordVisible ? 'text' : 'password'"
+                        [type]="passwordVisible() ? 'text' : 'password'"
                         autocomplete="current-password"
                         formControlName="password"
                         placeholder="Digite sua senha"
@@ -41,61 +49,58 @@
                     <button
                         mat-icon-button
                         matSuffix
-                        class="password-toggle"
                         type="button"
                         (click)="togglePasswordVisibility()"
-                        [attr.aria-label]="passwordVisible ? 'Ocultar senha' : 'Mostrar senha'"
-                        [attr.aria-pressed]="passwordVisible"
+                        [attr.aria-label]="passwordVisible() ? 'Ocultar senha' : 'Mostrar senha'"
+                        [attr.aria-pressed]="passwordVisible()"
                     >
-                        <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        <mat-icon>{{ passwordVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
                     </button>
 
-                    <mat-error>Senha é obrigatória</mat-error>
+                    @if (loginForm.controls.password.hasError('required')) {
+                        <mat-error>Informe sua senha.</mat-error>
+                    }
                 </mat-form-field>
 
-                @if (submitError(); as errorMessage) {
-                    <p class="login-error" role="alert">{{ errorMessage }}</p>
-                }
-
-                <button
-                    mat-flat-button
-                    class="primary-action"
-                    type="submit"
-                    [disabled]="loginForm.invalid || submitting()"
-                >
+                <button mat-flat-button type="submit" [disabled]="loginForm.invalid || submitting()">
                     @if (submitting()) {
                         <mat-spinner diameter="20" aria-label="Entrando" />
-                        <span>Entrando</span>
+                        Entrando
                     } @else {
-                        <span>Entrar</span>
+                        Entrar
                     }
                 </button>
 
-                <button mat-button class="text-action" type="button">
-                    <mat-icon>lock_reset</mat-icon>
-                    Esqueci minha senha
-                </button>
+                @if (config.showAccountActions) {
+                    <button mat-button class="login-page__text-action" type="button">
+                        <mat-icon>lock_reset</mat-icon>
+                        Esqueci minha senha
+                    </button>
+                }
             </form>
 
-            <section class="access-request" aria-label="Solicitação de acesso">
-                <p>Ainda não tem acesso?</p>
+            @if (config.showAccountActions) {
+                <section class="login-page__access-request" aria-label="Solicitação de acesso">
+                    <p>Ainda não tem acesso?</p>
 
-                <button mat-stroked-button type="button">
-                    <mat-icon>person_add</mat-icon>
-                    Solicitar cadastro
-                </button>
-            </section>
+                    <button mat-stroked-button type="button">
+                        <mat-icon>person_add</mat-icon>
+                        Solicitar cadastro
+                    </button>
+                </section>
+            }
         } @else {
-            <div class="context-error" role="alert">
+            <div class="login-page__context-error" role="alert">
                 <mat-icon aria-hidden="true">location_off</mat-icon>
+
                 @if (townhouseError() === 'not-found') {
                     <h1 id="login-title">Condomínio não encontrado</h1>
                     <p>Não encontramos um condomínio para este endereço.</p>
                 } @else {
                     <h1 id="login-title">Não foi possível carregar</h1>
-                    <p> Não conseguimos consultar o condomínio agora. Tente novamente em instantes. </p>
+                    <p>Não conseguimos consultar o condomínio agora. Tente novamente em instantes.</p>
                 }
             </div>
         }
     </mat-card>
-</div>
+</main>

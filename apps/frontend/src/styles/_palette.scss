@@ -1,26 +1,15 @@
-// Paleta oficial — Condomínio Corumbá II.
-// Não adicione novas cores sem alinhamento de design.
-$primary: #406eb7;
-$secondary: #e95623;
-$success: #2e7d5e;
-$text-primary: #0d1846;
-$text-secondary: #5a6480;
-$background: #f4f3f0;
-$surface: #ffffff;
-$neutral-track: #e3e3e3;
-$error: #d32f2f;
-
 :root {
-    // Tokens-base
-    --color-primary: #{$primary};
-    --color-secondary: #{$secondary};
-    --color-success: #{$success};
-    --color-text-primary: #{$text-primary};
-    --color-text-secondary: #{$text-secondary};
-    --color-background: #{$background};
-    --color-surface: #{$surface};
-    --color-neutral-track: #{$neutral-track};
-    --color-error: #{$error};
+    // Paleta oficial — Condomínio Corumbá II.
+    // Não adicione novas cores sem alinhamento de design.
+    --color-primary: #406eb7;
+    --color-secondary: #e95623;
+    --color-success: #2e7d5e;
+    --color-text-primary: #0d1846;
+    --color-text-secondary: #5a6480;
+    --color-background: #f4f3f0;
+    --color-surface: #ffffff;
+    --color-neutral-track: #e3e3e3;
+    --color-error: #d32f2f;
 
     // Tokens semânticos
     --color-navigation: var(--color-primary);

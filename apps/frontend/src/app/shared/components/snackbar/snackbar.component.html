@@ -1,0 +1,24 @@
+<div class="snackbar" [class]="'snackbar snackbar--' + data.type">
+    <div class="snackbar__content">
+        <span matSnackBarLabel>{{ data.message }}</span>
+
+        @if (data.actionLabel) {
+            <button mat-button matSnackBarAction type="button" (click)="snackbarRef.dismissWithAction()">
+                {{ data.actionLabel }}
+            </button>
+        } @else {
+            <button
+                mat-icon-button
+                matSnackBarAction
+                class="snackbar__close"
+                type="button"
+                aria-label="Fechar mensagem"
+                (click)="snackbarRef.dismissWithAction()"
+            >
+                <mat-icon>close</mat-icon>
+            </button>
+        }
+    </div>
+
+    <div class="snackbar__lifetime" [style.animation-duration]="data.duration + 'ms'"></div>
+</div>

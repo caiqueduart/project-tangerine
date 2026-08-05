@@ -29,20 +29,6 @@
         gap: 12px;
     }
 
-    &__status {
-        background: color-mix(in srgb, var(--color-successful) 12%, transparent);
-        border-radius: 999px;
-        color: var(--color-successful);
-        font-size: pxToRem(12);
-        font-weight: 800;
-        padding: 5px 10px;
-
-        &--inactive {
-            background: var(--color-neutral-track);
-            color: var(--color-text-secondary);
-        }
-    }
-
     &__header-actions {
         display: flex;
         flex-wrap: wrap;

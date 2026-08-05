@@ -83,21 +83,6 @@
             padding: 4px 0;
         }
     }
-
-    &__status {
-        background: color-mix(in srgb, var(--color-successful) 12%, transparent);
-        border-radius: 999px;
-        color: var(--color-successful);
-        display: inline-flex;
-        font-size: pxToRem(12);
-        font-weight: 800;
-        padding: 5px 10px;
-
-        &--inactive {
-            background: var(--color-neutral-track);
-            color: var(--color-text-secondary);
-        }
-    }
 }
 
 @media (width >= $breakpoint-md) {

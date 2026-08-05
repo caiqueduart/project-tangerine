@@ -1,0 +1,57 @@
+.snackbar {
+    --snackbar-accent: var(--color-information);
+
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+
+    &--error {
+        --snackbar-accent: var(--color-error);
+    }
+
+    &--success {
+        --snackbar-accent: var(--color-successful);
+    }
+
+    &--warning {
+        --snackbar-accent: var(--color-pending);
+    }
+
+    &__content {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+    }
+
+    &__close {
+        color: var(--snackbar-accent);
+        flex: 0 0 auto;
+    }
+
+    &__lifetime {
+        animation: snackbar-lifetime linear forwards;
+        background: var(--snackbar-accent);
+        bottom: 0;
+        height: 4px;
+        inset-inline: 0;
+        position: absolute;
+        transform-origin: left;
+    }
+}
+
+@keyframes snackbar-lifetime {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .snackbar__lifetime {
+        animation: none;
+    }
+}

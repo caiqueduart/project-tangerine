@@ -1,0 +1,7 @@
+<span class="label" [class]="'label label--' + theme()">
+    @if (icon(); as labelIcon) {
+        <mat-icon aria-hidden="true">{{ labelIcon }}</mat-icon>
+    }
+
+    <span>{{ text() }}</span>
+</span>

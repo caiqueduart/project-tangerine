@@ -5,10 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SYSTEM_ADMIN_ROUTES } from '../../../core/config/routes/system-admin-routes.config';
+import { LabelComponent } from '../../../shared/components/label/label.component';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { ConfirmationDialog, ConfirmationDialogData } from '../components/confirmation-dialog/confirmation-dialog';
 import { HouseFormDialog, HouseFormDialogData } from '../components/house-form-dialog/house-form-dialog';
 import { TownhouseFormDialog } from '../components/townhouse-form-dialog/townhouse-form-dialog';
@@ -26,9 +27,9 @@ import { AdminTownhouseService } from '../services/admin-townhouse.service';
         MatDialogModule,
         MatIconModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         MatTabsModule,
         RouterLink,
+        LabelComponent,
     ],
     templateUrl: './admin-townhouse-details.html',
     styleUrl: './admin-townhouse-details.scss',
@@ -37,7 +38,7 @@ export class AdminTownhouseDetails {
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _dialog = inject(MatDialog);
     private readonly _router = inject(Router);
-    private readonly _snackBar = inject(MatSnackBar);
+    private readonly _snackbar = inject(SnackbarService);
     private readonly _townhouseService = inject(AdminTownhouseService);
     private readonly _townhouseId = Number(this._activatedRoute.snapshot.paramMap.get('townhouseId'));
 
@@ -89,7 +90,7 @@ export class AdminTownhouseDetails {
                 this._townhouseService.update(townhouse.id, value).subscribe({
                     next: (updatedTownhouse) => {
                         this.townhouse.set(updatedTownhouse);
-                        this._snackBar.open('Condomínio atualizado.', 'Fechar', { duration: 3500 });
+                        this._snackbar.success('Condomínio atualizado.');
                     },
                     error: (error: HttpErrorResponse) =>
                         this._showError(error, 'Não foi possível atualizar o condomínio.'),
@@ -125,13 +126,7 @@ export class AdminTownhouseDetails {
                     .subscribe({
                         next: (updatedTownhouse) => {
                             this.townhouse.set(updatedTownhouse);
-                            this._snackBar.open(
-                                willInactivate ? 'Condomínio inativado.' : 'Condomínio ativado.',
-                                'Fechar',
-                                {
-                                    duration: 3500,
-                                },
-                            );
+                            this._snackbar.success(willInactivate ? 'Condomínio inativado.' : 'Condomínio ativado.');
                         },
                         error: (error: HttpErrorResponse) =>
                             this._showError(error, 'Não foi possível alterar a situação do condomínio.'),
@@ -163,7 +158,7 @@ export class AdminTownhouseDetails {
 
                 this._townhouseService.delete(townhouse.id).subscribe({
                     next: () => {
-                        this._snackBar.open('Condomínio excluído.', 'Fechar', { duration: 3500 });
+                        this._snackbar.success('Condomínio excluído.');
                         void this._router.navigate(this.townhousesRoute);
                     },
                     error: (error: HttpErrorResponse) =>
@@ -194,12 +189,10 @@ export class AdminTownhouseDetails {
                     .createHouses({ townhouseId: townhouse.id, identifiers: result.identifiers })
                     .subscribe({
                         next: () => {
-                            this._snackBar.open(
+                            this._snackbar.success(
                                 result.identifiers.length === 1
                                     ? 'Casa adicionada.'
                                     : `${result.identifiers.length} casas adicionadas.`,
-                                'Fechar',
-                                { duration: 3500 },
                             );
                             this.loadTownhouse();
                         },
@@ -230,7 +223,7 @@ export class AdminTownhouseDetails {
 
                 this._townhouseService.updateHouse(house.id, { townhouseId: townhouse.id, identifier }).subscribe({
                     next: () => {
-                        this._snackBar.open('Casa atualizada.', 'Fechar', { duration: 3500 });
+                        this._snackbar.success('Casa atualizada.');
                         this.loadTownhouse();
                     },
                     error: (error: HttpErrorResponse) => this._showError(error, 'Não foi possível atualizar a casa.'),
@@ -256,7 +249,7 @@ export class AdminTownhouseDetails {
 
                 this._townhouseService.deleteHouse(house.id).subscribe({
                     next: () => {
-                        this._snackBar.open('Casa excluída.', 'Fechar', { duration: 3500 });
+                        this._snackbar.success('Casa excluída.');
                         this.loadTownhouse();
                     },
                     error: (error: HttpErrorResponse) => this._showError(error, 'Não foi possível excluir a casa.'),
@@ -265,7 +258,7 @@ export class AdminTownhouseDetails {
     }
 
     private _showError(error: HttpErrorResponse, fallback: string): void {
-        this._snackBar.open(this._getErrorMessage(error, fallback), 'Fechar', { duration: 5000 });
+        this._snackbar.error(this._getErrorMessage(error, fallback));
     }
 
     private _getErrorMessage(error: HttpErrorResponse, fallback: string): string {

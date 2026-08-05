@@ -1,10 +1,7 @@
 @use '../../../styles/functions' as *;
 @use '../../../styles/variables' as *;
 
-$desktop-menu-width: 260px;
-
 .system-admin-layout {
-    box-sizing: border-box;
     min-height: 100vh;
 
     &__sidebar {
@@ -89,7 +86,7 @@ $desktop-menu-width: 260px;
 @media (width >= $breakpoint-lg) {
     .system-admin-layout {
         display: grid;
-        grid-template-columns: $desktop-menu-width 1fr;
+        grid-template-columns: var(--system-admin-sidebar-width) 1fr;
 
         &__mobile-header,
         &__mobile-navigation {
