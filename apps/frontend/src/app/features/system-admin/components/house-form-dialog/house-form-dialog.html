@@ -1,0 +1,39 @@
+<header class="house-form-dialog__header">
+    <h2 mat-dialog-title>{{ isEditing ? 'Editar casa' : 'Adicionar casas' }}</h2>
+
+    <p>
+        {{
+            isEditing
+                ? 'Atualize a identificação da casa.'
+                : 'Digite uma identificação por linha para cadastro em lote, ou uma única para individual.'
+        }}
+    </p>
+</header>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-dialog-content class="house-form-dialog__content">
+        <mat-form-field appearance="outline">
+            <mat-label>{{ isEditing ? 'Identificação' : 'Identificações' }}</mat-label>
+
+            @if (isEditing) {
+                <input matInput formControlName="identifiers" maxlength="50" placeholder="ex: Casa 12" />
+            } @else {
+                <textarea
+                    matInput
+                    formControlName="identifiers"
+                    rows="8"
+                    placeholder="Casa 01&#10;Casa 02&#10;Casa 03"
+                ></textarea>
+            }
+
+            @if (form.controls.identifiers.invalid && form.controls.identifiers.touched) {
+                <mat-error>Informe identificações válidas, com até 50 caracteres cada.</mat-error>
+            }
+        </mat-form-field>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" mat-dialog-close>Cancelar</button>
+        <button mat-flat-button type="submit">{{ isEditing ? 'Salvar' : 'Adicionar' }}</button>
+    </mat-dialog-actions>
+</form>

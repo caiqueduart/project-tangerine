@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content class="confirmation-dialog__content">
+    <p>{{ data.message }}</p>
+
+    @if (data.requiredText) {
+        <p class="confirmation-dialog__instruction">
+            Digite <span>{{ data.requiredText }}</span> para confirmar.
+        </p>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Confirmação</mat-label>
+            <input matInput [formControl]="confirmation" autocomplete="off" />
+        </mat-form-field>
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button [mat-dialog-close]="false">Cancelar</button>
+
+    <button
+        mat-flat-button
+        [class.confirmation-dialog__destructive-action]="data.destructive"
+        [disabled]="!canConfirm"
+        [mat-dialog-close]="true"
+    >
+        {{ data.confirmLabel }}
+    </button>
+</mat-dialog-actions>

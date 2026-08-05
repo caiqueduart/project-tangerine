@@ -1,0 +1,25 @@
+@use '../../../../../styles/functions' as *;
+
+.confirmation-dialog {
+    &__content {
+        p {
+            color: var(--color-text-secondary);
+            line-height: pxToRem(22);
+            margin: 0 0 16px;
+        }
+
+        mat-form-field {
+            width: 100%;
+        }
+    }
+
+    &__instruction span {
+        color: var(--color-text-primary);
+        font-weight: 700;
+    }
+
+    &__destructive-action:not(:disabled) {
+        background: var(--color-error);
+        color: var(--color-surface);
+    }
+}

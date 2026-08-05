@@ -1,0 +1,43 @@
+<header class="townhouse-form-dialog__header">
+    <h2 mat-dialog-title>{{ isEditing ? 'Editar condomínio' : 'Novo condomínio' }}</h2>
+    <p>{{ isEditing ? 'Atualize os dados de identificação.' : 'Cadastre um novo espaço na plataforma.' }}</p>
+</header>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-dialog-content class="townhouse-form-dialog__content">
+        <mat-form-field appearance="outline">
+            <mat-label>Nome</mat-label>
+
+            <input matInput formControlName="name" maxlength="100" (input)="updateSuggestedSlug()" />
+
+            @if (form.controls.name.hasError('required')) {
+                <mat-error>Informe o nome do condomínio.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Identificador de acesso</mat-label>
+
+            <input
+                matInput
+                formControlName="slug"
+                maxlength="30"
+                placeholder="ex: meu-condominio"
+                (input)="markSlugAsEdited()"
+            />
+
+            <mat-hint>Único na plataforma. Use letras minúsculas, números e hífens.</mat-hint>
+
+            @if (form.controls.slug.hasError('required')) {
+                <mat-error>Informe o identificador.</mat-error>
+            } @else if (form.controls.slug.hasError('pattern')) {
+                <mat-error>Use o formato meu-condominio.</mat-error>
+            }
+        </mat-form-field>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" mat-dialog-close>Cancelar</button>
+        <button mat-flat-button type="submit">{{ isEditing ? 'Salvar alterações' : 'Cadastrar' }}</button>
+    </mat-dialog-actions>
+</form>

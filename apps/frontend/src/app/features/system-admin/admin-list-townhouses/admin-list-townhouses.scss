@@ -1,0 +1,178 @@
+@use '../../../../styles/functions' as *;
+@use '../../../../styles/variables' as *;
+
+.system-admin-townhouses {
+    margin: 0 auto;
+    max-width: $system-container-max-width;
+    padding: 24px 16px 40px;
+
+    &__header {
+        align-items: flex-start;
+        flex-direction: column;
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        margin-bottom: 24px;
+
+        h1 {
+            font-size: pxToRem(30);
+            line-height: pxToRem(38);
+            margin: 4px 0 2px;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+    }
+
+    &__search {
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    &__feedback {
+        align-items: center;
+        background: var(--color-card-background);
+        border: 1px solid var(--color-neutral-track);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        justify-content: center;
+        min-height: 180px;
+        padding: 32px;
+        text-align: center;
+
+        mat-icon {
+            color: var(--color-primary);
+            height: 40px;
+            font-size: 40px;
+            width: 40px;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+    }
+
+    &__table-wrapper {
+        background: var(--color-card-background);
+        border: 1px solid var(--color-neutral-track);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    &__table {
+        border-collapse: collapse;
+        width: 100%;
+
+        thead {
+            display: none;
+        }
+
+        tbody,
+        tr,
+        td {
+            display: block;
+        }
+
+        tr {
+            border-bottom: 1px solid var(--color-neutral-track);
+            padding: 18px 56px 18px 18px;
+
+            &:last-child {
+                border-bottom: 0;
+            }
+        }
+
+        td {
+            color: var(--color-text-secondary);
+            font-size: pxToRem(14);
+            padding: 4px 0;
+        }
+    }
+
+    &__status {
+        background: color-mix(in srgb, var(--color-successful) 12%, transparent);
+        border-radius: 999px;
+        color: var(--color-successful);
+        display: inline-flex;
+        font-size: pxToRem(12);
+        font-weight: 800;
+        padding: 5px 10px;
+
+        &--inactive {
+            background: var(--color-neutral-track);
+            color: var(--color-text-secondary);
+        }
+    }
+}
+
+@media (width >= $breakpoint-md) {
+    .system-admin-townhouses {
+        padding: 40px 32px 56px;
+
+        &__header {
+            align-items: center;
+            flex-direction: row;
+        }
+
+        &__search {
+            max-width: 480px;
+        }
+
+        &__table {
+            thead {
+                background: color-mix(in srgb, var(--color-background) 70%, var(--color-surface));
+                display: table-header-group;
+            }
+
+            tbody {
+                display: table-row-group;
+            }
+
+            tr {
+                display: table-row;
+                padding: 0;
+            }
+
+            th,
+            td {
+                border-bottom: 1px solid var(--color-neutral-track);
+                display: table-cell;
+                padding: 16px;
+                text-align: left;
+            }
+
+            th {
+                color: var(--color-text-secondary);
+                font-size: pxToRem(12);
+                font-weight: 800;
+                letter-spacing: pxToRem(0.4);
+                text-transform: uppercase;
+            }
+
+            td {
+                color: var(--color-text-secondary);
+                font-size: pxToRem(14);
+
+                &::before {
+                    content: none;
+                }
+            }
+
+            tbody tr:last-child td {
+                border-bottom: 0;
+            }
+        }
+
+        &__action-cell {
+            position: static;
+            text-align: right;
+            transform: none;
+            width: 48px;
+        }
+    }
+}

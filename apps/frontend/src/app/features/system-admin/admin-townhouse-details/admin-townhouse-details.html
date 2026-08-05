@@ -1,0 +1,127 @@
+<section class="system-admin-townhouse-details" aria-labelledby="townhouse-details-title">
+    <a mat-button class="system-admin-townhouse-details__back" [routerLink]="townhousesRoute">
+        <mat-icon>arrow_back</mat-icon>
+        Condomínios
+    </a>
+
+    @if (loading()) {
+        <div class="system-admin-townhouse-details__feedback" role="status">
+            <mat-spinner diameter="32" />
+            <p>Carregando condomínio...</p>
+        </div>
+    } @else if (townhouse(); as townhouse) {
+        <header class="system-admin-townhouse-details__header">
+            <div>
+                <div class="system-admin-townhouse-details__title-row">
+                    <h1 id="townhouse-details-title">{{ townhouse.name }}</h1>
+
+                    <span
+                        class="system-admin-townhouse-details__status"
+                        [class.system-admin-townhouse-details__status--inactive]="townhouse.situation === 'INACTIVE'"
+                    >
+                        {{ townhouse.situation === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
+                    </span>
+                </div>
+
+                <p>Criado em {{ townhouse.createdAt | date: 'dd/MM/yyyy' }}</p>
+            </div>
+
+            <div class="system-admin-townhouse-details__header-actions">
+                <button mat-stroked-button (click)="openEditDialog()">
+                    <mat-icon>edit</mat-icon>
+                    Editar
+                </button>
+
+                <button matButton="outlined" (click)="toggleSituation()" class="red-outlined-button">
+                    <mat-icon>{{ townhouse.situation === 'ACTIVE' ? 'pause_circle' : 'play_circle' }}</mat-icon>
+                    {{ townhouse.situation === 'ACTIVE' ? 'Inativar' : 'Ativar' }}
+                </button>
+
+                <button
+                    mat-icon-button
+                    class="system-admin-townhouse-details__delete-button"
+                    aria-label="Excluir condomínio"
+                    (click)="deleteTownhouse()"
+                >
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+        </header>
+
+        <div class="system-admin-townhouse-details__summary" aria-label="Resumo do condomínio">
+            <article>
+                <mat-icon>holiday_village</mat-icon>
+
+                <div>
+                    <span>Casas</span>
+                    <p>{{ townhouse.houseCount }}</p>
+                </div>
+            </article>
+
+            <article>
+                <mat-icon>group</mat-icon>
+
+                <div>
+                    <span>Moradores</span>
+                    <p>{{ townhouse.residentCount }}</p>
+                </div>
+            </article>
+        </div>
+
+        <mat-tab-group class="system-admin-townhouse-details__tabs" animationDuration="150ms">
+            <mat-tab label="Casas">
+                <div class="system-admin-townhouse-details__tab-content">
+                    <div class="system-admin-townhouse-details__section-header">
+                        <div>
+                            <h2>Casas</h2>
+                            <p>Cadastre e organize as unidades deste condomínio.</p>
+                        </div>
+
+                        <button mat-flat-button (click)="addHouses()">
+                            <mat-icon>add</mat-icon>
+                            Adicionar casas
+                        </button>
+                    </div>
+
+                    @if (townhouse.houses.length === 0) {
+                        <div class="system-admin-townhouse-details__empty">
+                            <mat-icon>holiday_village</mat-icon>
+                            <p>Nenhuma casa cadastrada.</p>
+                        </div>
+                    } @else {
+                        <ul class="system-admin-townhouse-details__houses" aria-label="Casas cadastradas">
+                            @for (house of townhouse.houses; track house.id) {
+                                <li>
+                                    <div>
+                                        <p>{{ house.identifier }}</p>
+                                        <span>{{ house.residentCount }} moradores</span>
+                                    </div>
+
+                                    <div class="system-admin-townhouse-details__house-actions">
+                                        <button
+                                            mat-icon-button
+                                            [attr.aria-label]="'Editar ' + house.identifier"
+                                            (click)="editHouse(house)"
+                                        >
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                        <button
+                                            mat-icon-button
+                                            type="button"
+                                            [attr.aria-label]="'Excluir ' + house.identifier"
+                                            (click)="deleteHouse(house)"
+                                        >
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </mat-tab>
+            <mat-tab label="Usuários" disabled />
+            <mat-tab label="Gestores" disabled />
+        </mat-tab-group>
+    }
+</section>

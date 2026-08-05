@@ -1,0 +1,23 @@
+@use '../../../../../styles/functions' as *;
+
+.townhouse-form-dialog {
+    &__header {
+        padding: 24px 24px 0;
+
+        h2 {
+            margin: 0;
+            padding: 0;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            font-size: pxToRem(14);
+            margin: 6px 0 0;
+        }
+    }
+
+    &__content {
+        display: grid;
+        gap: 8px;
+    }
+}

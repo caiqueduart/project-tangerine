@@ -1,0 +1,216 @@
+@use '../../../../styles/functions' as *;
+@use '../../../../styles/variables' as *;
+
+.system-admin-townhouse-details {
+    max-width: $system-container-max-width;
+    padding: 16px 16px 48px;
+
+    &__header {
+        align-items: flex-start;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        justify-content: space-between;
+        margin-bottom: 24px;
+
+        h1 {
+            font-size: pxToRem(28);
+            line-height: pxToRem(36);
+            margin: 0;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin: 6px 0 0;
+        }
+    }
+
+    &__title-row {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    &__status {
+        background: color-mix(in srgb, var(--color-successful) 12%, transparent);
+        border-radius: 999px;
+        color: var(--color-successful);
+        font-size: pxToRem(12);
+        font-weight: 800;
+        padding: 5px 10px;
+
+        &--inactive {
+            background: var(--color-neutral-track);
+            color: var(--color-text-secondary);
+        }
+    }
+
+    &__header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    &__delete-button {
+        color: var(--color-error);
+        border: 1px solid color-percent(var(--color-error), 50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__summary {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: auto auto;
+        margin-bottom: 24px;
+        min-width: 100%;
+
+        article {
+            align-items: center;
+            background: var(--color-card-background);
+            border: 1px solid var(--color-neutral-track);
+            border-radius: 14px;
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .mat-icon {
+            color: color-percent(var(--color-primary), 50%);
+            width: pxToRem(64);
+            height: pxToRem(64);
+            font-size: pxToRem(64);
+        }
+
+        span {
+            color: var(--color-text-secondary);
+            font-size: pxToRem(12);
+            font-weight: 700;
+        }
+
+        p {
+            font-size: pxToRem(24);
+            font-weight: 800;
+            line-height: pxToRem(28);
+            margin: 0;
+        }
+    }
+
+    &__tab-content {
+        padding: 20px 16px 24px;
+    }
+
+    &__section-header {
+        align-items: flex-start;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        justify-content: space-between;
+        margin-bottom: 20px;
+
+        h2 {
+            font-size: pxToRem(20);
+            margin: 0;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            font-size: pxToRem(14);
+            margin: 4px 0 0;
+        }
+    }
+
+    &__houses {
+        border: 1px solid var(--color-neutral-track);
+        border-radius: 12px;
+        list-style: none;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+
+        li {
+            align-items: center;
+            border-bottom: 1px solid var(--color-neutral-track);
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 8px 10px 14px;
+
+            &:last-child {
+                border-bottom: 0;
+            }
+        }
+
+        p {
+            color: var(--color-text-primary);
+            font-weight: 800;
+            margin: 0 0 2px;
+        }
+
+        span {
+            color: var(--color-text-secondary);
+            font-size: pxToRem(12);
+        }
+    }
+
+    &__house-actions {
+        display: flex;
+
+        button:last-child {
+            color: var(--color-error);
+        }
+    }
+
+    &__empty,
+    &__feedback {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        justify-content: center;
+        min-height: 220px;
+        padding: 24px;
+        text-align: center;
+
+        p {
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+
+        > mat-icon {
+            color: var(--color-primary);
+            font-size: 38px;
+            height: 38px;
+            width: 38px;
+        }
+    }
+}
+
+@media (width >= $breakpoint-md) {
+    .system-admin-townhouse-details {
+        padding: 32px 32px 56px;
+
+        &__header {
+            align-items: center;
+            flex-direction: row;
+        }
+
+        &__summary {
+            max-width: 560px;
+        }
+
+        &__tab-content {
+            padding: 28px;
+        }
+
+        &__section-header {
+            align-items: center;
+            flex-direction: row;
+        }
+
+        &__houses li {
+            padding: 12px 10px 12px 18px;
+        }
+    }
+}

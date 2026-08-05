@@ -5,6 +5,7 @@ import { catchError, switchMap, throwError } from 'rxjs';
 import { API_BASE_URL } from '../../config/api.config';
 import { APP_ROUTES } from '../../config/routes/app-routes.config';
 import { AUTH_API_ROUTES, AUTH_ROUTES } from '../../config/routes/auth-routes.config';
+import { SYSTEM_ADMIN_ROUTES } from '../../config/routes/system-admin-routes.config';
 import { AuthSessionService } from '../services/auth-session.service';
 import { AuthService } from '../services/auth.service';
 
@@ -61,8 +62,19 @@ function shouldHandleUnauthorizedRequest(request: HttpRequest<unknown>, error: u
 function redirectToLogin(authService: AuthService, authSessionService: AuthSessionService, router: Router): void {
     const slug = authSessionService.townhouseSlug;
     const returnUrl = router.url;
+    const systemAdminRootUrl = router.serializeUrl(router.createUrlTree(SYSTEM_ADMIN_ROUTES.root));
+    const isSystemAdminRoute = isWithinRoute(returnUrl, systemAdminRootUrl);
 
     authService.logout();
+
+    if (isSystemAdminRoute) {
+        const systemAdminLoginUrl = router.serializeUrl(router.createUrlTree(SYSTEM_ADMIN_ROUTES.login));
+
+        void router.navigate(SYSTEM_ADMIN_ROUTES.login, {
+            queryParams: isWithinRoute(returnUrl, systemAdminLoginUrl) ? undefined : { returnUrl },
+        });
+        return;
+    }
 
     if (!slug) {
         void router.navigate(APP_ROUTES.notFound);

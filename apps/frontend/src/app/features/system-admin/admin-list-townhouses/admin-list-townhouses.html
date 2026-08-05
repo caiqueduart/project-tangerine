@@ -1,0 +1,77 @@
+<section class="system-admin-townhouses" aria-labelledby="system-admin-townhouses-title">
+    <header class="system-admin-townhouses__header">
+        <div>
+            <h1 id="system-admin-townhouses-title">Condomínios</h1>
+            <p>{{ townhouses().length }} cadastrados</p>
+        </div>
+
+        <button mat-flat-button type="button" (click)="openCreateDialog()">
+            <mat-icon>add</mat-icon>
+            Novo condomínio
+        </button>
+    </header>
+
+    <mat-form-field class="system-admin-townhouses__search" appearance="outline" subscriptSizing="dynamic">
+        <mat-icon matPrefix>search</mat-icon>
+        <mat-label>Buscar condomínio</mat-label>
+
+        <input matInput placeholder="Nome ou identificador" (input)="updateSearch($event)" />
+    </mat-form-field>
+
+    @if (loading()) {
+        <div class="system-admin-townhouses__feedback" role="status">
+            <mat-spinner diameter="32" />
+            <p>Carregando condomínios...</p>
+        </div>
+    } @else if (filteredTownhouses().length === 0) {
+        <div class="system-admin-townhouses__feedback">
+            <mat-icon>apartment</mat-icon>
+            <p>{{ search() ? 'Nenhum condomínio encontrado.' : 'Nenhum condomínio cadastrado ainda.' }}</p>
+        </div>
+    } @else {
+        <div class="system-admin-townhouses__table-wrapper">
+            <table class="system-admin-townhouses__table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Identificador</th>
+                        <th scope="col">Casas</th>
+                        <th scope="col">Moradores</th>
+                        <th scope="col">Situação</th>
+                        <th scope="col">Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (townhouse of filteredTownhouses(); track townhouse.id) {
+                        <tr>
+                            <td>{{ townhouse.name }}</td>
+                            <td>{{ townhouse.slug }}</td>
+                            <td>{{ townhouse.houseCount }}</td>
+                            <td>{{ townhouse.residentCount }}</td>
+                            <td>
+                                <span
+                                    class="system-admin-townhouses__status"
+                                    [class.system-admin-townhouses__status--inactive]="
+                                        townhouse.situation === 'INACTIVE'
+                                    "
+                                >
+                                    {{ townhouse.situation === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
+                                </span>
+                            </td>
+                            <td class="system-admin-townhouses__action-cell">
+                                <a
+                                    mat-icon-button
+                                    [routerLink]="SYSTEM_ADMIN_ROUTES.townhouseDetails(townhouse.id)"
+                                    [attr.aria-label]="'Gerenciar ' + townhouse.name"
+                                >
+                                    <mat-icon>chevron_right</mat-icon>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

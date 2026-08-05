@@ -7,9 +7,12 @@ export function buildFromSystemAdmin<TSegments extends readonly RouteSegment[]>(
 export const SYSTEM_ADMIN_SEGMENTS = {
     root: 'admin',
     login: 'login',
+    townhouses: 'condominios',
 } as const;
 
 export const SYSTEM_ADMIN_ROUTES = {
     root: buildFromSystemAdmin(),
     login: buildFromSystemAdmin(SYSTEM_ADMIN_SEGMENTS.login),
+    townhouses: buildFromSystemAdmin(SYSTEM_ADMIN_SEGMENTS.townhouses),
+    townhouseDetails: (townhouseId: number) => buildFromSystemAdmin(SYSTEM_ADMIN_SEGMENTS.townhouses, townhouseId),
 } as const;

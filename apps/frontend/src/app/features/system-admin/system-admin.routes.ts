@@ -1,24 +1,35 @@
 import { Routes } from '@angular/router';
-import { systemAdminGuard } from '../../core/auth/guards/system-admin.guard';
+import { adminGuard } from '../../core/auth/guards/admin.guard';
+import { adminGuestGuard } from '../../core/auth/guards/admin-guest.guard';
 import { APP_SEGMENTS } from '../../core/config/routes/app-routes.config';
 import { SYSTEM_ADMIN_SEGMENTS } from '../../core/config/routes/system-admin-routes.config';
 
 export const routes: Routes = [
     {
         path: SYSTEM_ADMIN_SEGMENTS.login,
-        loadComponent: () =>
-            import('./system-admin-login-page/system-admin-login-page').then((m) => m.SystemAdminLoginPage),
+        canActivate: [adminGuestGuard],
+        loadComponent: () => import('./admin-login-page/admin-login-page').then((m) => m.AdminLoginPage),
     },
     {
         path: APP_SEGMENTS.empty,
-        loadComponent: () => import('./system-admin-layout/system-admin-layout').then((m) => m.SystemAdminLayout),
-        canActivate: [systemAdminGuard],
-        canActivateChild: [systemAdminGuard],
+        loadComponent: () => import('./system-admin-layout').then((m) => m.SystemAdminLayout),
+        canActivate: [adminGuard],
+        canActivateChild: [adminGuard],
         children: [
             {
                 path: APP_SEGMENTS.empty,
                 pathMatch: 'full',
-                loadComponent: () => import('./system-admin-home/system-admin-home').then((m) => m.SystemAdminHome),
+                loadComponent: () => import('./admin-home/admin-home').then((m) => m.AdminHome),
+            },
+            {
+                path: SYSTEM_ADMIN_SEGMENTS.townhouses,
+                loadComponent: () =>
+                    import('./admin-list-townhouses/admin-list-townhouses').then((m) => m.AdminListTownhouses),
+            },
+            {
+                path: `${SYSTEM_ADMIN_SEGMENTS.townhouses}/:townhouseId`,
+                loadComponent: () =>
+                    import('./admin-townhouse-details/admin-townhouse-details').then((m) => m.AdminTownhouseDetails),
             },
         ],
     },

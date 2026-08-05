@@ -24,10 +24,17 @@ export class AuthSessionService {
         return localStorage.getItem(TOWNHOUSE_SLUG_KEY);
     }
 
-    save(response: LoginResponse, townhouseSlug: string): void {
+    save(response: LoginResponse, townhouseSlug?: string): void {
+        const sessionTownhouseSlug = response.session.house?.townhouse.slug ?? townhouseSlug;
+
         localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
-        localStorage.setItem(TOWNHOUSE_SLUG_KEY, response.session.house?.townhouse.slug ?? townhouseSlug);
         localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(response.session));
+
+        if (sessionTownhouseSlug) {
+            localStorage.setItem(TOWNHOUSE_SLUG_KEY, sessionTownhouseSlug);
+        } else {
+            localStorage.removeItem(TOWNHOUSE_SLUG_KEY);
+        }
 
         this._session.set(response.session);
     }

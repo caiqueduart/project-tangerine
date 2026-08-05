@@ -1,0 +1,74 @@
+<div class="system-admin-layout">
+    <aside class="system-admin-layout__sidebar">
+        <a class="system-admin-layout__brand" [routerLink]="rootRoute" aria-label="Tangerine Admin — início">
+            <mat-icon>admin_panel_settings</mat-icon>
+
+            <div>
+                <p>Sistema</p>
+                <span>Administração</span>
+            </div>
+        </a>
+
+        <nav class="system-admin-layout__navigation" aria-label="Administração do sistema">
+            @let routerActiveClass = 'system-admin-layout__navigation-link--active';
+
+            <a
+                [routerLink]="rootRoute"
+                [routerLinkActive]="routerActiveClass"
+                [routerLinkActiveOptions]="{ exact: true }"
+            >
+                <mat-icon>dashboard</mat-icon>
+                Visão geral
+            </a>
+
+            <a [routerLink]="townhousesRoute" [routerLinkActive]="routerActiveClass">
+                <mat-icon>apartment</mat-icon>
+                Condomínios
+            </a>
+        </nav>
+
+        <div class="system-admin-layout__account">
+            <span class="system-admin-layout__avatar">{{ userInitials() }}</span>
+
+            <div>
+                <p>{{ userName() }}</p>
+                <span>Admin do sistema</span>
+            </div>
+
+            <button mat-icon-button type="button" aria-label="Deslogar" (click)="logout()">
+                <mat-icon>logout</mat-icon>
+            </button>
+        </div>
+    </aside>
+
+    <header class="system-admin-layout__mobile-header">
+        <a class="system-admin-layout__mobile-brand" [routerLink]="rootRoute" aria-label="Tangerine Admin — início">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <p>{{ userName() }}</p>
+        </a>
+
+        <button mat-icon-button type="button" aria-label="Deslogar" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+        </button>
+    </header>
+
+    <nav class="system-admin-layout__mobile-navigation" aria-label="Administração do sistema">
+        <a
+            [routerLink]="rootRoute"
+            routerLinkActive="system-admin-layout__mobile-navigation-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+        >
+            <mat-icon>dashboard</mat-icon>
+            Visão geral
+        </a>
+
+        <a [routerLink]="townhousesRoute" routerLinkActive="system-admin-layout__mobile-navigation-link--active">
+            <mat-icon>apartment</mat-icon>
+            Condomínios
+        </a>
+    </nav>
+
+    <main class="system-admin-layout__content">
+        <router-outlet />
+    </main>
+</div>

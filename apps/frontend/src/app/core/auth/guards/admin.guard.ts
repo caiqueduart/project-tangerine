@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { SYSTEM_ADMIN_ROUTES } from '../../config/routes/system-admin-routes.config';
 import { AuthSessionService } from '../services/auth-session.service';
 
-export const systemAdminGuard: CanActivateFn = (_route, state) => {
+export const adminGuard: CanActivateFn = (_route, state) => {
     const authSessionService = inject(AuthSessionService);
     const router = inject(Router);
 
