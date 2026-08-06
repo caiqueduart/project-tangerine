@@ -39,7 +39,7 @@ export class AuthService {
 
         return {
             ...tokens,
-            session: this._toAuthSessionDto(user),
+            session: this._generateAuthSessionData(user),
         };
     }
 
@@ -108,7 +108,7 @@ export class AuthService {
         return { accessToken, refreshToken };
     }
 
-    private _toAuthSessionDto(user: User): AuthSessionDto {
+    private _generateAuthSessionData(user: User): AuthSessionDto {
         const house = user.resident?.house;
 
         return {
@@ -127,7 +127,7 @@ export class AuthService {
                           slug: house.townhouse.slug,
                       },
                   }
-                : null,
+                : undefined,
         };
     }
 
