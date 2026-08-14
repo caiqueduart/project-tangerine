@@ -4,10 +4,12 @@ import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SYSTEM_ADMIN_ROUTES } from '../../../core/config/routes/system-admin-routes.config';
+import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
 import { LabelComponent } from '../../../shared/components/label/label.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { ConfirmationDialog, ConfirmationDialogData } from '../components/confirmation-dialog/confirmation-dialog';
@@ -17,7 +19,9 @@ import {
     SystemAdminHouse,
     SystemAdminTownhouseDetails as SystemAdminTownhouseDetailsModel,
 } from '../models/admin-townhouse.model';
+import { AdminUser } from '../models/admin-user.model';
 import { AdminTownhouseService } from '../services/admin-townhouse.service';
+import { AdminUserService } from '../services/admin-user.service';
 
 @Component({
     selector: 'app-admin-townhouse-details',
@@ -26,6 +30,7 @@ import { AdminTownhouseService } from '../services/admin-townhouse.service';
         MatButtonModule,
         MatDialogModule,
         MatIconModule,
+        MatMenuModule,
         MatProgressSpinnerModule,
         MatTabsModule,
         RouterLink,
@@ -36,14 +41,17 @@ import { AdminTownhouseService } from '../services/admin-townhouse.service';
 })
 export class AdminTownhouseDetails {
     private readonly _activatedRoute = inject(ActivatedRoute);
+    private readonly _authSessionService = inject(AuthSessionService);
     private readonly _dialog = inject(MatDialog);
     private readonly _router = inject(Router);
     private readonly _snackbar = inject(SnackbarService);
     private readonly _townhouseService = inject(AdminTownhouseService);
+    private readonly _userService = inject(AdminUserService);
     private readonly _townhouseId = Number(this._activatedRoute.snapshot.paramMap.get('townhouseId'));
 
     readonly townhouse = signal<SystemAdminTownhouseDetailsModel | null>(null);
     readonly loading = signal(true);
+    readonly users = signal<readonly AdminUser[]>([]);
     readonly townhousesRoute = SYSTEM_ADMIN_ROUTES.townhouses;
 
     constructor() {
@@ -62,6 +70,7 @@ export class AdminTownhouseDetails {
             next: (townhouse) => {
                 this.townhouse.set(townhouse);
                 this.loading.set(false);
+                this.loadUsers();
             },
             error: (error: HttpErrorResponse) => {
                 this.loading.set(false);
@@ -255,6 +264,70 @@ export class AdminTownhouseDetails {
                     error: (error: HttpErrorResponse) => this._showError(error, 'Não foi possível excluir a casa.'),
                 });
             });
+    }
+
+    toggleUserSituation(user: AdminUser): void {
+        const willInactivate = user.situation === 'ACTIVE';
+        const data: ConfirmationDialogData = {
+            title: willInactivate ? 'Inativar usuário?' : 'Reativar usuário?',
+            message: willInactivate
+                ? `${user.firstName} perderá o acesso à plataforma, mas continuará vinculado a este condomínio.`
+                : `${user.firstName} voltará a poder acessar a plataforma.`,
+            confirmLabel: willInactivate ? 'Inativar' : 'Reativar',
+            destructive: willInactivate,
+        };
+
+        this._dialog
+            .open(ConfirmationDialog, { width: '480px', maxWidth: 'calc(100vw - 32px)', data })
+            .afterClosed()
+            .subscribe((confirmed) => {
+                if (!confirmed) return;
+
+                this._userService.update(user.id, { situation: willInactivate ? 'INACTIVE' : 'ACTIVE' }).subscribe({
+                    next: () => {
+                        this._snackbar.success(willInactivate ? 'Usuário inativado.' : 'Usuário reativado.');
+                        this.loadUsers();
+                    },
+                    error: (error: HttpErrorResponse) =>
+                        this._showError(error, 'Não foi possível alterar a situação do usuário.'),
+                });
+            });
+    }
+
+    removeUser(user: AdminUser): void {
+        const data: ConfirmationDialogData = {
+            title: 'Remover do condomínio?',
+            message: `${user.firstName} deixará de estar vinculado à casa ${user.house?.identifier}. O cadastro do usuário será preservado.`,
+            confirmLabel: 'Remover vínculo',
+            destructive: true,
+        };
+
+        this._dialog
+            .open(ConfirmationDialog, { width: '500px', maxWidth: 'calc(100vw - 32px)', data })
+            .afterClosed()
+            .subscribe((confirmed) => {
+                if (!confirmed) return;
+
+                this._userService.update(user.id, { houseId: null }).subscribe({
+                    next: () => {
+                        this._snackbar.success('Vínculo residencial removido.');
+                        this.loadTownhouse();
+                    },
+                    error: (error: HttpErrorResponse) =>
+                        this._showError(error, 'Não foi possível remover o vínculo do usuário.'),
+                });
+            });
+    }
+
+    isCurrentUser(user: AdminUser): boolean {
+        return user.id === this._authSessionService.session()?.user.id;
+    }
+
+    private loadUsers(): void {
+        this._userService.getAll(this._townhouseId).subscribe({
+            next: (users) => this.users.set(users),
+            error: (error: HttpErrorResponse) => this._showError(error, 'Não foi possível carregar os usuários.'),
+        });
     }
 
     private _showError(error: HttpErrorResponse, fallback: string): void {

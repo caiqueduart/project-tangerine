@@ -22,6 +22,7 @@ export const TOWNHOUSE_ROUTES = {
 
 export const TOWNHOUSE_API_ROUTES = {
     root: `${API_BASE_URL}/townhouse`,
+    options: `${API_BASE_URL}/townhouse/options`,
     byId: (townhouseId: number) => `${API_BASE_URL}/townhouse/${townhouseId}`,
     bySlug: (slug: string) => `${API_BASE_URL}/townhouse/by-slug/${slug}`,
 } as const;

@@ -29,6 +29,11 @@ export class GetTownhouseDto {
     slug: string;
 }
 
+export class TownhouseOptionDto {
+    id: number;
+    name: string;
+}
+
 export class TownhouseListItemDto extends GetTownhouseDto {
     situation: TownhouseSituation;
     createdAt: Date;

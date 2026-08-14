@@ -1,0 +1,139 @@
+<section class="admin-list-users" aria-labelledby="admin-list-users-title">
+    <header class="admin-list-users__header">
+        <div>
+            <h1 id="admin-list-users-title">Usuários</h1>
+            <p>{{ users().length }} cadastrados</p>
+        </div>
+
+        <button mat-flat-button type="button" (click)="openForm()">
+            <mat-icon>person_add</mat-icon>
+            Novo usuário
+        </button>
+    </header>
+
+    <div class="admin-list-users__tools">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-label>Buscar usuário</mat-label>
+            <input matInput placeholder="Nome, telefone ou e-mail" (input)="updateSearch($event)" />
+        </mat-form-field>
+
+        <mat-button-toggle-group
+            aria-label="Filtrar usuários por situação"
+            [value]="filter()"
+            (change)="filter.set($event.value)"
+        >
+            <mat-button-toggle value="ALL">Todos</mat-button-toggle>
+            <mat-button-toggle value="ACTIVE">Ativos</mat-button-toggle>
+            <mat-button-toggle value="INACTIVE">Inativos</mat-button-toggle>
+            <mat-button-toggle value="PENDING">Pendentes ({{ pendingCount() }})</mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+
+    @if (loading()) {
+        <div class="admin-list-users__feedback" role="status">
+            <mat-spinner diameter="32" />
+            <p>Carregando usuários...</p>
+        </div>
+    } @else if (filteredUsers().length === 0) {
+        <div class="admin-list-users__feedback">
+            <mat-icon>group_off</mat-icon>
+            <p>Nenhum usuário encontrado.</p>
+        </div>
+    } @else {
+        <div class="admin-list-users__table-wrapper">
+            <table class="admin-list-users__table">
+                <thead>
+                    <tr>
+                        <th scope="col">Usuário</th>
+                        <th scope="col">Contato</th>
+                        <th scope="col">Vínculo</th>
+                        <th scope="col">Situação</th>
+                        <th scope="col">Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (user of filteredUsers(); track user.id) {
+                        <tr>
+                            <td data-label="Usuário">
+                                <button
+                                    class="admin-list-users__user-button"
+                                    type="button"
+                                    (click)="openDetails(user.id)"
+                                >
+                                    {{ user.firstName }} {{ user.lastName }}
+                                </button>
+                            </td>
+                            <td data-label="Contato">
+                                <span>{{ user.email || 'Sem e-mail' }}</span>
+                                <span>{{ user.phone }}</span>
+                            </td>
+                            <td data-label="Vínculo">
+                                @if (user.house) {
+                                    <span>{{ user.house.townhouse.name }}</span>
+                                    <span>{{ user.house.identifier }}</span>
+                                } @else {
+                                    <span>Sem vínculo residencial</span>
+                                }
+                            </td>
+                            <td data-label="Situação">
+                                <app-label
+                                    [theme]="statusTheme(user.situation)"
+                                    [icon]="statusIcon(user.situation)"
+                                    [text]="statusText(user.situation)"
+                                />
+                            </td>
+                            <td class="admin-list-users__actions">
+                                @if (user.situation === 'PENDING') {
+                                    <button mat-button type="button" (click)="approve(user)">
+                                        <mat-icon>check</mat-icon>
+                                        Aprovar
+                                    </button>
+                                    <button
+                                        mat-icon-button
+                                        type="button"
+                                        aria-label="Rejeitar solicitação"
+                                        (click)="reject(user)"
+                                    >
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                }
+
+                                <button
+                                    mat-icon-button
+                                    type="button"
+                                    [matMenuTriggerFor]="userMenu"
+                                    aria-label="Ações do usuário"
+                                >
+                                    <mat-icon>more_vert</mat-icon>
+                                </button>
+                                <mat-menu #userMenu="matMenu">
+                                    <button mat-menu-item type="button" (click)="openForm(user)">
+                                        <mat-icon>edit</mat-icon>
+                                        <span>Editar informações</span>
+                                    </button>
+                                    @if (user.situation !== 'PENDING') {
+                                        <button
+                                            mat-menu-item
+                                            type="button"
+                                            [disabled]="isCurrentUser(user)"
+                                            (click)="toggleSituation(user)"
+                                        >
+                                            <mat-icon>{{
+                                                user.situation === 'ACTIVE' ? 'person_off' : 'person'
+                                            }}</mat-icon>
+                                            <span>{{
+                                                user.situation === 'ACTIVE' ? 'Inativar usuário' : 'Reativar usuário'
+                                            }}</span>
+                                        </button>
+                                    }
+                                </mat-menu>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

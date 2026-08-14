@@ -11,6 +11,7 @@ import { User } from '../user/entities/user.entity';
 import { AccessTokenDto } from './dtos/access-token.dto';
 import { AuthSessionDto } from './dtos/auth-session.dto';
 import { LoginResultDto } from './dtos/login-result.dto';
+import { UserSituation } from '../user/enums/user-situation';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +34,10 @@ export class AuthService {
 
         if (!isPasswordValid) {
             throw new UnauthorizedException(unauthorizedMessage);
+        }
+
+        if (user.situation && user.situation !== UserSituation.ACTIVE) {
+            throw new UnauthorizedException('Seu acesso está pendente ou inativo.');
         }
 
         const tokens = await this._generateRefreshAndAccessTokens(user);
@@ -66,7 +71,11 @@ export class AuthService {
         }
 
         try {
-            await this._userService.get(payload.id);
+            const user = await this._userService.get(payload.id);
+
+            if (user.situation !== UserSituation.ACTIVE) {
+                throw new UnauthorizedException(unauthorizedMessage);
+            }
         } catch {
             throw new UnauthorizedException(unauthorizedMessage);
         }

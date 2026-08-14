@@ -1,0 +1,112 @@
+<header class="user-details-dialog__header">
+    <div>
+        <h2 mat-dialog-title>Detalhes do usuário</h2>
+        <p>Dados cadastrais, vínculo residencial e histórico.</p>
+    </div>
+
+    <button mat-icon-button type="button" mat-dialog-close aria-label="Fechar detalhes do usuário">
+        <mat-icon>close</mat-icon>
+    </button>
+</header>
+
+<mat-dialog-content class="user-details-dialog__content">
+    @if (loading()) {
+        <div class="user-details-dialog__feedback" role="status">
+            <mat-spinner diameter="32" />
+            <p>Carregando detalhes...</p>
+        </div>
+    } @else if (failed()) {
+        <div class="user-details-dialog__feedback">
+            <mat-icon>error_outline</mat-icon>
+            <p>Não foi possível carregar os detalhes do usuário.</p>
+        </div>
+    } @else if (user(); as user) {
+        <section class="user-details-dialog__section" aria-labelledby="user-details-registration-title">
+            <div class="user-details-dialog__section-title">
+                <h3 id="user-details-registration-title">Dados cadastrais</h3>
+                <app-label
+                    [theme]="statusTheme(user.situation)"
+                    [icon]="statusIcon(user.situation)"
+                    [text]="statusText(user.situation)"
+                />
+            </div>
+
+            <dl class="user-details-dialog__details">
+                <div>
+                    <dt>ID</dt>
+                    <dd>{{ user.id }}</dd>
+                </div>
+                <div>
+                    <dt>Nome</dt>
+                    <dd>{{ user.firstName }} {{ user.lastName }}</dd>
+                </div>
+                <div>
+                    <dt>Telefone</dt>
+                    <dd>{{ user.phone }}</dd>
+                </div>
+                <div>
+                    <dt>E-mail</dt>
+                    <dd>{{ user.email || 'Não informado' }}</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="user-details-dialog__section" aria-labelledby="user-details-residence-title">
+            <h3 id="user-details-residence-title">Vínculo residencial</h3>
+
+            @if (user.house) {
+                <dl class="user-details-dialog__details">
+                    <div>
+                        <dt>ID da casa</dt>
+                        <dd>{{ user.house.id }}</dd>
+                    </div>
+                    <div>
+                        <dt>Casa</dt>
+                        <dd>{{ user.house.identifier }}</dd>
+                    </div>
+                    <div>
+                        <dt>ID do condomínio</dt>
+                        <dd>{{ user.house.townhouse.id }}</dd>
+                    </div>
+                    <div>
+                        <dt>Condomínio</dt>
+                        <dd>{{ user.house.townhouse.name }}</dd>
+                    </div>
+                    <div>
+                        <dt>Identificador de acesso</dt>
+                        <dd>{{ user.house.townhouse.slug }}</dd>
+                    </div>
+                </dl>
+            } @else {
+                <p class="user-details-dialog__empty">Este usuário não possui vínculo residencial.</p>
+            }
+        </section>
+
+        <section class="user-details-dialog__section" aria-labelledby="user-details-history-title">
+            <h3 id="user-details-history-title">Histórico</h3>
+
+            @if (user.audits.length) {
+                <ol class="user-details-dialog__timeline">
+                    @for (audit of user.audits; track audit.id) {
+                        <li>
+                            <span class="user-details-dialog__timeline-marker" aria-hidden="true"></span>
+                            <p>
+                                <span>{{ actorName(audit) }}</span>
+                                {{ auditText(audit.action) }}
+                                <time [attr.datetime]="audit.createdAt">
+                                    em {{ audit.createdAt | date: "dd/MM/yyyy 'às' HH:mm" : '-0300' }}
+                                </time>
+                            </p>
+                        </li>
+                    }
+                </ol>
+            } @else {
+                <p class="user-details-dialog__empty">Ainda não há eventos de auditoria para este usuário.</p>
+            }
+        </section>
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Fechar</button>
+</mat-dialog-actions>

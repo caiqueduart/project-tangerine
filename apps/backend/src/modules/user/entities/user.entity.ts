@@ -22,7 +22,7 @@ export class User {
     @Column({ type: 'varchar', nullable: true, length: 255, unique: true })
     email: string | null;
 
-    @Column({ type: 'enum', enum: UserSituation, nullable: false, default: UserSituation.INACTIVE })
+    @Column({ type: 'enum', enum: UserSituation, nullable: false, default: UserSituation.PENDING })
     situation: UserSituation;
 
     @OneToOne(() => Resident, (resident) => resident.user)

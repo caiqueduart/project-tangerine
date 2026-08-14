@@ -35,6 +35,10 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./admin-townhouse-details/admin-townhouse-details').then((m) => m.AdminTownhouseDetails),
             },
+            {
+                path: SYSTEM_ADMIN_SEGMENTS.users,
+                loadComponent: () => import('./admin-list-users/admin-list-users').then((m) => m.AdminListUsers),
+            },
         ],
     },
     {

@@ -44,3 +44,8 @@ export class GetHouseDto {
     identifier: string;
     residentCount: number;
 }
+
+export class HouseOptionDto {
+    id: number;
+    identifier: string;
+}

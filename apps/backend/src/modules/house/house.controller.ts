@@ -1,6 +1,18 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseIntPipe,
+    Patch,
+    Post,
+    Query,
+} from '@nestjs/common';
 import { HouseService } from './house.service';
-import { CreateHouseDto, CreateHousesBatchDto, GetHouseDto, UpdateHouseDto } from './dtos/house.dto';
+import { CreateHouseDto, CreateHousesBatchDto, GetHouseDto, HouseOptionDto, UpdateHouseDto } from './dtos/house.dto';
 
 @Controller('house')
 export class HouseController {
@@ -14,6 +26,11 @@ export class HouseController {
     @Post('batch')
     postBatch(@Body() houses: CreateHousesBatchDto): Promise<GetHouseDto[]> {
         return this._houseService.registerBatch(houses);
+    }
+
+    @Get('options')
+    getOptions(@Query('townhouseId', ParseIntPipe) townhouseId: number): Promise<HouseOptionDto[]> {
+        return this._houseService.getOptions(townhouseId);
     }
 
     @Get(':houseId')

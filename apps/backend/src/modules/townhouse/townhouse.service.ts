@@ -4,6 +4,7 @@ import {
     GetTownhouseDto,
     TownhouseDetailsDto,
     TownhouseListItemDto,
+    TownhouseOptionDto,
     UpdateTownhouseDto,
 } from './dtos/townhouse.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -59,6 +60,15 @@ export class TownhouseService {
         });
 
         return townhouses.map((townhouse) => this._toListItemDto(townhouse));
+    }
+
+    async getOptions(): Promise<TownhouseOptionDto[]> {
+        const townhouses = await this._townhouseRepository.find({
+            select: { id: true, name: true },
+            order: { name: 'ASC' },
+        });
+
+        return townhouses.map(({ id, name }) => ({ id, name }));
     }
 
     async deleteOne(id: number): Promise<void> {

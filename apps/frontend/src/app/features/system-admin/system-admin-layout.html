@@ -25,6 +25,11 @@
                 <mat-icon>apartment</mat-icon>
                 Condomínios
             </a>
+
+            <a [routerLink]="usersRoute" [routerLinkActive]="routerActiveClass">
+                <mat-icon>group</mat-icon>
+                Usuários
+            </a>
         </nav>
 
         <div class="system-admin-layout__account">
@@ -65,6 +70,11 @@
         <a [routerLink]="townhousesRoute" routerLinkActive="system-admin-layout__mobile-navigation-link--active">
             <mat-icon>apartment</mat-icon>
             Condomínios
+        </a>
+
+        <a [routerLink]="usersRoute" routerLinkActive="system-admin-layout__mobile-navigation-link--active">
+            <mat-icon>group</mat-icon>
+            Usuários
         </a>
     </nav>
 

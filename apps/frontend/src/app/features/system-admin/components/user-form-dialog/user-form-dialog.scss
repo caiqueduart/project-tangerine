@@ -1,0 +1,57 @@
+@use '../../../../../styles/functions' as *;
+@use '../../../../../styles/variables' as *;
+
+.user-form-dialog {
+    &__header {
+        padding: 24px 24px 0;
+
+        h2 {
+            margin: 0;
+            padding: 0;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            font-size: pxToRem(14);
+            margin: 6px 0 0;
+        }
+    }
+
+    &__content {
+        display: grid;
+        gap: 4px;
+        min-width: min(560px, calc(100vw - 72px));
+        padding-top: 20px;
+    }
+
+    &__name-fields {
+        display: grid;
+        gap: 4px;
+    }
+
+    &__residence {
+        border-top: 1px solid var(--color-neutral-track);
+        display: grid;
+        gap: 4px;
+        padding-top: 18px;
+
+        h3 {
+            font-size: pxToRem(16);
+            margin: 0;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            font-size: pxToRem(13);
+            line-height: pxToRem(19);
+            margin: 4px 0 14px;
+        }
+    }
+}
+
+@media (width >= $breakpoint-sm) {
+    .user-form-dialog__name-fields {
+        grid-template-columns: 1fr 1.5fr;
+        gap: 12px;
+    }
+}

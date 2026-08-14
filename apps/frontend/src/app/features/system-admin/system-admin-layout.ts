@@ -13,6 +13,10 @@ import { SYSTEM_ADMIN_ROUTES } from '../../core/config/routes/system-admin-route
     styleUrl: './system-admin-layout.scss',
 })
 export class SystemAdminLayout {
+    readonly rootRoute = SYSTEM_ADMIN_ROUTES.root;
+    readonly townhousesRoute = SYSTEM_ADMIN_ROUTES.townhouses;
+    readonly usersRoute = SYSTEM_ADMIN_ROUTES.users;
+
     private readonly _authService = inject(AuthService);
     private readonly _authSessionService = inject(AuthSessionService);
     private readonly _router = inject(Router);
@@ -27,9 +31,6 @@ export class SystemAdminLayout {
         const user = this.session()?.user;
         return user ? `${user.firstName[0] ?? ''}${user.lastName[0] ?? ''}`.toUpperCase() : 'AD';
     });
-
-    readonly rootRoute = SYSTEM_ADMIN_ROUTES.root;
-    readonly townhousesRoute = SYSTEM_ADMIN_ROUTES.townhouses;
 
     logout(): void {
         this._authService.logout();

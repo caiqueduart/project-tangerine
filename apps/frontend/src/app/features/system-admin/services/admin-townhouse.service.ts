@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HOUSE_API_ROUTES } from '../../../core/config/routes/house-routes.config';
@@ -7,8 +7,10 @@ import {
     HouseFormValue,
     HousesBatchFormValue,
     SystemAdminHouse,
+    SystemAdminHouseOption,
     SystemAdminTownhouseDetails,
     SystemAdminTownhouseListItem,
+    SystemAdminTownhouseOption,
     TownhouseFormValue,
     UpdateTownhousePayload,
 } from '../models/admin-townhouse.model';
@@ -19,6 +21,16 @@ export class AdminTownhouseService {
 
     getAll(): Observable<SystemAdminTownhouseListItem[]> {
         return this._httpClient.get<SystemAdminTownhouseListItem[]>(TOWNHOUSE_API_ROUTES.root);
+    }
+
+    getOptions(): Observable<SystemAdminTownhouseOption[]> {
+        return this._httpClient.get<SystemAdminTownhouseOption[]>(TOWNHOUSE_API_ROUTES.options);
+    }
+
+    getHouseOptions(townhouseId: number): Observable<SystemAdminHouseOption[]> {
+        const params = new HttpParams().set('townhouseId', townhouseId);
+
+        return this._httpClient.get<SystemAdminHouseOption[]>(HOUSE_API_ROUTES.options, { params });
     }
 
     getOne(townhouseId: number): Observable<SystemAdminTownhouseDetails> {

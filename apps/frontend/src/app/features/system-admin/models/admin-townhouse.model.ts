@@ -10,10 +10,20 @@ export interface SystemAdminTownhouseListItem {
     readonly residentCount: number;
 }
 
+export interface SystemAdminTownhouseOption {
+    readonly id: number;
+    readonly name: string;
+}
+
 export interface SystemAdminHouse {
     readonly id: number;
     readonly identifier: string;
     readonly residentCount: number;
+}
+
+export interface SystemAdminHouseOption {
+    readonly id: number;
+    readonly identifier: string;
 }
 
 export interface SystemAdminTownhouseDetails extends SystemAdminTownhouseListItem {

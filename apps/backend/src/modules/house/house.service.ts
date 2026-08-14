@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
-import { CreateHouseDto, CreateHousesBatchDto, GetHouseDto, UpdateHouseDto } from './dtos/house.dto';
+import { CreateHouseDto, CreateHousesBatchDto, GetHouseDto, HouseOptionDto, UpdateHouseDto } from './dtos/house.dto';
 import { House } from './entities/house.entity';
 import { Townhouse } from '../townhouse/entities/townhouse.entity';
 
@@ -54,6 +54,16 @@ export class HouseService {
         const house = await this._findOne(id);
 
         return this._toDto(house);
+    }
+
+    async getOptions(townhouseId: number): Promise<HouseOptionDto[]> {
+        const houses = await this._houseRepository.find({
+            select: { id: true, identifier: true },
+            where: { townhouse: { id: townhouseId } },
+            order: { identifier: 'ASC' },
+        });
+
+        return houses.map(({ id, identifier }) => ({ id, identifier }));
     }
 
     async updateOne(id: number, data: UpdateHouseDto): Promise<GetHouseDto> {

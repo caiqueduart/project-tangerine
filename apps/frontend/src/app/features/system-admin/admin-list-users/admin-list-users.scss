@@ -1,0 +1,205 @@
+@use '../../../../styles/functions' as *;
+@use '../../../../styles/variables' as *;
+
+.admin-list-users {
+    &__header {
+        align-items: flex-start;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        justify-content: space-between;
+        margin-bottom: 24px;
+
+        h1 {
+            font-size: var(--text-h1);
+            margin: 0;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin: 2px 0 0;
+        }
+    }
+
+    &__tools {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 20px;
+
+        mat-button-toggle-group {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+    }
+
+    &__feedback {
+        align-items: center;
+        background: var(--color-card-background);
+        border: 1px solid var(--color-neutral-track);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        justify-content: center;
+        min-height: 260px;
+        padding: 32px;
+        text-align: center;
+
+        > mat-icon {
+            color: var(--color-primary);
+            font-size: pxToRem(40);
+            height: 40px;
+            width: 40px;
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+    }
+
+    &__table-wrapper {
+        background: var(--color-card-background);
+        border: 1px solid var(--color-neutral-track);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    &__table {
+        border-collapse: collapse;
+        width: 100%;
+
+        thead {
+            display: none;
+        }
+
+        tbody,
+        tr,
+        td {
+            display: block;
+        }
+
+        tr {
+            border-bottom: 1px solid var(--color-neutral-track);
+            padding: 16px 56px 16px 16px;
+            position: relative;
+
+            &:last-child {
+                border-bottom: 0;
+            }
+        }
+
+        td {
+            color: var(--color-text-secondary);
+            font-size: pxToRem(14);
+            padding: 5px 0;
+
+            &::before {
+                color: var(--color-text-primary);
+                content: attr(data-label) ': ';
+                font-weight: 700;
+            }
+
+            > span {
+                display: block;
+                line-height: pxToRem(20);
+            }
+        }
+    }
+
+    &__user-button {
+        background: none;
+        border: 0;
+        color: var(--color-text-primary);
+        cursor: pointer;
+        font: inherit;
+        font-size: pxToRem(15);
+        font-weight: 800;
+        padding: 0;
+        text-align: left;
+
+        &:hover {
+            color: var(--color-primary);
+            text-decoration: underline;
+        }
+    }
+
+    &__table &__actions {
+        align-items: center;
+        display: flex;
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+
+        &::before {
+            content: none;
+        }
+
+        > button:last-of-type mat-icon {
+            color: var(--color-error);
+        }
+    }
+}
+
+@media (width >= $breakpoint-md) {
+    .admin-list-users {
+        &__header {
+            align-items: center;
+            flex-direction: row;
+        }
+
+        &__tools {
+            align-items: center;
+            grid-template-columns: minmax(300px, 480px) auto;
+            justify-content: space-between;
+        }
+
+        &__table {
+            thead {
+                background: color-mix(in srgb, var(--color-background) 70%, var(--color-surface));
+                display: table-header-group;
+            }
+
+            tbody {
+                display: table-row-group;
+            }
+
+            tr {
+                display: table-row;
+                padding: 0;
+            }
+
+            th,
+            td {
+                border-bottom: 1px solid var(--color-neutral-track);
+                display: table-cell;
+                padding: 14px 16px;
+                text-align: left;
+                vertical-align: middle;
+            }
+
+            th {
+                color: var(--color-text-secondary);
+                font-size: pxToRem(12);
+                text-transform: uppercase;
+            }
+
+            td::before {
+                content: none;
+            }
+
+            tbody tr:last-child td {
+                border-bottom: 0;
+            }
+        }
+
+        &__table &__actions {
+            display: table-cell;
+            position: static;
+            text-align: right;
+            transform: none;
+            white-space: nowrap;
+        }
+    }
+}

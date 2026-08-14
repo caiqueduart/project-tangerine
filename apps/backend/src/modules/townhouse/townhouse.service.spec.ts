@@ -5,6 +5,7 @@ import { Townhouse } from './entities/townhouse.entity';
 
 describe('TownhouseService', () => {
     const townhouseRepository = {
+        find: jest.fn(),
         findOne: jest.fn(),
     };
 
@@ -36,5 +37,21 @@ describe('TownhouseService', () => {
         townhouseRepository.findOne.mockResolvedValue(null);
 
         await expect(service.getOneBySlug('inexistente')).rejects.toThrow(NotFoundException);
+    });
+
+    it('retorna somente id e nome nas opções de condomínio', async () => {
+        townhouseRepository.find.mockResolvedValue([
+            { id: 2, name: 'Condomínio B' },
+            { id: 1, name: 'Condomínio A' },
+        ]);
+
+        await expect(service.getOptions()).resolves.toEqual([
+            { id: 2, name: 'Condomínio B' },
+            { id: 1, name: 'Condomínio A' },
+        ]);
+        expect(townhouseRepository.find).toHaveBeenCalledWith({
+            select: { id: true, name: true },
+            order: { name: 'ASC' },
+        });
     });
 });

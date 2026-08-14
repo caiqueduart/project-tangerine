@@ -5,6 +5,7 @@ import {
     GetTownhouseDto,
     TownhouseDetailsDto,
     TownhouseListItemDto,
+    TownhouseOptionDto,
     UpdateTownhouseDto,
 } from './dtos/townhouse.dto';
 import { Public } from '../auth/decorators/public.decorator';
@@ -16,6 +17,11 @@ export class TownhouseController {
     @Get()
     getAll(): Promise<TownhouseListItemDto[]> {
         return this._townhouseService.getAll();
+    }
+
+    @Get('options')
+    getOptions(): Promise<TownhouseOptionDto[]> {
+        return this._townhouseService.getOptions();
     }
 
     @Public()

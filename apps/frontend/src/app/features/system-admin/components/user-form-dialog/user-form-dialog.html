@@ -1,0 +1,104 @@
+<header class="user-form-dialog__header">
+    <h2 mat-dialog-title>{{ isEditing ? 'Editar usuário' : 'Novo usuário' }}</h2>
+    <p>{{ isEditing ? 'Atualize os dados e o vínculo residencial.' : 'Cadastre um novo acesso na plataforma.' }}</p>
+</header>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-dialog-content class="user-form-dialog__content">
+        <div class="user-form-dialog__name-fields">
+            <mat-form-field appearance="outline">
+                <mat-label>Nome</mat-label>
+                <input matInput formControlName="firstName" maxlength="20" />
+                <mat-error>Informe o nome.</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Sobrenome</mat-label>
+                <input matInput formControlName="lastName" maxlength="80" />
+                <mat-error>Informe o sobrenome.</mat-error>
+            </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Telefone</mat-label>
+            <input matInput formControlName="phone" maxlength="20" inputmode="tel" autocomplete="tel" />
+            <mat-error>Informe o telefone.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>E-mail</mat-label>
+            <input matInput formControlName="email" maxlength="255" inputmode="email" autocomplete="email" />
+            <mat-error>Informe um e-mail válido.</mat-error>
+        </mat-form-field>
+
+        @if (!isEditing) {
+            <mat-form-field appearance="outline">
+                <mat-label>Senha inicial</mat-label>
+                <input matInput type="password" formControlName="password" autocomplete="new-password" />
+                @if (form.controls.password.hasError('minlength')) {
+                    <mat-error>A senha deve ter pelo menos 8 caracteres.</mat-error>
+                } @else {
+                    <mat-error>Informe a senha inicial.</mat-error>
+                }
+            </mat-form-field>
+        } @else {
+            <mat-form-field appearance="outline">
+                <mat-label>Situação</mat-label>
+                <mat-select formControlName="situation">
+                    @for (situation of situations; track situation.value) {
+                        <mat-option [value]="situation.value">{{ situation.label }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        }
+
+        <section class="user-form-dialog__residence" aria-labelledby="user-residence-title">
+            <div>
+                <h3 id="user-residence-title">Vínculo residencial</h3>
+                <p>Opcional. Selecione um condomínio e uma casa para cadastrar o usuário como morador.</p>
+            </div>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Condomínio</mat-label>
+                <mat-select
+                    formControlName="townhouseId"
+                    [disabled]="loadingTownhouses()"
+                    (valueChange)="townhouseChanged($event)"
+                >
+                    <mat-option [value]="null">Sem vínculo</mat-option>
+                    @for (townhouse of townhouses(); track townhouse.id) {
+                        <mat-option [value]="townhouse.id">{{ townhouse.name }}</mat-option>
+                    }
+                </mat-select>
+                @if (loadingTownhouses()) {
+                    <mat-spinner matSuffix diameter="18" aria-label="Carregando condomínios" />
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Casa</mat-label>
+                <mat-select
+                    formControlName="houseId"
+                    [disabled]="!form.controls.townhouseId.value || loadingTownhouses() || loadingHouses()"
+                >
+                    @for (house of houses(); track house.id) {
+                        <mat-option [value]="house.id">{{ house.identifier }}</mat-option>
+                    }
+                </mat-select>
+                @if (loadingHouses()) {
+                    <mat-spinner matSuffix diameter="18" aria-label="Carregando casas" />
+                }
+                @if (form.controls.houseId.hasError('required')) {
+                    <mat-error>Selecione uma casa.</mat-error>
+                }
+            </mat-form-field>
+        </section>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" mat-dialog-close>Cancelar</button>
+        <button mat-flat-button type="submit" [disabled]="loadingTownhouses() || loadingHouses()">
+            {{ isEditing ? 'Salvar alterações' : 'Cadastrar usuário' }}
+        </button>
+    </mat-dialog-actions>
+</form>

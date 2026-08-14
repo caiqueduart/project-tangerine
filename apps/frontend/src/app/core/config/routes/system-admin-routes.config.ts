@@ -8,6 +8,7 @@ export const SYSTEM_ADMIN_SEGMENTS = {
     root: 'admin',
     login: 'login',
     townhouses: 'condominios',
+    users: 'usuarios',
 } as const;
 
 export const SYSTEM_ADMIN_ROUTES = {
@@ -15,4 +16,5 @@ export const SYSTEM_ADMIN_ROUTES = {
     login: buildFromSystemAdmin(SYSTEM_ADMIN_SEGMENTS.login),
     townhouses: buildFromSystemAdmin(SYSTEM_ADMIN_SEGMENTS.townhouses),
     townhouseDetails: (townhouseId: number) => buildFromSystemAdmin(SYSTEM_ADMIN_SEGMENTS.townhouses, townhouseId),
+    users: buildFromSystemAdmin(SYSTEM_ADMIN_SEGMENTS.users),
 } as const;

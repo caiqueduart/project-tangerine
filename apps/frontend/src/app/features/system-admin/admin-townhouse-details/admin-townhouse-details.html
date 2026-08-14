@@ -88,7 +88,7 @@
                             <p>Nenhuma casa cadastrada.</p>
                         </div>
                     } @else {
-                        <ul class="system-admin-townhouse-details__houses" aria-label="Casas cadastradas">
+                        <ul class="system-admin-townhouse-details__records" aria-label="Casas cadastradas">
                             @for (house of townhouse.houses; track house.id) {
                                 <li>
                                     <div>
@@ -119,7 +119,85 @@
                     }
                 </div>
             </mat-tab>
-            <mat-tab label="Usuários" disabled />
+            <mat-tab [label]="'Usuários (' + users().length + ')'">
+                <div class="system-admin-townhouse-details__tab-content">
+                    <div class="system-admin-townhouse-details__section-header">
+                        <div>
+                            <h2>Usuários</h2>
+                            <p>Moradores vinculados às casas deste condomínio.</p>
+                        </div>
+                    </div>
+
+                    @if (users().length === 0) {
+                        <div class="system-admin-townhouse-details__empty">
+                            <mat-icon>group_off</mat-icon>
+                            <p>Nenhum usuário vinculado.</p>
+                        </div>
+                    } @else {
+                        <ul class="system-admin-townhouse-details__records" aria-label="Usuários vinculados">
+                            @for (user of users(); track user.id) {
+                                <li>
+                                    <div>
+                                        <p>{{ user.firstName }} {{ user.lastName }}</p>
+                                        <span>{{ user.house?.identifier }} · {{ user.email || user.phone }}</span>
+                                    </div>
+
+                                    <div class="system-admin-townhouse-details__user-actions">
+                                        <app-label
+                                            [theme]="
+                                                user.situation === 'ACTIVE'
+                                                    ? 'green'
+                                                    : user.situation === 'PENDING'
+                                                      ? 'orange'
+                                                      : 'opaque'
+                                            "
+                                            [icon]="user.situation === 'ACTIVE' ? 'check_circle' : 'pause_circle'"
+                                            [text]="
+                                                user.situation === 'ACTIVE'
+                                                    ? 'Ativo'
+                                                    : user.situation === 'PENDING'
+                                                      ? 'Pendente'
+                                                      : 'Inativo'
+                                            "
+                                        />
+
+                                        <button
+                                            mat-icon-button
+                                            type="button"
+                                            [matMenuTriggerFor]="userMenu"
+                                            [attr.aria-label]="'Ações de ' + user.firstName"
+                                        >
+                                            <mat-icon>more_vert</mat-icon>
+                                        </button>
+
+                                        <mat-menu #userMenu="matMenu">
+                                            <button
+                                                mat-menu-item
+                                                type="button"
+                                                [disabled]="isCurrentUser(user)"
+                                                (click)="toggleUserSituation(user)"
+                                            >
+                                                <mat-icon>{{
+                                                    user.situation === 'ACTIVE' ? 'person_off' : 'person'
+                                                }}</mat-icon>
+                                                <span>{{
+                                                    user.situation === 'ACTIVE'
+                                                        ? 'Inativar usuário'
+                                                        : 'Reativar usuário'
+                                                }}</span>
+                                            </button>
+                                            <button mat-menu-item type="button" (click)="removeUser(user)">
+                                                <mat-icon>link_off</mat-icon>
+                                                <span>Remover deste condomínio</span>
+                                            </button>
+                                        </mat-menu>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </mat-tab>
             <mat-tab label="Gestores" disabled />
         </mat-tab-group>
     }

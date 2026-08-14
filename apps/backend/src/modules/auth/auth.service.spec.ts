@@ -4,6 +4,7 @@ import { AuthTokenType } from './dtos/token-payload.dto';
 import { JwtService } from '@nestjs/jwt';
 import { HashService } from '../common/services/hash.service';
 import { UserService } from '../user/user.service';
+import { UserSituation } from '../user/enums/user-situation';
 
 describe('AuthService', () => {
     const jwtConfiguration = {
@@ -45,6 +46,7 @@ describe('AuthService', () => {
             firstName: 'Maria',
             lastName: 'Silva',
             passwordHash: 'password-hash',
+            situation: UserSituation.ACTIVE,
             resident: {
                 house: {
                     id: 7,
@@ -119,7 +121,7 @@ describe('AuthService', () => {
             id: 'user-id',
             tokenType: AuthTokenType.REFRESH,
         });
-        userService.get.mockResolvedValue({ id: 'user-id' });
+        userService.get.mockResolvedValue({ id: 'user-id', situation: UserSituation.ACTIVE });
         jwtService.signAsync.mockResolvedValueOnce('new-access-token');
 
         const result = await service.refreshAccessToken('valid-refresh-token');
@@ -171,6 +173,31 @@ describe('AuthService', () => {
             tokenType: AuthTokenType.REFRESH,
         });
         userService.get.mockRejectedValue(new Error('user not found'));
+
+        await expect(service.refreshAccessToken('valid-refresh-token')).rejects.toThrow(UnauthorizedException);
+        expect(jwtService.signAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejeita login de usuário inativo mesmo quando a senha é válida', async () => {
+        userService.findUserByLogin.mockResolvedValue({
+            id: 'inactive-user-id',
+            passwordHash: 'password-hash',
+            situation: UserSituation.INACTIVE,
+        });
+        hashService.compare.mockResolvedValue(true);
+
+        await expect(service.login({ uid: 'inativo@email.com', password: '1234' })).rejects.toThrow(
+            UnauthorizedException,
+        );
+        expect(jwtService.signAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejeita refresh token de usuário que deixou de estar ativo', async () => {
+        jwtService.verifyAsync.mockResolvedValue({
+            id: 'inactive-user-id',
+            tokenType: AuthTokenType.REFRESH,
+        });
+        userService.get.mockResolvedValue({ id: 'inactive-user-id', situation: UserSituation.INACTIVE });
 
         await expect(service.refreshAccessToken('valid-refresh-token')).rejects.toThrow(UnauthorizedException);
         expect(jwtService.signAsync).not.toHaveBeenCalled();
