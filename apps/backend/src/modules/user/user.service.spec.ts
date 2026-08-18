@@ -11,8 +11,8 @@ describe('UserService', () => {
         create: jest.fn((entity: { name: string }, data: object) => ({ ...data, entity: entity.name })),
         findOne: jest.fn(),
         remove: jest.fn(),
-        save: jest.fn(async (entity: { entity?: string; id?: string }) =>
-            entity.entity === User.name ? { ...entity, id: entity.id ?? 'new-user-id' } : entity,
+        save: jest.fn((entity: { entity?: string; id?: string }) =>
+            Promise.resolve(entity.entity === User.name ? { ...entity, id: entity.id ?? 'new-user-id' } : entity),
         ),
     };
     const userRepository = {
@@ -104,6 +104,20 @@ describe('UserService', () => {
             userId: 'user-id',
             action: UserAuditAction.UPDATED,
             actorUserId: 'admin-id',
+        });
+    });
+
+    it('consulta um usuário ativo com seu vínculo residencial', async () => {
+        const user = {
+            id: 'user-id',
+            situation: UserSituation.ACTIVE,
+        };
+        userRepository.findOne.mockResolvedValue(user);
+
+        await expect(service.findActiveUserById('user-id')).resolves.toBe(user);
+        expect(userRepository.findOne).toHaveBeenCalledWith({
+            where: { id: 'user-id', situation: UserSituation.ACTIVE },
+            relations: { resident: { house: { townhouse: true } } },
         });
     });
 

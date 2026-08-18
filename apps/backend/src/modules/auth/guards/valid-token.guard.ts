@@ -7,8 +7,15 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { TOKEN_PAYLOAD_KEY } from '../auth.constants';
 import { AccessTokenPayloadDto, AuthTokenType } from '../dtos/token-payload.dto';
 import { Request } from 'express';
+import { UserService } from '../../user/user.service';
+import { AUTHENTICATED_ACTOR_KEY } from '../../authorization/authorization.constants';
+import { AuthenticatedActor } from '../../authorization/models/authenticated-actor';
 
-type RequestWithTokenPayload = Request & Partial<Record<typeof TOKEN_PAYLOAD_KEY, AccessTokenPayloadDto>>;
+type AuthenticatedRequest = Request &
+    Partial<
+        Record<typeof TOKEN_PAYLOAD_KEY, AccessTokenPayloadDto> &
+            Record<typeof AUTHENTICATED_ACTOR_KEY, AuthenticatedActor>
+    >;
 
 @Injectable()
 export class ValidTokenGuard implements CanActivate {
@@ -16,14 +23,18 @@ export class ValidTokenGuard implements CanActivate {
         @Inject(jwtConfig.KEY) private readonly _jwtConfiguration: config.ConfigType<typeof jwtConfig>,
         private readonly _jwtService: JwtService,
         private readonly _reflector: Reflector,
+        private readonly _userService: UserService,
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const isPublic = this._reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
+        const isPublic = this._reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
 
         if (isPublic) return true;
 
-        const request = context.switchToHttp().getRequest<RequestWithTokenPayload>();
+        const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
         const authorization = request.headers.authorization;
 
         if (!authorization?.startsWith('Bearer ')) throw new UnauthorizedException();
@@ -32,19 +43,33 @@ export class ValidTokenGuard implements CanActivate {
 
         if (!token) throw new UnauthorizedException();
 
+        let payload: AccessTokenPayloadDto;
+
         try {
-            const payload = await this._jwtService.verifyAsync<AccessTokenPayloadDto>(token, {
+            payload = await this._jwtService.verifyAsync<AccessTokenPayloadDto>(token, {
                 audience: this._jwtConfiguration.audience,
                 issuer: this._jwtConfiguration.issuer,
                 secret: this._jwtConfiguration.secret,
             });
-
-            if (payload.tokenType !== AuthTokenType.ACCESS) throw new UnauthorizedException();
-
-            request[TOKEN_PAYLOAD_KEY] = payload;
         } catch {
             throw new UnauthorizedException();
         }
+
+        if (!payload.id || payload.tokenType !== AuthTokenType.ACCESS) throw new UnauthorizedException();
+
+        const user = await this._userService.findActiveUserById(payload.id);
+
+        if (!user) throw new UnauthorizedException();
+
+        const house = user.resident?.house;
+
+        request[TOKEN_PAYLOAD_KEY] = payload;
+        request[AUTHENTICATED_ACTOR_KEY] = {
+            userId: user.id,
+            role: user.role,
+            houseId: house?.id,
+            townhouseId: house?.townhouse.id,
+        };
 
         return true;
     }

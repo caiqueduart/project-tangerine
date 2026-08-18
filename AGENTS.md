@@ -35,6 +35,11 @@ Estas instruções valem para todo o repositório. Antes de alterar qualquer arq
 - Componentes devem ter responsabilidade clara e se possível, burros.
 - Conteúdo que aparece tanto em menu quanto em bottom sheet deve ser um componente reutilizável, sem duplicação de template.
 
+## Backend e persistência
+
+- Cada repositório deve ser injetado e acessado somente pelo service do módulo responsável por sua entidade.
+- Módulos externos devem consumir métodos públicos do service responsável por meio dos exports do módulo, sem registrar ou acessar diretamente o repositório de uma entidade pertencente a outro módulo.
+
 ## Angular Material
 
 - Utilize Angular Material sempre que ele fornecer comportamento, acessibilidade ou integração útil.

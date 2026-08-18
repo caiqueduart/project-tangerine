@@ -180,6 +180,18 @@ export class UserService {
         }
     }
 
+    async findActiveUserById(userId: string): Promise<User | null> {
+        try {
+            return await this._userRepository.findOne({
+                where: { id: userId, situation: UserSituation.ACTIVE },
+                relations: { resident: { house: { townhouse: true } } },
+            });
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            throw new InternalServerErrorException('Erro ao consultar usuário.');
+        }
+    }
+
     private async _findOne(userId: string): Promise<User> {
         try {
             const user = await this._userRepository.findOne({

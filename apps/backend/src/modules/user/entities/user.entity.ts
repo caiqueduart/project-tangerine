@@ -1,6 +1,7 @@
 import { UserSituation } from '../enums/user-situation';
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Resident } from './resident.entity';
+import { UserRole } from '../enums/user-role';
 
 @Entity()
 export class User {
@@ -24,6 +25,9 @@ export class User {
 
     @Column({ type: 'enum', enum: UserSituation, nullable: false, default: UserSituation.PENDING })
     situation: UserSituation;
+
+    @Column({ type: 'enum', enum: UserRole, nullable: false, default: UserRole.RESIDENT })
+    role: UserRole;
 
     @OneToOne(() => Resident, (resident) => resident.user)
     resident?: Resident;
