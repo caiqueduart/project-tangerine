@@ -4,8 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { AUTHENTICATED_ACTOR_KEY } from '../../authorization/authorization.constants';
 import { UserRole } from '../../user/enums/user-role';
 import { UserService } from '../../user/user.service';
-import { TOKEN_PAYLOAD_KEY } from '../auth.constants';
-import { AuthTokenType } from '../dtos/token-payload.dto';
+import { AuthenticationTokenType } from '../dtos/token-payload.dto';
 import { ValidTokenGuard } from './valid-token.guard';
 
 describe('ValidTokenGuard', () => {
@@ -54,10 +53,10 @@ describe('ValidTokenGuard', () => {
         expect(userService.findActiveUserById).not.toHaveBeenCalled();
     });
 
-    it('anexa o payload e o ator ativo à requisição', async () => {
+    it('anexa o ator ativo à requisição', async () => {
         const payload = {
             id: 'manager-id',
-            tokenType: AuthTokenType.ACCESS,
+            tokenType: AuthenticationTokenType.ACCESS,
         };
         reflector.getAllAndOverride.mockReturnValue(false);
         request.headers.authorization = 'Bearer access-token';
@@ -75,7 +74,6 @@ describe('ValidTokenGuard', () => {
 
         await expect(guard.canActivate(context)).resolves.toBe(true);
         expect(userService.findActiveUserById).toHaveBeenCalledWith(payload.id);
-        expect(request[TOKEN_PAYLOAD_KEY]).toBe(payload);
         expect(request[AUTHENTICATED_ACTOR_KEY]).toEqual({
             userId: payload.id,
             role: UserRole.TOWNHOUSE_MANAGER,
@@ -98,7 +96,7 @@ describe('ValidTokenGuard', () => {
         request.headers.authorization = 'Bearer access-token';
         jwtService.verifyAsync.mockResolvedValue({
             id: 'inactive-id',
-            tokenType: AuthTokenType.ACCESS,
+            tokenType: AuthenticationTokenType.ACCESS,
         });
         userService.findActiveUserById.mockResolvedValue(null);
 

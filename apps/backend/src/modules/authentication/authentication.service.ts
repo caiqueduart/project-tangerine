@@ -5,16 +5,16 @@ import { HashService } from '../common/services/hash.service';
 import jwtConfig from './configs/jwt.config';
 import * as config from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { AccessTokenPayloadDto, AuthTokenType, RefreshTokenPayloadDto } from './dtos/token-payload.dto';
-import { AuthTokensDto } from './dtos/auth-tokens.dto';
+import { AccessTokenPayloadDto, AuthenticationTokenType, RefreshTokenPayloadDto } from './dtos/token-payload.dto';
+import { AuthenticationTokensDto } from './dtos/authentication-tokens.dto';
 import { User } from '../user/entities/user.entity';
 import { AccessTokenDto } from './dtos/access-token.dto';
-import { AuthSessionDto } from './dtos/auth-session.dto';
+import { AuthenticationSessionDto } from './dtos/authentication-session.dto';
 import { LoginResultDto } from './dtos/login-result.dto';
 import { UserSituation } from '../user/enums/user-situation';
 
 @Injectable()
-export class AuthService {
+export class AuthenticationService {
     constructor(
         @Inject(jwtConfig.KEY) private readonly _jwtConfiguration: config.ConfigType<typeof jwtConfig>,
         private readonly _jwtService: JwtService,
@@ -44,7 +44,7 @@ export class AuthService {
 
         return {
             ...tokens,
-            session: this._generateAuthSessionData(user),
+            session: this._generateAuthenticationSessionData(user),
         };
     }
 
@@ -66,7 +66,7 @@ export class AuthService {
             throw new UnauthorizedException(unauthorizedMessage);
         }
 
-        if (payload.tokenType !== AuthTokenType.REFRESH || !payload.id) {
+        if (payload.tokenType !== AuthenticationTokenType.REFRESH || !payload.id) {
             throw new UnauthorizedException(unauthorizedMessage);
         }
 
@@ -82,7 +82,7 @@ export class AuthService {
 
         const accessTokenPayload: AccessTokenPayloadDto = {
             id: payload.id,
-            tokenType: AuthTokenType.ACCESS,
+            tokenType: AuthenticationTokenType.ACCESS,
         };
 
         const accessToken = await this._generateToken(
@@ -94,15 +94,15 @@ export class AuthService {
         return { accessToken };
     }
 
-    private async _generateRefreshAndAccessTokens(user: Pick<User, 'id'>): Promise<AuthTokensDto> {
+    private async _generateRefreshAndAccessTokens(user: Pick<User, 'id'>): Promise<AuthenticationTokensDto> {
         const accessTokenPayload: AccessTokenPayloadDto = {
             id: user.id,
-            tokenType: AuthTokenType.ACCESS,
+            tokenType: AuthenticationTokenType.ACCESS,
         };
 
         const refreshTokenPayload: RefreshTokenPayloadDto = {
             id: user.id,
-            tokenType: AuthTokenType.REFRESH,
+            tokenType: AuthenticationTokenType.REFRESH,
         };
 
         const [accessToken, refreshToken] = await Promise.all([
@@ -117,7 +117,7 @@ export class AuthService {
         return { accessToken, refreshToken };
     }
 
-    private _generateAuthSessionData(user: User): AuthSessionDto {
+    private _generateAuthenticationSessionData(user: User): AuthenticationSessionDto {
         const house = user.resident?.house;
 
         return {

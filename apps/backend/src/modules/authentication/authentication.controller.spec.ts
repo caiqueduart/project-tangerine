@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { ConfigType } from '@nestjs/config';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { REFRESH_TOKEN_COOKIE } from './auth.constants';
+import { AuthenticationController } from './authentication.controller';
+import { AuthenticationService } from './authentication.service';
+import { REFRESH_TOKEN_COOKIE } from './authentication.constants';
 import jwtConfig from './configs/jwt.config';
 
-describe('AuthController', () => {
-    const authService = {
+describe('AuthenticationController', () => {
+    const authenticationService = {
         login: jest.fn(),
         refreshAccessToken: jest.fn(),
     };
@@ -18,18 +18,18 @@ describe('AuthController', () => {
         cookie: jest.fn(),
     };
 
-    let controller: AuthController;
+    let controller: AuthenticationController;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        controller = new AuthController(
-            authService as unknown as AuthService,
+        controller = new AuthenticationController(
+            authenticationService as unknown as AuthenticationService,
             jwtConfiguration as unknown as ConfigType<typeof jwtConfig>,
         );
     });
 
     it('grava o refresh token em cookie HttpOnly e não o retorna no login', async () => {
-        authService.login.mockResolvedValue({
+        authenticationService.login.mockResolvedValue({
             accessToken: 'access-token',
             refreshToken: 'refresh-token',
             session: {
@@ -68,7 +68,7 @@ describe('AuthController', () => {
     });
 
     it('renova o access token usando o refresh token do cookie', async () => {
-        authService.refreshAccessToken.mockResolvedValue({ accessToken: 'new-access-token' });
+        authenticationService.refreshAccessToken.mockResolvedValue({ accessToken: 'new-access-token' });
         const request = {
             cookies: {
                 [REFRESH_TOKEN_COOKIE]: 'refresh-token',
@@ -77,7 +77,7 @@ describe('AuthController', () => {
 
         const result = await controller.refreshAccessToken(request);
 
-        expect(authService.refreshAccessToken).toHaveBeenCalledWith('refresh-token');
+        expect(authenticationService.refreshAccessToken).toHaveBeenCalledWith('refresh-token');
         expect(result).toEqual({ accessToken: 'new-access-token' });
     });
 

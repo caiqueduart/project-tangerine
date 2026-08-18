@@ -4,18 +4,13 @@ import jwtConfig from '../configs/jwt.config';
 import * as config from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { TOKEN_PAYLOAD_KEY } from '../auth.constants';
-import { AccessTokenPayloadDto, AuthTokenType } from '../dtos/token-payload.dto';
+import { AccessTokenPayloadDto, AuthenticationTokenType } from '../dtos/token-payload.dto';
 import { Request } from 'express';
 import { UserService } from '../../user/user.service';
 import { AUTHENTICATED_ACTOR_KEY } from '../../authorization/authorization.constants';
 import { AuthenticatedActor } from '../../authorization/models/authenticated-actor';
 
-type AuthenticatedRequest = Request &
-    Partial<
-        Record<typeof TOKEN_PAYLOAD_KEY, AccessTokenPayloadDto> &
-            Record<typeof AUTHENTICATED_ACTOR_KEY, AuthenticatedActor>
-    >;
+type AuthenticatedRequest = Request & Partial<Record<typeof AUTHENTICATED_ACTOR_KEY, AuthenticatedActor>>;
 
 @Injectable()
 export class ValidTokenGuard implements CanActivate {
@@ -55,7 +50,7 @@ export class ValidTokenGuard implements CanActivate {
             throw new UnauthorizedException();
         }
 
-        if (!payload.id || payload.tokenType !== AuthTokenType.ACCESS) throw new UnauthorizedException();
+        if (!payload.id || payload.tokenType !== AuthenticationTokenType.ACCESS) throw new UnauthorizedException();
 
         const user = await this._userService.findActiveUserById(payload.id);
 
@@ -63,7 +58,6 @@ export class ValidTokenGuard implements CanActivate {
 
         const house = user.resident?.house;
 
-        request[TOKEN_PAYLOAD_KEY] = payload;
         request[AUTHENTICATED_ACTOR_KEY] = {
             userId: user.id,
             role: user.role,

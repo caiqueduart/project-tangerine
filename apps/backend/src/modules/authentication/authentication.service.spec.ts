@@ -1,12 +1,12 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthTokenType } from './dtos/token-payload.dto';
+import { AuthenticationService } from './authentication.service';
+import { AuthenticationTokenType } from './dtos/token-payload.dto';
 import { JwtService } from '@nestjs/jwt';
 import { HashService } from '../common/services/hash.service';
 import { UserService } from '../user/user.service';
 import { UserSituation } from '../user/enums/user-situation';
 
-describe('AuthService', () => {
+describe('AuthenticationService', () => {
     const jwtConfiguration = {
         secret: 'access-secret',
         refreshSecret: 'refresh-secret',
@@ -28,11 +28,11 @@ describe('AuthService', () => {
         get: jest.fn(),
     };
 
-    let service: AuthService;
+    let service: AuthenticationService;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        service = new AuthService(
+        service = new AuthenticationService(
             jwtConfiguration,
             jwtService as unknown as JwtService,
             hashService as unknown as HashService,
@@ -92,7 +92,7 @@ describe('AuthService', () => {
             1,
             {
                 id: 'user-id',
-                tokenType: AuthTokenType.ACCESS,
+                tokenType: AuthenticationTokenType.ACCESS,
             },
             {
                 audience: jwtConfiguration.audience,
@@ -105,7 +105,7 @@ describe('AuthService', () => {
             2,
             {
                 id: 'user-id',
-                tokenType: AuthTokenType.REFRESH,
+                tokenType: AuthenticationTokenType.REFRESH,
             },
             {
                 audience: jwtConfiguration.audience,
@@ -119,7 +119,7 @@ describe('AuthService', () => {
     it('gera somente um novo access token quando o refresh token é válido', async () => {
         jwtService.verifyAsync.mockResolvedValue({
             id: 'user-id',
-            tokenType: AuthTokenType.REFRESH,
+            tokenType: AuthenticationTokenType.REFRESH,
         });
         userService.get.mockResolvedValue({ id: 'user-id', situation: UserSituation.ACTIVE });
         jwtService.signAsync.mockResolvedValueOnce('new-access-token');
@@ -135,7 +135,7 @@ describe('AuthService', () => {
         expect(jwtService.signAsync).toHaveBeenCalledWith(
             {
                 id: 'user-id',
-                tokenType: AuthTokenType.ACCESS,
+                tokenType: AuthenticationTokenType.ACCESS,
             },
             {
                 audience: jwtConfiguration.audience,
@@ -151,7 +151,7 @@ describe('AuthService', () => {
     it('rejeita um access token enviado como refresh token', async () => {
         jwtService.verifyAsync.mockResolvedValue({
             id: 'user-id',
-            tokenType: AuthTokenType.ACCESS,
+            tokenType: AuthenticationTokenType.ACCESS,
         });
 
         await expect(service.refreshAccessToken('access-token')).rejects.toThrow(UnauthorizedException);
@@ -170,7 +170,7 @@ describe('AuthService', () => {
     it('rejeita refresh token de usuário que não existe mais', async () => {
         jwtService.verifyAsync.mockResolvedValue({
             id: 'removed-user-id',
-            tokenType: AuthTokenType.REFRESH,
+            tokenType: AuthenticationTokenType.REFRESH,
         });
         userService.get.mockRejectedValue(new Error('user not found'));
 
@@ -195,7 +195,7 @@ describe('AuthService', () => {
     it('rejeita refresh token de usuário que deixou de estar ativo', async () => {
         jwtService.verifyAsync.mockResolvedValue({
             id: 'inactive-user-id',
-            tokenType: AuthTokenType.REFRESH,
+            tokenType: AuthenticationTokenType.REFRESH,
         });
         userService.get.mockResolvedValue({ id: 'inactive-user-id', situation: UserSituation.INACTIVE });
 

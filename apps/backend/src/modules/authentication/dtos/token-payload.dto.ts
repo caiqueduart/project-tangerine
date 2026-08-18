@@ -1,14 +1,14 @@
-export enum AuthTokenType {
+export enum AuthenticationTokenType {
     ACCESS = 'access',
     REFRESH = 'refresh',
 }
 
 export class AccessTokenPayloadDto {
     id: string;
-    tokenType: AuthTokenType.ACCESS;
+    tokenType: AuthenticationTokenType.ACCESS;
 }
 
 export class RefreshTokenPayloadDto {
     id: string;
-    tokenType: AuthTokenType.REFRESH;
+    tokenType: AuthenticationTokenType.REFRESH;
 }

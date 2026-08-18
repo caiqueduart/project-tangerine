@@ -3,13 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TownhouseModule } from './modules/townhouse/townhouse.module';
-import { AuthModule } from './modules/auth/auth.module';
+import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
     imports: [
-        AuthModule,
+        AuthenticationModule,
         UserModule,
         TownhouseModule,
         ConfigModule.forRoot(),

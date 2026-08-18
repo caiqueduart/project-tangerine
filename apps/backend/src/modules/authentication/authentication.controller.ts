@@ -1,18 +1,18 @@
 import { Body, Controller, Inject, Post, Req, Res } from '@nestjs/common';
 import * as config from '@nestjs/config';
 import type { CookieOptions, Request, Response } from 'express';
-import { AuthService } from './auth.service';
+import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dtos/login.dto';
 import { Public } from './decorators/public.decorator';
 import { AccessTokenDto } from './dtos/access-token.dto';
 import { LoginResponseDto } from './dtos/login-response.dto';
-import { REFRESH_TOKEN_COOKIE } from './auth.constants';
+import { REFRESH_TOKEN_COOKIE } from './authentication.constants';
 import jwtConfig from './configs/jwt.config';
 
 @Controller('auth')
-export class AuthController {
+export class AuthenticationController {
     constructor(
-        private readonly _authService: AuthService,
+        private readonly _authenticationService: AuthenticationService,
         @Inject(jwtConfig.KEY) private readonly _jwtConfiguration: config.ConfigType<typeof jwtConfig>,
     ) {}
 
@@ -22,7 +22,7 @@ export class AuthController {
         @Body() credentials: LoginDto,
         @Res({ passthrough: true }) response: Response,
     ): Promise<LoginResponseDto> {
-        const { refreshToken, ...loginResponse } = await this._authService.login(credentials);
+        const { refreshToken, ...loginResponse } = await this._authenticationService.login(credentials);
 
         response.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
             ...this._refreshTokenCookieOptions,
@@ -35,7 +35,8 @@ export class AuthController {
     @Public()
     @Post('refresh')
     refreshAccessToken(@Req() request: Request): Promise<AccessTokenDto> {
-        return this._authService.refreshAccessToken(request.cookies?.[REFRESH_TOKEN_COOKIE]);
+        const cookies = request.cookies as Record<string, string | undefined> | undefined;
+        return this._authenticationService.refreshAccessToken(cookies?.[REFRESH_TOKEN_COOKIE]);
     }
 
     @Public()

@@ -8,7 +8,7 @@ import {
     TownhouseOptionDto,
     UpdateTownhouseDto,
 } from './dtos/townhouse.dto';
-import { Public } from '../auth/decorators/public.decorator';
+import { Public } from '../authentication/decorators/public.decorator';
 
 @Controller('townhouse')
 export class TownhouseController {
