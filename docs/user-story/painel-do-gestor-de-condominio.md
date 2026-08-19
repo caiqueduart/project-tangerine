@@ -31,7 +31,8 @@ Precondições:
 
 Critérios de aceite:
 
-- O resumo deve apresentar, no mínimo, a quantidade de casas, moradores ativos e solicitações de cadastro pendentes.
+- O resumo deve apresentar, no mínimo, a quantidade de casas, moradores ativos e usuários pendentes de definição da
+  senha pessoal.
 - O resumo deve apresentar as contribuições abertas e os respectivos prazos.
 - O resumo deve destacar contribuições que possuam casas com pagamento pendente.
 - O resumo deve apresentar os comprovantes enviados recentemente.
@@ -103,12 +104,13 @@ Critérios de aceite:
 - Para cada morador, o sistema deve apresentar, no mínimo, nome, casa, situação do acesso e indicação de responsável pela residência.
 - O gestor deve conseguir localizar moradores por nome, telefone, e-mail ou identificação da casa.
 - O gestor deve conseguir acessar os detalhes de um morador listado.
-- O sistema deve diferenciar moradores ativos, inativos e com solicitação pendente.
+- O sistema deve diferenciar moradores ativos, inativos, bloqueados e pendentes de definição da senha pessoal.
 - Quando não houver moradores, o sistema deve apresentar uma mensagem simples, sem deixar a área em branco.
 
 ### US-GES-007 - Cadastrar e vincular um morador
 
-Como gestor de condomínio, quero cadastrar um morador e vinculá-lo a uma casa para liberar seu acesso ao sistema.
+Como gestor de condomínio, quero pré-cadastrar um morador e vinculá-lo a uma casa para que ele possa concluir a ativação
+do próprio acesso.
 
 Precondições:
 
@@ -117,31 +119,47 @@ Precondições:
 
 Critérios de aceite:
 
-- O gestor deve conseguir informar nome, telefone, e-mail e casa do morador.
+- O gestor deve conseguir informar nome, telefone obrigatório, e-mail opcional e casa do morador.
+- O condomínio deve ser preenchido com o condomínio administrado e não deve permitir alteração pelo gestor.
+- A seleção de uma casa do condomínio administrado deve ser obrigatória.
 - O gestor deve conseguir indicar se o morador é responsável pela residência.
 - O sistema não deve permitir duplicidade de telefone ou e-mail.
-- O morador deve estar vinculado a uma casa antes de ter o acesso liberado.
+- O sistema deve gerar a senha provisória, sem permitir que o gestor a defina manualmente.
+- A senha provisória deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número, e usar uma
+  combinação familiar, simples de comunicar e digitar, sem dados pessoais do morador.
+- O sistema deve armazenar somente o hash da senha provisória no mesmo campo usado pela senha comum.
+- Após o pré-cadastro, o morador e seu vínculo residencial devem ser criados com situação pendente.
+- A senha provisória deve ser exibida ao gestor somente no resultado da criação para que ele a comunique manualmente ao
+  morador, sempre por WhatsApp e também por e-mail quando estiver disponível.
+- O envio automático por WhatsApp ou e-mail não faz parte deste fluxo.
 - O cadastro não deve conceder automaticamente permissão administrativa ao morador.
-- O sistema deve fornecer um fluxo seguro para definição ou criação da senha do morador.
+- O gestor não deve poder conceder ou remover papéis administrativos.
 - O gestor não deve conseguir vincular o morador a uma casa de outro condomínio.
 
-### US-GES-008 - Analisar solicitações de cadastro
+### US-GES-008 - Gerar nova senha provisória para um morador pendente
 
-Como gestor de condomínio, quero aprovar ou rejeitar solicitações de cadastro para impedir vínculos indevidos com as casas do condomínio.
+Como gestor de condomínio, quero gerar uma nova senha provisória para um morador pendente que perdeu a anterior para
+permitir que ele conclua a ativação.
 
 Precondições:
 
 - O gestor deve atender às precondições da US-GES-001.
+- O morador deve estar vinculado a uma casa do condomínio administrado.
+- O morador deve estar com situação pendente.
 
 Critérios de aceite:
 
-- O sistema deve listar somente solicitações relacionadas a casas do condomínio administrado.
-- O gestor deve conseguir consultar os dados informados e a casa selecionada antes de decidir.
-- O gestor deve conseguir manter ou remover a indicação de responsável pela residência durante a aprovação.
-- A aprovação deve ativar o vínculo do morador com a casa selecionada.
-- A rejeição não deve liberar acesso às áreas internas.
-- O sistema deve registrar a decisão, o gestor responsável e a data e hora da ação.
-- Uma solicitação já decidida não deve ser processada novamente.
+- A opção deve estar disponível no painel administrativo apenas para moradores pendentes do condomínio administrado.
+- O sistema deve gerar a nova senha, sem permitir que o gestor a defina manualmente.
+- A nova senha provisória deve seguir as mesmas regras de formação e armazenamento usadas no pré-cadastro.
+- O novo hash deve substituir o hash anterior no mesmo campo, invalidando imediatamente a senha provisória anterior.
+- A situação do morador deve permanecer pendente.
+- A senha provisória não deve possuir prazo de validade.
+- O sistema deve exibir a nova senha ao gestor somente no resultado da regeneração para comunicação manual ao morador.
+- O sistema deve registrar a alteração de senha, o gestor responsável e a data e hora, sem armazenar a senha nem seu hash
+  no histórico.
+- O gestor não deve conseguir gerar senha provisória para usuários ativos, inativos, bloqueados ou pertencentes a outro
+  condomínio.
 
 ### US-GES-009 - Gerenciar responsáveis de uma casa
 

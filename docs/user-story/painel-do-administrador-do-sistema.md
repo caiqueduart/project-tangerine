@@ -33,7 +33,8 @@ Critérios de aceite:
 - O resumo deve apresentar, no mínimo, a quantidade de condomínios, casas e usuários cadastrados.
 - O sistema deve diferenciar condomínios ativos e inativos.
 - O resumo deve indicar condomínios sem gestor ativo.
-- O resumo deve apresentar solicitações de cadastro pendentes separadas por condomínio.
+- O resumo deve apresentar usuários pendentes de definição da senha pessoal, separados por condomínio quando possuírem
+  vínculo residencial.
 - O administrador deve conseguir acessar o contexto relacionado a partir de cada informação resumida.
 - Quando não houver pendências, o sistema deve apresentar uma mensagem simples, sem deixar a área em branco.
 
@@ -195,7 +196,61 @@ Critérios de aceite:
 - O administrador deve conseguir acessar os detalhes de um usuário listado.
 - Dados pessoais devem ser exibidos apenas na medida necessária para a gestão operacional.
 
-### US-SIS-012 - Desativar e reativar um usuário
+### US-SIS-012 - Pré-cadastrar um usuário
+
+Como administrador do sistema, quero pré-cadastrar um usuário para preparar seu acesso e permitir que ele defina a senha
+pessoal no primeiro login.
+
+Precondições:
+
+- O administrador deve atender às precondições da US-SIS-001.
+
+Critérios de aceite:
+
+- O administrador deve conseguir informar nome, telefone obrigatório e e-mail opcional.
+- O administrador deve conseguir selecionar qualquer condomínio e uma casa pertencente a ele.
+- O vínculo residencial deve ser opcional para o administrador do sistema.
+- Quando houver vínculo residencial, condomínio e casa devem ser informados em conjunto; informar somente um deles deve
+  impedir a conclusão do pré-cadastro.
+- A ausência de condomínio e casa não deve criar vínculo de morador.
+- Quando houver vínculo residencial, o administrador deve conseguir indicar se o usuário é responsável pela residência.
+- O sistema não deve permitir duplicidade de telefone ou e-mail.
+- O sistema deve gerar a senha provisória, sem permitir que o administrador a defina manualmente.
+- A senha provisória deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número, e usar uma
+  combinação familiar, simples de comunicar e digitar, sem dados pessoais do usuário.
+- O sistema deve armazenar somente o hash da senha provisória no mesmo campo usado pela senha comum.
+- O usuário deve ser criado com situação pendente.
+- A senha provisória deve ser exibida ao administrador somente no resultado da criação para comunicação manual ao
+  usuário, sempre por WhatsApp e também por e-mail quando estiver disponível.
+- O envio automático por WhatsApp ou e-mail não faz parte deste fluxo.
+- O pré-cadastro não deve conceder automaticamente papel de gestor de condomínio ou administrador do sistema.
+
+### US-SIS-013 - Gerar nova senha provisória para um usuário pendente
+
+Como administrador do sistema, quero gerar uma nova senha provisória para um usuário pendente que perdeu a anterior para
+permitir que ele conclua a ativação.
+
+Precondições:
+
+- O administrador deve atender às precondições da US-SIS-001.
+- O usuário deve estar com situação pendente.
+
+Critérios de aceite:
+
+- A opção deve estar disponível no painel administrativo apenas para usuários pendentes.
+- O administrador deve poder realizar a ação independentemente de o usuário possuir vínculo residencial.
+- O sistema deve gerar a nova senha, sem permitir que o administrador a defina manualmente.
+- A nova senha provisória deve seguir as mesmas regras de formação e armazenamento usadas no pré-cadastro.
+- O novo hash deve substituir o hash anterior no mesmo campo, invalidando imediatamente a senha provisória anterior.
+- A situação do usuário deve permanecer pendente.
+- A senha provisória não deve possuir prazo de validade.
+- O sistema deve exibir a nova senha ao administrador somente no resultado da regeneração para comunicação manual ao
+  usuário.
+- O sistema deve registrar a alteração de senha, o administrador responsável e a data e hora, sem armazenar a senha nem
+  seu hash no histórico.
+- O sistema não deve permitir gerar senha provisória para usuários ativos, inativos ou bloqueados.
+
+### US-SIS-014 - Desativar e reativar um usuário
 
 Como administrador do sistema, quero desativar ou reativar um usuário para controlar seu acesso à plataforma.
 
@@ -213,7 +268,7 @@ Critérios de aceite:
 - O sistema deve impedir que o administrador desative a própria conta durante a sessão atual.
 - O sistema deve registrar a ação, o administrador responsável e a data e hora.
 
-### US-SIS-013 - Apoiar a recuperação de acesso de um usuário
+### US-SIS-015 - Apoiar a recuperação de acesso de um usuário
 
 Como administrador do sistema, quero iniciar a recuperação de acesso de um usuário para ajudá-lo sem conhecer ou definir sua senha.
 
@@ -224,13 +279,14 @@ Precondições:
 Critérios de aceite:
 
 - O administrador deve conseguir iniciar o envio de um convite temporário de redefinição para o telefone ou e-mail cadastrado.
+- Esse fluxo deve atender usuários ativos e não deve gerar senha provisória nem alterar sua situação para pendente.
 - O sistema não deve exibir a senha atual do usuário.
 - O convite deve possuir validade limitada e deixar de funcionar após o uso.
 - Um novo convite deve invalidar os convites anteriores ainda não utilizados.
 - O sistema deve registrar quem iniciou a recuperação e quando a ação ocorreu.
 - Uma falha no envio deve ser informada sem alterar a senha ou bloquear o acesso atual do usuário.
 
-### US-SIS-014 - Consultar o histórico de ações administrativas
+### US-SIS-016 - Consultar o histórico de ações administrativas
 
 Como administrador do sistema, quero consultar o histórico de ações administrativas para investigar alterações e manter a rastreabilidade da plataforma.
 
@@ -240,13 +296,14 @@ Precondições:
 
 Critérios de aceite:
 
-- O sistema deve registrar, no mínimo, criação e alteração de condomínios, mudanças de situação e concessão ou remoção de permissões.
+- O sistema deve registrar, no mínimo, criação e alteração de condomínios, mudanças de situação, alterações de senha e
+  concessão ou remoção de permissões.
 - Cada registro deve identificar a ação, o alvo afetado, o responsável e a data e hora.
 - O administrador deve conseguir consultar o histórico de um condomínio ou usuário específico.
 - Registros históricos não devem ser alterados quando um usuário, casa ou condomínio for inativado.
 - O histórico deve respeitar a ordem cronológica e não deve permitir edição manual.
 
-### US-SIS-015 - Garantir o isolamento entre condomínios [IDEAÇÃO]
+### US-SIS-017 - Garantir o isolamento entre condomínios [IDEAÇÃO]
 
 Como administrador do sistema, quero que os dados de cada condomínio permaneçam isolados para impedir acessos indevidos entre diferentes comunidades.
 

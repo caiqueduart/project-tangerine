@@ -10,7 +10,10 @@ Critérios de aceite:
 
 - O morador deve conseguir informar telefone ou e-mail cadastrado.
 - O morador deve informar uma senha válida.
-- Ao autenticar com sucesso, o sistema deve direcionar o morador para o painel do morador.
+- Ao autenticar um usuário ativo com sucesso, o sistema deve direcioná-lo para a área correspondente às suas permissões.
+- Ao autenticar um usuário pendente com sucesso, o sistema deve direcioná-lo para a definição obrigatória de uma nova
+  senha.
+- O sistema deve impedir o login de usuários inativos ou bloqueados.
 - O sistema deve carregar apenas as informações permitidas para a casa vinculada ao morador.
 - Caso as credenciais estejam incorretas, o sistema deve exibir uma mensagem simples, sem informar se o erro foi no telefone, no e-mail ou na senha.
 
@@ -40,31 +43,35 @@ Critérios de aceite:
 - Administradores do sistema devem acessar funcionalidades de gestão geral, usuários e permissões.
 - Tentativas de acessar telas ou ações sem permissão devem ser bloqueadas.
 
-### US-AUT-004 - Solicitar cadastro de morador
+### US-AUT-004 - Acessar o sistema com senha provisória
 
-Como futuro morador usuário, quero solicitar meu cadastro informando meus dados e minha casa para que meu acesso seja liberado pela administração.
-
-Critérios de aceite:
-
-- O usuário deve conseguir informar nome, telefone, e-mail, senha e selecionar uma casa já cadastrada.
-- O usuário deve conseguir indicar se é responsável pela residência selecionada.
-- O sistema deve registrar a solicitação com status pendente.
-- O sistema não deve liberar acesso antes da aprovação da solicitação.
-- O sistema não deve permitir cadastrar dois usuários com o mesmo telefone ou e-mail.
-
-### US-AUT-005 - Aprovar cadastro de morador
-
-Como morador com acesso administrativo, quero aprovar o cadastro solicitado por um morador para que ele consiga entrar no sistema.
+Como usuário pré-cadastrado, quero entrar com a senha provisória recebida para definir minha senha pessoal e concluir a
+ativação do meu acesso.
 
 Critérios de aceite:
 
-- O morador com acesso administrativo deve conseguir aprovar solicitação de cadastro de morador.
-- O administrador do sistema também deve conseguir aprovar solicitação de cadastro de morador.
-- A aprovação deve vincular o morador à casa selecionada.
-- A aprovação deve permitir manter ou remover a indicação de responsável pela residência.
-- Após a aprovação, o morador deve conseguir acessar o sistema com o telefone ou e-mail e a senha informados na solicitação.
-- O morador deve ficar vinculado a uma casa antes de acessar o sistema.
-- O sistema não deve permitir cadastrar dois usuários com o mesmo telefone ou e-mail.
+- O usuário pendente deve conseguir autenticar com o telefone ou e-mail cadastrado e a senha provisória válida.
+- A senha provisória não deve possuir prazo de validade.
+- O sistema deve impedir o acesso do usuário pendente às demais áreas e operações até que ele defina uma nova senha.
+- O bloqueio das demais operações deve ser aplicado pelo backend, independentemente do redirecionamento realizado pelo
+  frontend.
+- O usuário inativo ou bloqueado não deve conseguir autenticar, ainda que informe credenciais válidas.
+
+### US-AUT-005 - Definir senha no primeiro acesso
+
+Como usuário pendente autenticado, quero substituir a senha provisória por uma senha pessoal para ativar meu cadastro e
+usar normalmente o sistema.
+
+Critérios de aceite:
+
+- O sistema deve exigir a confirmação da nova senha.
+- A nova senha deve respeitar as mesmas regras aplicadas às senhas comuns.
+- A troca deve substituir, no mesmo campo, o hash da senha provisória pelo hash da nova senha.
+- A troca da senha e a alteração da situação de pendente para ativo devem ocorrer na mesma operação.
+- Em caso de falha, o usuário deve permanecer pendente e a senha provisória anterior deve continuar válida.
+- Após a conclusão, a senha provisória não deve mais autenticar o usuário.
+- O sistema deve registrar a alteração de senha e a mudança de situação, sem armazenar a senha nem seu hash no histórico.
+- Após a ativação, o usuário deve ser direcionado para a área correspondente às suas permissões.
 
 ### US-AUT-006 - Alterar senha
 
@@ -75,8 +82,11 @@ Critérios de aceite:
 - O usuário deve conseguir acessar uma opção de alteração de senha após estar logado.
 - O sistema deve solicitar a senha atual antes de permitir a alteração.
 - A nova senha deve ser confirmada pelo usuário.
+- A nova senha deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número.
 - O sistema deve impedir alteração quando a senha atual estiver incorreta.
 - Após a alteração, a nova senha deve ser usada no próximo login.
+- O sistema deve registrar a alteração, o próprio usuário como responsável e a data e hora, sem armazenar a senha nem seu
+  hash no histórico.
 
 ### US-AUT-007 - Recuperar senha
 

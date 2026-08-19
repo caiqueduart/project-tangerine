@@ -54,7 +54,8 @@ Esse usuário continua sendo um morador e, portanto, também deve conseguir visu
 Principais permissões:
 
 - Acessar as informações da própria casa como qualquer outro morador.
-- Cadastrar casas e aprovar registro de moradores.
+- Cadastrar casas e pré-cadastrar moradores do próprio condomínio.
+- Gerar uma nova senha provisória para moradores com acesso pendente no próprio condomínio.
 - Criar contribuições.
 - Repetir contribuições em outros meses.
 - Definir valores, prazos, descrição e anexos de cada contribuição.
@@ -89,10 +90,12 @@ Funcionalidades previstas:
 - Cadastro de casa com número ou identificação.
 - Cadastro de um ou mais moradores por casa.
 - Definição de um ou mais responsáveis por casa.
-- Cadastro de telefone, e-mail, nome e dados básicos de acesso para moradores.
-- Solicitação de cadastro por morador, selecionando uma casa já cadastrada.
-- Indicação, no cadastro, de que o morador é responsável pela residência.
-- Aprovação ou rejeição de solicitação de cadastro pela administração.
+- Pré-cadastro de moradores exclusivamente por moradores com acesso administrativo ou administradores do sistema.
+- Cadastro de nome, telefone obrigatório, e-mail opcional e vínculo residencial.
+- Indicação, no pré-cadastro, de que o morador é responsável pela residência.
+- Geração de senha provisória pelo sistema, sem definição manual pelo administrador.
+- Comunicação manual do telefone ou e-mail de acesso e da senha provisória ao morador, sempre por WhatsApp e também
+  por e-mail quando disponível.
 - Desativação de moradores.
 
 Regras importantes:
@@ -100,6 +103,12 @@ Regras importantes:
 - Uma casa pode ter mais de um morador usuário.
 - Uma casa pode ter mais de um morador responsável, sem limite máximo.
 - Um morador sempre atua em nome de uma casa.
+- O gestor de condomínio somente pode pré-cadastrar moradores no condomínio que administra. O condomínio deve ficar
+  inalterável, e a seleção de uma casa desse condomínio é obrigatória.
+- O administrador do sistema pode pré-cadastrar usuários em qualquer condomínio ou sem vínculo residencial.
+- Um usuário somente deve receber vínculo de morador quando condomínio e casa forem informados. A ausência de um dos
+  dois dados deve impedir a criação do vínculo.
+- Somente o administrador do sistema pode conceder ou remover papéis administrativos.
 - Pagamentos e pendências devem ser associados à casa, não ao morador que enviou o comprovante.
 - Moradores vinculados à mesma casa veem os mesmos dados da casa.
 
@@ -111,11 +120,20 @@ Funcionalidades previstas:
 
 - Login com telefone ou e-mail.
 - Senha individual por morador.
+- Login de usuário pendente limitado à definição obrigatória de uma nova senha.
 - Recuperação ou alteração de senha.
+- Auditoria de toda alteração de senha, sem registrar a senha nem seu hash.
 - Diferenciação entre acesso comum de morador e permissões administrativas adicionais.
 - Encerramento de sessão.
 
-Para o MVP, pode ser adotado um fluxo simples de convite para criação ou redefinição de senha enviado ao telefone ou e-mail do usuário.
+No pré-cadastro, o sistema deve gerar uma senha provisória que respeite as regras das senhas comuns, combine letras e
+números e seja fácil de comunicar e digitar. A senha não deve expirar por tempo e deve ser armazenada somente como hash,
+no mesmo campo da senha comum. O usuário pendente pode entrar com essa senha apenas para definir uma nova senha; a troca
+substitui o hash anterior e ativa o cadastro. Enquanto o usuário permanecer pendente, qualquer administrador autorizado
+em seu escopo pode gerar outra senha provisória, que substitui imediatamente a anterior.
+
+Para o MVP, a entrega da senha provisória é responsabilidade do administrador que realizou o cadastro ou a regeneração.
+O envio automático por WhatsApp ou e-mail permanece fora do escopo.
 
 ### 3. Contribuições
 

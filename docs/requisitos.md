@@ -48,9 +48,10 @@ Responsabilidades e acessos:
 
 O sistema deve permitir cadastrar casas do condomínio com uma identificação única, como número ou nome.
 
-### RF-002 - Cadastro de moradores
+### RF-002 - Pré-cadastro de moradores
 
-O sistema deve permitir cadastrar moradores com, no mínimo, nome, telefone, e-mail e casa vinculada.
+O sistema deve permitir que administradores pré-cadastrem moradores com, no mínimo, nome, telefone e casa vinculada. O
+e-mail deve ser opcional.
 
 ### RF-003 - Vínculo entre morador e casa
 
@@ -74,11 +75,13 @@ O sistema deve permitir login com telefone ou e-mail.
 
 ### RF-008 - Senha individual
 
-O sistema deve manter senha individual para cada usuário.
+O sistema deve manter senha individual para cada usuário. Toda senha deve conter pelo menos oito caracteres, incluindo
+ao menos uma letra e um número.
 
 ### RF-009 - Acesso ao painel do morador
 
-Após login bem-sucedido, o sistema deve permitir que o morador acesse o painel com informações da própria casa.
+Após o login bem-sucedido de um morador ativo, o sistema deve permitir acesso ao painel com informações da própria casa.
+O usuário pendente deve acessar somente o fluxo obrigatório de definição da nova senha.
 
 ### RF-010 - Permissão administrativa
 
@@ -94,11 +97,13 @@ O sistema deve bloquear telas e ações administrativas para moradores sem permi
 
 ### RF-013 - Alteração de senha
 
-O sistema deve permitir que o usuário autenticado altere sua senha informando a senha atual.
+O sistema deve permitir que o usuário autenticado altere sua senha informando a senha atual. A alteração deve ser
+auditada sem registrar a senha nem seu hash.
 
 ### RF-014 - Recuperação de senha
 
-O sistema deve permitir redefinição de senha por administrador do sistema ou por convite temporário enviado ao telefone ou e-mail do usuário.
+O sistema deve permitir a redefinição de senha por convite temporário enviado ao telefone ou e-mail do usuário. O
+administrador do sistema pode iniciar o envio do convite, mas não deve conhecer nem definir a nova senha do usuário ativo.
 
 ### RF-015 - Solicitação de recuperação de senha
 
@@ -228,17 +233,39 @@ O sistema deve permitir que o administrador do sistema remova a permissão admin
 
 O sistema deve registrar quando uma permissão administrativa for concedida ou removida, incluindo usuário afetado, responsável pela ação e data da alteração.
 
-### RF-049 - Solicitação de cadastro
+### RF-049 - Pré-cadastro de usuário
 
-O sistema deve permitir que uma pessoa solicite cadastro informando nome, telefone, e-mail, casa já cadastrada e senha.
+O sistema deve permitir que moradores com acesso administrativo e administradores do sistema pré-cadastrem usuários,
+sem disponibilizar solicitação pública de cadastro.
 
-### RF-050 - Indicação de responsável no cadastro
+### RF-050 - Geração de senha provisória
 
-O sistema deve permitir que a pessoa marque, na solicitação de cadastro, que é responsável pela residência selecionada.
+No pré-cadastro, o sistema deve gerar uma senha provisória sem permitir que o administrador a defina manualmente. A senha
+deve respeitar as regras das senhas comuns e usar uma combinação familiar, simples de comunicar e digitar, sem dados
+pessoais do usuário.
 
-### RF-051 - Aprovação de cadastro
+### RF-051 - Ativação no primeiro acesso
 
-O sistema deve permitir que administrador do sistema ou morador com acesso administrativo aprove ou rejeite solicitações de cadastro antes de liberar acesso. (Comentário: este ponto reduz o risco de alguém se vincular à casa errada.)
+O sistema deve permitir que o usuário pendente entre com a senha provisória somente para definir uma nova senha. A troca
+deve substituir o hash anterior e alterar a situação do usuário para ativo na mesma operação.
+
+### RF-052 - Regeneração de senha provisória
+
+O sistema deve permitir que qualquer administrador autorizado gere uma nova senha provisória somente para usuários
+pendentes dentro do seu escopo. A nova senha deve substituir imediatamente a anterior e não deve possuir prazo de
+validade.
+
+### RF-053 - Auditoria de senha e situação
+
+O sistema deve auditar toda alteração de senha, inclusive a definição realizada no primeiro acesso, a alteração por um
+usuário ativo e a regeneração administrativa. A ativação realizada no primeiro acesso também deve ser auditada. Nenhum
+registro de auditoria deve conter a senha nem seu hash.
+
+### RF-054 - Comunicação das credenciais iniciais
+
+Após o pré-cadastro ou a regeneração, o sistema deve exibir a senha provisória ao administrador somente no resultado da
+operação. O administrador deve comunicar manualmente o telefone ou e-mail de acesso e a senha ao usuário, sempre por
+WhatsApp e também por e-mail quando estiver disponível.
 
 ## Regras de Negócio
 
@@ -298,13 +325,16 @@ O sistema deve registrar quem enviou comprovante e quando enviou.
 
 O administrador do sistema não deve ser tratado automaticamente como morador de uma casa. Para participar de contribuições como morador, ele deve possuir cadastro de morador vinculado a uma casa.
 
-### RN-015 - Gestão de permissões restrita
+### RN-015 - Gestão de papéis administrativos restrita
 
-Somente o administrador do sistema deve conceder ou remover permissão administrativa de moradores.
+Somente o administrador do sistema deve conceder ou remover qualquer papel administrativo, incluindo gestor de
+condomínio e administrador do sistema.
 
-### RN-016 - Aprovação de cadastro por qualquer admin
+### RN-016 - Pré-cadastro por qualquer administrador
 
-Qualquer morador com acesso administrativo ou administrador do sistema pode aprovar ou rejeitar solicitações de cadastro de moradores.
+Qualquer morador com acesso administrativo ou administrador do sistema pode pré-cadastrar usuários. O gestor de
+condomínio deve permanecer limitado ao próprio condomínio; o administrador do sistema pode atuar em qualquer condomínio
+ou criar um usuário sem vínculo residencial.
 
 ### RN-017 - Contribuição sem tipo
 
@@ -346,13 +376,15 @@ Uma casa pode ter mais de um morador responsável, sem limite máximo de respons
 
 Qualquer morador com acesso administrativo ou administrador do sistema pode atribuir ou remover a marcação de responsável de uma casa.
 
-### RN-028 - Indicação de responsável no cadastro
+### RN-028 - Indicação de responsável no pré-cadastro
 
-Quando um morador solicitar cadastro marcando que é responsável pela residência, essa indicação deve ser considerada na aprovação do cadastro.
+O administrador deve poder indicar no pré-cadastro se o morador é responsável pela residência selecionada.
 
-### RN-029 - Casa selecionada no cadastro
+### RN-029 - Vínculo residencial no pré-cadastro
 
-Na solicitação de cadastro, o morador deve selecionar uma casa já cadastrada.
+No pré-cadastro realizado por gestor de condomínio, o condomínio deve ser fixo e a casa deve ser obrigatória. No
+pré-cadastro realizado por administrador do sistema, o vínculo residencial pode ser omitido; quando existir, condomínio e
+casa devem ser informados em conjunto. A ausência de qualquer um desses dados não deve produzir vínculo de morador.
 
 ### RN-031 - Reabertura de contribuição exige motivo
 
@@ -385,6 +417,43 @@ O sistema deve armazenar comprovantes e documentos de prestação de contas, sem
 ### RN-038 - Registro documental por qualquer admin
 
 Qualquer morador com acesso administrativo ou administrador do sistema pode anexar documentos de prestação de contas.
+
+### RN-039 - Situações que permitem autenticação
+
+Usuários ativos e pendentes podem autenticar. Usuários inativos ou bloqueados não podem iniciar sessão, ainda que as
+credenciais estejam corretas.
+
+### RN-040 - Acesso restrito do usuário pendente
+
+O usuário pendente deve acessar somente as operações necessárias para definir uma nova senha e encerrar a sessão. O
+backend deve impedir todas as demais operações, independentemente das restrições de navegação do frontend.
+
+### RN-041 - Armazenamento da senha provisória
+
+O sistema deve armazenar somente o hash da senha provisória no mesmo campo usado pela senha comum. Ao definir ou gerar
+outra senha, o novo hash deve substituir o anterior, caracterizando uma alteração de senha.
+
+### RN-042 - Regeneração restrita a usuários pendentes
+
+A opção de gerar nova senha provisória deve existir somente enquanto o usuário estiver pendente. Gestores de condomínio
+podem realizar a ação apenas para moradores do próprio condomínio; administradores do sistema podem realizá-la para
+qualquer usuário pendente.
+
+### RN-043 - Formação da senha provisória
+
+A senha provisória deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número. Sua composição deve
+usar elementos familiares, evitar símbolos difíceis e caracteres visualmente ambíguos e não utilizar nome, telefone,
+e-mail, condomínio, casa ou outros dados pessoais do usuário.
+
+### RN-044 - Comunicação manual da senha provisória
+
+O envio automático da senha provisória por WhatsApp ou e-mail não faz parte do MVP. A entrega das credenciais é
+responsabilidade do administrador que realizou o pré-cadastro ou a regeneração.
+
+## Regra de Transição dos Dados Existentes
+
+Os registros de teste que estiverem com situação pendente antes da implantação do novo fluxo devem passar para a situação
+ativa. Como não existem cadastros oficiais nesse conjunto, essa migração não precisa gerar registros de auditoria.
 
 ## Requisitos Não Funcionais
 
