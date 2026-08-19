@@ -1,5 +1,6 @@
 export enum UserAuditAction {
     CREATED = 'CREATED',
+    REGISTRATION_REQUESTED = 'REGISTRATION_REQUESTED',
     UPDATED = 'UPDATED',
     APPROVED = 'APPROVED',
 }

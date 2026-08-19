@@ -40,7 +40,7 @@ describe('UserService', () => {
         );
     });
 
-    it('registra criação e aprovação quando o administrador cria um usuário ativo', async () => {
+    it('registra como pendente um usuário criado pelo administrador', async () => {
         await service.register(
             {
                 firstName: 'Ana',
@@ -49,8 +49,12 @@ describe('UserService', () => {
                 email: 'ana@example.com',
                 password: 'password',
             },
-            UserSituation.ACTIVE,
             'admin-id',
+        );
+
+        expect(manager.create).toHaveBeenCalledWith(
+            User,
+            expect.objectContaining({ situation: UserSituation.PENDING }),
         );
 
         expect(manager.create).toHaveBeenCalledWith(UserAudit, {
@@ -58,10 +62,24 @@ describe('UserService', () => {
             action: UserAuditAction.CREATED,
             actorUserId: 'admin-id',
         });
+        expect(manager.create).not.toHaveBeenCalledWith(
+            UserAudit,
+            expect.objectContaining({ action: UserAuditAction.APPROVED }),
+        );
+    });
+
+    it('registra uma solicitação pública pendente com o próprio usuário como autor', async () => {
+        await service.register({
+            firstName: 'Ana',
+            lastName: 'Silva',
+            phone: '11999999999',
+            password: 'password',
+        });
+
         expect(manager.create).toHaveBeenCalledWith(UserAudit, {
             userId: 'new-user-id',
-            action: UserAuditAction.APPROVED,
-            actorUserId: 'admin-id',
+            action: UserAuditAction.REGISTRATION_REQUESTED,
+            actorUserId: 'new-user-id',
         });
     });
 

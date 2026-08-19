@@ -1,5 +1,5 @@
 export type UserSituation = 'ACTIVE' | 'BLOCKED' | 'INACTIVE' | 'PENDING';
-export type UserAuditAction = 'CREATED' | 'UPDATED' | 'APPROVED';
+export type UserAuditAction = 'CREATED' | 'REGISTRATION_REQUESTED' | 'UPDATED' | 'APPROVED';
 
 export interface AdminUser {
     readonly id: string;

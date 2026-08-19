@@ -28,11 +28,7 @@ export class UserService {
         private readonly _hashService: HashService,
     ) {}
 
-    async register(
-        dto: CreateUserDto,
-        situation = UserSituation.PENDING,
-        actorUserId: string | null = null,
-    ): Promise<GetUserDto> {
+    async register(dto: CreateUserDto, actorUserId: string | null = null): Promise<GetUserDto> {
         try {
             const passwordHash = await this._hashService.hash(dto.password);
 
@@ -43,15 +39,13 @@ export class UserService {
                     passwordHash,
                     email: dto.email?.trim().toLowerCase() || null,
                     phone: dto.phone.trim(),
-                    situation,
+                    situation: UserSituation.PENDING,
                 });
                 const savedUser = await manager.save(user);
+                const auditAction = actorUserId ? UserAuditAction.CREATED : UserAuditAction.REGISTRATION_REQUESTED;
+                const auditActorUserId = actorUserId ?? savedUser.id;
 
-                await this._saveAudit(manager, savedUser.id, UserAuditAction.CREATED, actorUserId);
-
-                if (situation === UserSituation.ACTIVE) {
-                    await this._saveAudit(manager, savedUser.id, UserAuditAction.APPROVED, actorUserId);
-                }
+                await this._saveAudit(manager, savedUser.id, auditAction, auditActorUserId);
 
                 if (dto.houseId === undefined || dto.houseId === null) {
                     return this._toGetUserDto(savedUser);

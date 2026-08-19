@@ -1,15 +1,16 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
+import { Public } from '../authentication/decorators/public.decorator';
 import { CurrentActor } from '../authorization/decorators/current-actor.decorator';
 import type { AuthenticatedActor } from '../authorization/models/authenticated-actor';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { UserSituation } from './enums/user-situation';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly _userService: UserService) {}
 
+    @Public()
     @Post('register')
     register(@Body() body: CreateUserDto) {
         return this._userService.register(body);
@@ -17,7 +18,7 @@ export class UserController {
 
     @Post()
     create(@Body() body: CreateUserDto, @CurrentActor() actor: AuthenticatedActor) {
-        return this._userService.register(body, UserSituation.ACTIVE, actor.userId);
+        return this._userService.register(body, actor.userId);
     }
 
     @Get('all')

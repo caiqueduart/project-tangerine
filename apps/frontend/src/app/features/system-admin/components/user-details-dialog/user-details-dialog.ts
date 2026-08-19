@@ -47,6 +47,7 @@ export class UserDetailsDialog {
     auditText(action: UserAuditAction): string {
         return {
             CREATED: 'criou o cadastro',
+            REGISTRATION_REQUESTED: 'solicitou cadastro',
             UPDATED: 'atualizou o usuário',
             APPROVED: 'aprovou o cadastro',
         }[action];
