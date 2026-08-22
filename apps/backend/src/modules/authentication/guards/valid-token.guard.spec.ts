@@ -6,6 +6,7 @@ import { UserRole } from '../../user/enums/user-role';
 import { UserService } from '../../user/user.service';
 import { AuthenticationTokenType } from '../dtos/token-payload.dto';
 import { ValidTokenGuard } from './valid-token.guard';
+import { UserSituation } from '../../user/enums/user-situation';
 
 describe('ValidTokenGuard', () => {
     const jwtConfiguration = {
@@ -20,7 +21,7 @@ describe('ValidTokenGuard', () => {
         getAllAndOverride: jest.fn(),
     };
     const userService = {
-        findActiveUserById: jest.fn(),
+        findAuthenticatableUserById: jest.fn(),
     };
     const request: { headers: { authorization?: string }; [key: string]: unknown } = {
         headers: {},
@@ -50,7 +51,7 @@ describe('ValidTokenGuard', () => {
 
         await expect(guard.canActivate(context)).resolves.toBe(true);
         expect(jwtService.verifyAsync).not.toHaveBeenCalled();
-        expect(userService.findActiveUserById).not.toHaveBeenCalled();
+        expect(userService.findAuthenticatableUserById).not.toHaveBeenCalled();
     });
 
     it('anexa o ator ativo à requisição', async () => {
@@ -61,9 +62,10 @@ describe('ValidTokenGuard', () => {
         reflector.getAllAndOverride.mockReturnValue(false);
         request.headers.authorization = 'Bearer access-token';
         jwtService.verifyAsync.mockResolvedValue(payload);
-        userService.findActiveUserById.mockResolvedValue({
+        userService.findAuthenticatableUserById.mockResolvedValue({
             id: payload.id,
             role: UserRole.TOWNHOUSE_MANAGER,
+            situation: UserSituation.ACTIVE,
             resident: {
                 house: {
                     id: 7,
@@ -73,10 +75,11 @@ describe('ValidTokenGuard', () => {
         });
 
         await expect(guard.canActivate(context)).resolves.toBe(true);
-        expect(userService.findActiveUserById).toHaveBeenCalledWith(payload.id);
+        expect(userService.findAuthenticatableUserById).toHaveBeenCalledWith(payload.id);
         expect(request[AUTHENTICATED_ACTOR_KEY]).toEqual({
             userId: payload.id,
             role: UserRole.TOWNHOUSE_MANAGER,
+            situation: UserSituation.ACTIVE,
             houseId: 7,
             townhouseId: 2,
         });
@@ -88,7 +91,7 @@ describe('ValidTokenGuard', () => {
         jwtService.verifyAsync.mockRejectedValue(new Error('invalid token'));
 
         await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
-        expect(userService.findActiveUserById).not.toHaveBeenCalled();
+        expect(userService.findAuthenticatableUserById).not.toHaveBeenCalled();
     });
 
     it('rejeita um token válido cujo usuário não está mais ativo', async () => {
@@ -98,7 +101,7 @@ describe('ValidTokenGuard', () => {
             id: 'inactive-id',
             tokenType: AuthenticationTokenType.ACCESS,
         });
-        userService.findActiveUserById.mockResolvedValue(null);
+        userService.findAuthenticatableUserById.mockResolvedValue(null);
 
         await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
     });

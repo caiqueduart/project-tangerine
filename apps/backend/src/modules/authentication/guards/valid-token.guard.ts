@@ -52,7 +52,7 @@ export class ValidTokenGuard implements CanActivate {
 
         if (!payload.id || payload.tokenType !== AuthenticationTokenType.ACCESS) throw new UnauthorizedException();
 
-        const user = await this._userService.findActiveUserById(payload.id);
+        const user = await this._userService.findAuthenticatableUserById(payload.id);
 
         if (!user) throw new UnauthorizedException();
 
@@ -61,6 +61,7 @@ export class ValidTokenGuard implements CanActivate {
         request[AUTHENTICATED_ACTOR_KEY] = {
             userId: user.id,
             role: user.role,
+            situation: user.situation,
             houseId: house?.id,
             townhouseId: house?.townhouse.id,
         };

@@ -5,6 +5,7 @@ import { AUTHENTICATED_ACTOR_KEY } from '../authorization.constants';
 import { Permission } from '../enums/permission';
 import { AuthenticatedActor } from '../models/authenticated-actor';
 import { PermissionsGuard } from './permissions.guard';
+import { UserSituation } from '../../user/enums/user-situation';
 
 describe('PermissionsGuard', () => {
     const reflector = {
@@ -19,6 +20,7 @@ describe('PermissionsGuard', () => {
     const actor: AuthenticatedActor = {
         userId: 'manager-id',
         role: UserRole.TOWNHOUSE_MANAGER,
+        situation: UserSituation.ACTIVE,
         houseId: 7,
         townhouseId: 2,
     };

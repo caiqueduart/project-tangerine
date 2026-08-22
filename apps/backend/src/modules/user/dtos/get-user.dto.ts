@@ -1,5 +1,6 @@
 import { UserSituation } from '../enums/user-situation';
 import { UserAuditAction } from '../enums/user-audit-action';
+import { UserRole } from '../enums/user-role';
 
 export class GetUserTownhouseDto {
     id: number;
@@ -20,7 +21,12 @@ export class GetUserDto {
     phone: string;
     email: string | null;
     situation: UserSituation;
+    role: UserRole;
     house: GetUserHouseDto | null;
+}
+
+export class CreateUserResultDto extends GetUserDto {
+    provisionalPassword: string;
 }
 
 export class GetUserAuditActorDto {

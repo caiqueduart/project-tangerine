@@ -12,6 +12,7 @@ import { AccessTokenDto } from './dtos/access-token.dto';
 import { AuthenticationSessionDto } from './dtos/authentication-session.dto';
 import { LoginResultDto } from './dtos/login-result.dto';
 import { UserSituation } from '../user/enums/user-situation';
+import { ChangePasswordDto, CompleteFirstAccessDto } from '../user/dtos/password.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -36,8 +37,8 @@ export class AuthenticationService {
             throw new UnauthorizedException(unauthorizedMessage);
         }
 
-        if (user.situation && user.situation !== UserSituation.ACTIVE) {
-            throw new UnauthorizedException('Seu acesso está pendente ou inativo.');
+        if (![UserSituation.ACTIVE, UserSituation.PENDING].includes(user.situation)) {
+            throw new UnauthorizedException('Acesso inativo ou bloqueado.');
         }
 
         const tokens = await this._generateRefreshAndAccessTokens(user);
@@ -73,7 +74,7 @@ export class AuthenticationService {
         try {
             const user = await this._userService.get(payload.id);
 
-            if (user.situation !== UserSituation.ACTIVE) {
+            if (![UserSituation.ACTIVE, UserSituation.PENDING].includes(user.situation)) {
                 throw new UnauthorizedException(unauthorizedMessage);
             }
         } catch {
@@ -92,6 +93,20 @@ export class AuthenticationService {
         );
 
         return { accessToken };
+    }
+
+    async completeFirstAccess(userId: string, dto: CompleteFirstAccessDto): Promise<LoginResultDto> {
+        const user = await this._userService.completeFirstAccess(userId, dto.newPassword);
+        const tokens = await this._generateRefreshAndAccessTokens(user);
+
+        return {
+            ...tokens,
+            session: this._generateAuthenticationSessionData(user),
+        };
+    }
+
+    changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+        return this._userService.changePassword(userId, dto.currentPassword, dto.newPassword);
     }
 
     private async _generateRefreshAndAccessTokens(user: Pick<User, 'id'>): Promise<AuthenticationTokensDto> {
@@ -125,6 +140,8 @@ export class AuthenticationService {
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                role: user.role,
+                situation: user.situation,
             },
             house: house
                 ? {
@@ -136,7 +153,7 @@ export class AuthenticationService {
                           slug: house.townhouse.slug,
                       },
                   }
-                : undefined,
+                : null,
         };
     }
 

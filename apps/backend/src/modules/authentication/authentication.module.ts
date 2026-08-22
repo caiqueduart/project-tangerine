@@ -8,6 +8,7 @@ import jwtConfig from './configs/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 import { ValidTokenGuard } from './guards/valid-token.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { PendingUserGuard } from './guards/pending-user.guard';
 
 @Module({
     imports: [
@@ -16,8 +17,14 @@ import { APP_GUARD } from '@nestjs/core';
         ConfigModule.forFeature(jwtConfig),
         JwtModule.registerAsync(jwtConfig.asProvider()),
     ],
-    providers: [AuthenticationService, ValidTokenGuard, { provide: APP_GUARD, useExisting: ValidTokenGuard }],
+    providers: [
+        AuthenticationService,
+        ValidTokenGuard,
+        PendingUserGuard,
+        { provide: APP_GUARD, useExisting: ValidTokenGuard },
+        { provide: APP_GUARD, useExisting: PendingUserGuard },
+    ],
     controllers: [AuthenticationController],
-    exports: [ValidTokenGuard],
+    exports: [ValidTokenGuard, PendingUserGuard],
 })
 export class AuthenticationModule {}

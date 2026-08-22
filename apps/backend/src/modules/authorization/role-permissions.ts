@@ -18,7 +18,7 @@ const TOWNHOUSE_MANAGER_PERMISSIONS = [
     Permission.USER_CREATE,
     Permission.USER_READ,
     Permission.USER_UPDATE,
-    Permission.USER_REJECT,
+    Permission.USER_PROVISIONAL_PASSWORD_CREATE,
     Permission.CONTRIBUTION_CREATE,
     Permission.CONTRIBUTION_UPDATE,
     Permission.CONTRIBUTION_FINALIZE,

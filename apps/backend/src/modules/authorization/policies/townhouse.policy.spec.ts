@@ -2,6 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { UserRole } from '../../user/enums/user-role';
 import { AuthenticatedActor } from '../models/authenticated-actor';
 import { TownhousePolicy } from './townhouse.policy';
+import { UserSituation } from '../../user/enums/user-situation';
 
 describe('TownhousePolicy', () => {
     const policy = new TownhousePolicy();
@@ -10,6 +11,7 @@ describe('TownhousePolicy', () => {
         const actor: AuthenticatedActor = {
             userId: 'admin-id',
             role: UserRole.SYSTEM_ADMIN,
+            situation: UserSituation.ACTIVE,
         };
 
         expect(() => policy.assertCanManage(actor, 10)).not.toThrow();
@@ -19,6 +21,7 @@ describe('TownhousePolicy', () => {
         const actor: AuthenticatedActor = {
             userId: 'manager-id',
             role: UserRole.TOWNHOUSE_MANAGER,
+            situation: UserSituation.ACTIVE,
             houseId: 7,
             townhouseId: 2,
         };
@@ -30,6 +33,7 @@ describe('TownhousePolicy', () => {
         const actor: AuthenticatedActor = {
             userId: 'manager-id',
             role: UserRole.TOWNHOUSE_MANAGER,
+            situation: UserSituation.ACTIVE,
             houseId: 7,
             townhouseId: 2,
         };
@@ -41,6 +45,7 @@ describe('TownhousePolicy', () => {
         const actor: AuthenticatedActor = {
             userId: 'resident-id',
             role: UserRole.RESIDENT,
+            situation: UserSituation.ACTIVE,
             houseId: 7,
             townhouseId: 2,
         };

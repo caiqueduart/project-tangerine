@@ -1,12 +1,6 @@
-import { IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength } from 'class-validator';
 
 export class CreateUserDto {
-    @IsNotEmpty()
-    @IsString()
-    @MaxLength(100)
-    @MinLength(8)
-    password: string;
-
     @IsNotEmpty()
     @MaxLength(20)
     @IsString()
@@ -23,12 +17,17 @@ export class CreateUserDto {
     phone: string;
 
     @MaxLength(255)
-    @IsString()
+    @IsEmail()
     @IsOptional()
-    email?: string;
+    email?: string | null;
 
     @IsInt()
     @IsPositive()
     @IsOptional()
-    houseId?: number;
+    townhouseId?: number | null;
+
+    @IsInt()
+    @IsPositive()
+    @IsOptional()
+    houseId?: number | null;
 }

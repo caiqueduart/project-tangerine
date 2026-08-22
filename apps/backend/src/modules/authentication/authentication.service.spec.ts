@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { HashService } from '../common/services/hash.service';
 import { UserService } from '../user/user.service';
 import { UserSituation } from '../user/enums/user-situation';
+import { UserRole } from '../user/enums/user-role';
 
 describe('AuthenticationService', () => {
     const jwtConfiguration = {
@@ -26,6 +27,8 @@ describe('AuthenticationService', () => {
     const userService = {
         findUserByLogin: jest.fn(),
         get: jest.fn(),
+        completeFirstAccess: jest.fn(),
+        changePassword: jest.fn(),
     };
 
     let service: AuthenticationService;
@@ -47,6 +50,7 @@ describe('AuthenticationService', () => {
             lastName: 'Silva',
             passwordHash: 'password-hash',
             situation: UserSituation.ACTIVE,
+            role: UserRole.RESIDENT,
             resident: {
                 house: {
                     id: 7,
@@ -75,6 +79,8 @@ describe('AuthenticationService', () => {
                     id: 'user-id',
                     firstName: 'Maria',
                     lastName: 'Silva',
+                    role: UserRole.RESIDENT,
+                    situation: UserSituation.ACTIVE,
                 },
                 house: {
                     id: 7,
@@ -146,6 +152,35 @@ describe('AuthenticationService', () => {
         );
         expect(jwtService.signAsync).toHaveBeenCalledTimes(1);
         expect(result).toEqual({ accessToken: 'new-access-token' });
+    });
+
+    it('permite login e renovação de token para usuário pendente', async () => {
+        userService.findUserByLogin.mockResolvedValue({
+            id: 'pending-id',
+            firstName: 'Ana',
+            lastName: 'Souza',
+            passwordHash: 'temporary-hash',
+            situation: UserSituation.PENDING,
+            role: UserRole.RESIDENT,
+        });
+        hashService.compare.mockResolvedValue(true);
+        jwtService.signAsync.mockResolvedValueOnce('access-token').mockResolvedValueOnce('refresh-token');
+
+        const login = await service.login({ uid: '11999999999', password: 'CasaSol2748' });
+
+        expect(login.session.user.situation).toBe(UserSituation.PENDING);
+
+        jest.clearAllMocks();
+        jwtService.verifyAsync.mockResolvedValue({
+            id: 'pending-id',
+            tokenType: AuthenticationTokenType.REFRESH,
+        });
+        userService.get.mockResolvedValue({ id: 'pending-id', situation: UserSituation.PENDING });
+        jwtService.signAsync.mockResolvedValue('new-access-token');
+
+        await expect(service.refreshAccessToken('refresh-token')).resolves.toEqual({
+            accessToken: 'new-access-token',
+        });
     });
 
     it('rejeita um access token enviado como refresh token', async () => {

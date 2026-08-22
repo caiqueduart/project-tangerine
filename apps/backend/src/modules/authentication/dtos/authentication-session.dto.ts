@@ -1,6 +1,6 @@
 export class AuthenticationSessionDto {
     user: AuthenticationSessionUserDto;
-    house?: AuthenticationSessionHouseDto;
+    house: AuthenticationSessionHouseDto | null;
 }
 
 class AuthenticationSessionHouseDto {
@@ -13,6 +13,8 @@ class AuthenticationSessionUserDto {
     id: string;
     firstName: string;
     lastName: string;
+    role: UserRole;
+    situation: UserSituation;
 }
 
 class AuthenticationSessionTownhouseDto {
@@ -20,3 +22,5 @@ class AuthenticationSessionTownhouseDto {
     name: string;
     slug: string;
 }
+import { UserRole } from '../../user/enums/user-role';
+import { UserSituation } from '../../user/enums/user-situation';
