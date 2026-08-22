@@ -40,9 +40,14 @@
                 <span>Admin do sistema</span>
             </div>
 
-            <button mat-icon-button type="button" aria-label="Deslogar" (click)="logout()">
-                <mat-icon>logout</mat-icon>
-            </button>
+            <span class="system-admin-layout__account-actions">
+                <a mat-icon-button [routerLink]="passwordRoute" aria-label="Alterar senha">
+                    <mat-icon>lock_reset</mat-icon>
+                </a>
+                <button mat-icon-button type="button" aria-label="Deslogar" (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                </button>
+            </span>
         </div>
     </aside>
 
@@ -52,9 +57,14 @@
             <p>{{ userName() }}</p>
         </a>
 
-        <button mat-icon-button type="button" aria-label="Deslogar" (click)="logout()">
-            <mat-icon>logout</mat-icon>
-        </button>
+        <span class="system-admin-layout__account-actions">
+            <a mat-icon-button [routerLink]="passwordRoute" aria-label="Alterar senha">
+                <mat-icon>lock_reset</mat-icon>
+            </a>
+            <button mat-icon-button type="button" aria-label="Deslogar" (click)="logout()">
+                <mat-icon>logout</mat-icon>
+            </button>
+        </span>
     </header>
 
     <nav class="system-admin-layout__mobile-navigation" aria-label="Administração do sistema">

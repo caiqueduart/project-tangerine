@@ -18,7 +18,12 @@
         </span>
     </div>
 
-    <button mat-stroked-button class="account-menu-content__logout red-outlined-button" (click)="logout()">
+    <button mat-stroked-button class="account-menu-content__action" (click)="changePassword()">
+        <mat-icon>lock_reset</mat-icon>
+        Alterar senha
+    </button>
+
+    <button mat-stroked-button class="account-menu-content__action red-outlined-button" (click)="logout()">
         <mat-icon>logout</mat-icon>
         Sair da conta
     </button>

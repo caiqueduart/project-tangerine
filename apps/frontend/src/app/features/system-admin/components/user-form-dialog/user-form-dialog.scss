@@ -29,6 +29,15 @@
         gap: 4px;
     }
 
+    &__pending-notice {
+        background: var(--color-navigation-active);
+        border-radius: 10px;
+        color: var(--color-text-secondary);
+        font-size: pxToRem(13);
+        margin: 0 0 16px;
+        padding: 12px 14px;
+    }
+
     &__residence {
         border-top: 1px solid var(--color-neutral-track);
         display: grid;

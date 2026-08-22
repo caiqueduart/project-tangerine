@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { SYSTEM_ADMIN_ROUTES } from '../../../core/config/routes/system-admin-routes.config';
 import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
 import { LabelComponent } from '../../../shared/components/label/label.component';
@@ -22,6 +23,10 @@ import {
 import { AdminUser } from '../models/admin-user.model';
 import { AdminTownhouseService } from '../services/admin-townhouse.service';
 import { AdminUserService } from '../services/admin-user.service';
+import {
+    ProvisionalPasswordDialog,
+    ProvisionalPasswordDialogData,
+} from '../components/provisional-password-dialog/provisional-password-dialog';
 
 @Component({
     selector: 'app-admin-townhouse-details',
@@ -51,6 +56,7 @@ export class AdminTownhouseDetails {
 
     readonly townhouse = signal<SystemAdminTownhouseDetailsModel | null>(null);
     readonly loading = signal(true);
+    readonly regeneratingUserId = signal<string | null>(null);
     readonly users = signal<readonly AdminUser[]>([]);
     readonly townhousesRoute = SYSTEM_ADMIN_ROUTES.townhouses;
 
@@ -294,6 +300,37 @@ export class AdminTownhouseDetails {
             });
     }
 
+    regenerateProvisionalPassword(user: AdminUser): void {
+        if (this.regeneratingUserId()) {
+            return;
+        }
+
+        this.regeneratingUserId.set(user.id);
+
+        this._userService
+            .regenerateProvisionalPassword(user.id)
+            .pipe(finalize(() => this.regeneratingUserId.set(null)))
+            .subscribe({
+                next: ({ provisionalPassword }) => {
+                    const data: ProvisionalPasswordDialogData = {
+                        userName: `${user.firstName} ${user.lastName}`.trim(),
+                        phone: user.phone,
+                        email: user.email,
+                        provisionalPassword,
+                    };
+
+                    this._dialog.open(ProvisionalPasswordDialog, {
+                        width: '520px',
+                        maxWidth: 'calc(100vw - 32px)',
+                        data,
+                        disableClose: true,
+                    });
+                },
+                error: (error: HttpErrorResponse) =>
+                    this._showError(error, 'Não foi possível gerar uma nova senha provisória.'),
+            });
+    }
+
     removeUser(user: AdminUser): void {
         const data: ConfirmationDialogData = {
             title: 'Remover do condomínio?',
@@ -308,7 +345,7 @@ export class AdminTownhouseDetails {
             .subscribe((confirmed) => {
                 if (!confirmed) return;
 
-                this._userService.update(user.id, { houseId: null }).subscribe({
+                this._userService.update(user.id, { townhouseId: null, houseId: null }).subscribe({
                     next: () => {
                         this._snackbar.success('Vínculo residencial removido.');
                         this.loadTownhouse();

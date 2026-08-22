@@ -48,6 +48,10 @@
                     <dt>E-mail</dt>
                     <dd>{{ user.email || 'Não informado' }}</dd>
                 </div>
+                <div>
+                    <dt>Papel</dt>
+                    <dd>{{ roleText(user.role) }}</dd>
+                </div>
             </dl>
         </section>
 

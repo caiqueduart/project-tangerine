@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
 import { LabelComponent, LabelTheme } from '../../../shared/components/label/label.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -16,6 +17,10 @@ import { UserDetailsDialog, UserDetailsDialogData } from '../components/user-det
 import { UserFormDialog } from '../components/user-form-dialog/user-form-dialog';
 import { AdminUser, UserSituation } from '../models/admin-user.model';
 import { AdminUserService } from '../services/admin-user.service';
+import {
+    ProvisionalPasswordDialog,
+    ProvisionalPasswordDialogData,
+} from '../components/provisional-password-dialog/provisional-password-dialog';
 
 type UserFilter = 'ALL' | Extract<UserSituation, 'ACTIVE' | 'INACTIVE' | 'PENDING'>;
 
@@ -43,6 +48,7 @@ export class AdminListUsers {
 
     readonly users = signal<readonly AdminUser[]>([]);
     readonly loading = signal(true);
+    readonly regeneratingUserId = signal<string | null>(null);
     readonly search = signal('');
     readonly filter = signal<UserFilter>('ALL');
     readonly pendingCount = computed(() => this.users().filter((user) => user.situation === 'PENDING').length);
@@ -99,17 +105,26 @@ export class AdminListUsers {
             .subscribe((value) => {
                 if (!value) return;
 
-                const request = user ? this._userService.update(user.id, value) : this._userService.create(value);
-                request.subscribe({
-                    next: () => {
-                        this._snackbar.success(user ? 'Usuário atualizado.' : 'Usuário cadastrado.');
+                if (user) {
+                    this._userService.update(user.id, value).subscribe({
+                        next: () => {
+                            this._snackbar.success('Usuário atualizado.');
+                            this.loadUsers();
+                        },
+                        error: (error: HttpErrorResponse) =>
+                            this._showError(error, 'Não foi possível atualizar o usuário.'),
+                    });
+                    return;
+                }
+
+                this._userService.create(value).subscribe({
+                    next: (createdUser) => {
+                        this._snackbar.success('Usuário pré-cadastrado.');
+                        this._openProvisionalPasswordDialog(createdUser, createdUser.provisionalPassword);
                         this.loadUsers();
                     },
                     error: (error: HttpErrorResponse) =>
-                        this._showError(
-                            error,
-                            user ? 'Não foi possível atualizar o usuário.' : 'Não foi possível cadastrar o usuário.',
-                        ),
+                        this._showError(error, 'Não foi possível cadastrar o usuário.'),
                 });
             });
     }
@@ -122,38 +137,22 @@ export class AdminListUsers {
         });
     }
 
-    approve(user: AdminUser): void {
-        this._userService.update(user.id, { situation: 'ACTIVE' }).subscribe({
-            next: () => {
-                this._snackbar.success('Cadastro aprovado.');
-                this.loadUsers();
-            },
-            error: (error: HttpErrorResponse) => this._showError(error, 'Não foi possível aprovar o cadastro.'),
-        });
-    }
+    regenerateProvisionalPassword(user: AdminUser): void {
+        if (this.regeneratingUserId()) {
+            return;
+        }
 
-    reject(user: AdminUser): void {
-        const data: ConfirmationDialogData = {
-            title: 'Rejeitar solicitação?',
-            message: `A solicitação de ${user.firstName} ${user.lastName} será removida permanentemente.`,
-            confirmLabel: 'Rejeitar solicitação',
-            destructive: true,
-        };
+        this.regeneratingUserId.set(user.id);
 
-        this._dialog
-            .open(ConfirmationDialog, { width: '480px', maxWidth: 'calc(100vw - 32px)', data })
-            .afterClosed()
-            .subscribe((confirmed) => {
-                if (!confirmed) return;
-
-                this._userService.reject(user.id).subscribe({
-                    next: () => {
-                        this._snackbar.success('Solicitação rejeitada.');
-                        this.loadUsers();
-                    },
-                    error: (error: HttpErrorResponse) =>
-                        this._showError(error, 'Não foi possível rejeitar a solicitação.'),
-                });
+        this._userService
+            .regenerateProvisionalPassword(user.id)
+            .pipe(finalize(() => this.regeneratingUserId.set(null)))
+            .subscribe({
+                next: ({ provisionalPassword }) => {
+                    this._openProvisionalPasswordDialog(user, provisionalPassword);
+                },
+                error: (error: HttpErrorResponse) =>
+                    this._showError(error, 'Não foi possível gerar uma nova senha provisória.'),
             });
     }
 
@@ -204,5 +203,21 @@ export class AdminListUsers {
     private _showError(error: HttpErrorResponse, fallback: string): void {
         const message = (error.error as { message?: string | string[] } | null)?.message;
         this._snackbar.error(Array.isArray(message) ? message[0] : (message ?? fallback));
+    }
+
+    private _openProvisionalPasswordDialog(user: AdminUser, provisionalPassword: string): void {
+        const data: ProvisionalPasswordDialogData = {
+            userName: `${user.firstName} ${user.lastName}`.trim(),
+            phone: user.phone,
+            email: user.email,
+            provisionalPassword,
+        };
+
+        this._dialog.open(ProvisionalPasswordDialog, {
+            width: '520px',
+            maxWidth: 'calc(100vw - 32px)',
+            data,
+            disableClose: true,
+        });
     }
 }

@@ -4,14 +4,20 @@ import { catchError, map, of } from 'rxjs';
 import { TOWNHOUSE_PARAMS, TOWNHOUSE_ROUTES } from '../../config/routes/townhouse-routes.config';
 import { AuthSessionService } from '../services/auth-session.service';
 import { AuthService } from '../services/auth.service';
+import { APP_ROUTES } from '../../config/routes/app-routes.config';
 
 export const guestGuard: CanActivateFn = (route) => {
     const authService = inject(AuthService);
     const authSessionService = inject(AuthSessionService);
     const router = inject(Router);
     const slug = getTownhouseSlug(route);
+    const session = authSessionService.session();
 
-    if (!slug || authSessionService.townhouseSlug !== slug) {
+    if (session?.user.situation === 'PENDING') {
+        return router.createUrlTree(APP_ROUTES.password);
+    }
+
+    if (!session || !slug || authSessionService.townhouseSlug !== slug) {
         return true;
     }
 

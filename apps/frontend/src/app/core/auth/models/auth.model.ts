@@ -1,12 +1,18 @@
+import { UserRole } from '../../../shared/enums/user-role.enum';
+
 export interface LoginCredentials {
     uid: string;
     password: string;
 }
 
+export type AuthUserSituation = 'ACTIVE' | 'BLOCKED' | 'INACTIVE' | 'PENDING';
+
 export interface AuthSessionUser {
     id: string;
     firstName: string;
     lastName: string;
+    role: UserRole;
+    situation: AuthUserSituation;
 }
 
 export interface AuthSessionTownhouse {
@@ -32,4 +38,12 @@ export interface LoginResponse extends AccessToken {
 
 export interface AccessToken {
     accessToken: string;
+}
+
+export interface CompleteFirstAccessPayload {
+    newPassword: string;
+}
+
+export interface ChangePasswordPayload extends CompleteFirstAccessPayload {
+    currentPassword: string;
 }

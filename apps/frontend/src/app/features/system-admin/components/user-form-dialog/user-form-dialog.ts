@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { catchError, finalize, of, Subject, switchMap, tap } from 'rxjs';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { UserRole, USER_ROLE_LABELS } from '../../../../shared/enums/user-role.enum';
 import { AdminUser, AdminUserFormValue, UserSituation } from '../../models/admin-user.model';
 import { SystemAdminHouseOption, SystemAdminTownhouseOption } from '../../models/admin-townhouse.model';
 import { AdminTownhouseService } from '../../services/admin-townhouse.service';
@@ -44,11 +45,16 @@ export class UserFormDialog {
     }>();
 
     readonly isEditing = Boolean(this._data.user);
+    readonly isPending = this._data.user?.situation === 'PENDING';
     readonly situations: readonly { readonly value: UserSituation; readonly label: string }[] = [
         { value: 'ACTIVE', label: 'Ativo' },
-        { value: 'PENDING', label: 'Pendente' },
         { value: 'INACTIVE', label: 'Inativo' },
         { value: 'BLOCKED', label: 'Bloqueado' },
+    ];
+    readonly roles: readonly { readonly value: UserRole; readonly label: string }[] = [
+        { value: UserRole.RESIDENT, label: USER_ROLE_LABELS[UserRole.RESIDENT] },
+        { value: UserRole.TOWNHOUSE_MANAGER, label: USER_ROLE_LABELS[UserRole.TOWNHOUSE_MANAGER] },
+        { value: UserRole.SYSTEM_ADMIN, label: USER_ROLE_LABELS[UserRole.SYSTEM_ADMIN] },
     ];
     readonly townhouses = signal<readonly SystemAdminTownhouseOption[]>([]);
     readonly houses = signal<readonly SystemAdminHouseOption[]>([]);
@@ -59,8 +65,8 @@ export class UserFormDialog {
         lastName: [this._data.user?.lastName ?? '', [Validators.required, Validators.maxLength(80)]],
         phone: [this._data.user?.phone ?? '', [Validators.required, Validators.maxLength(20)]],
         email: [this._data.user?.email ?? '', [Validators.email, Validators.maxLength(255)]],
-        password: ['', this.isEditing ? [] : [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
-        situation: [this._data.user?.situation ?? ('ACTIVE' as UserSituation)],
+        situation: [this._data.user?.situation ?? ('PENDING' as UserSituation)],
+        role: [this._data.user?.role ?? UserRole.RESIDENT],
         townhouseId: [this._data.user?.house?.townhouse.id ?? (null as number | null)],
         houseId: [this._data.user?.house?.id ?? (null as number | null)],
     });
@@ -110,9 +116,10 @@ export class UserFormDialog {
             lastName: value.lastName.trim(),
             phone: value.phone.trim(),
             email: value.email.trim().toLowerCase() || null,
+            townhouseId: value.townhouseId,
             houseId: value.houseId,
-            ...(this.isEditing && { situation: value.situation }),
-            ...(!this.isEditing && { password: value.password }),
+            ...(this.isEditing && { role: value.role }),
+            ...(this.isEditing && !this.isPending && { situation: value.situation }),
         };
 
         this._dialogRef.close(result);

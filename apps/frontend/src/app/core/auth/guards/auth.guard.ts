@@ -13,8 +13,13 @@ export const authGuard: CanActivateFn = (route, state) => {
     const router = inject(Router);
     const slug = getTownhouseSlug(route);
     const loginUrl = createLoginUrl(router, slug, state);
+    const session = authSessionService.session();
 
-    if (!slug || authSessionService.townhouseSlug !== slug) {
+    if (session?.user.situation === 'PENDING') {
+        return router.createUrlTree(APP_ROUTES.password);
+    }
+
+    if (!session || !slug || authSessionService.townhouseSlug !== slug) {
         return loginUrl;
     }
 

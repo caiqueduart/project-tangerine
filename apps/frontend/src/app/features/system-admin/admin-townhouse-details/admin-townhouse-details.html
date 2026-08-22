@@ -161,31 +161,47 @@
                                             "
                                         />
 
-                                        <button
-                                            mat-icon-button
-                                            type="button"
-                                            [matMenuTriggerFor]="userMenu"
-                                            [attr.aria-label]="'Ações de ' + user.firstName"
-                                        >
-                                            <mat-icon>more_vert</mat-icon>
-                                        </button>
+                                        @if (regeneratingUserId() === user.id) {
+                                            <mat-spinner diameter="20" aria-label="Gerando nova senha" />
+                                        } @else {
+                                            <button
+                                                mat-icon-button
+                                                type="button"
+                                                [matMenuTriggerFor]="userMenu"
+                                                [attr.aria-label]="'Ações de ' + user.firstName"
+                                            >
+                                                <mat-icon>more_vert</mat-icon>
+                                            </button>
+                                        }
 
                                         <mat-menu #userMenu="matMenu">
-                                            <button
-                                                mat-menu-item
-                                                type="button"
-                                                [disabled]="isCurrentUser(user)"
-                                                (click)="toggleUserSituation(user)"
-                                            >
-                                                <mat-icon>{{
-                                                    user.situation === 'ACTIVE' ? 'person_off' : 'person'
-                                                }}</mat-icon>
-                                                <span>{{
-                                                    user.situation === 'ACTIVE'
-                                                        ? 'Inativar usuário'
-                                                        : 'Reativar usuário'
-                                                }}</span>
-                                            </button>
+                                            @if (user.situation === 'PENDING') {
+                                                <button
+                                                    mat-menu-item
+                                                    type="button"
+                                                    [disabled]="regeneratingUserId() !== null"
+                                                    (click)="regenerateProvisionalPassword(user)"
+                                                >
+                                                    <mat-icon>key</mat-icon>
+                                                    <span>Gerar nova senha</span>
+                                                </button>
+                                            } @else {
+                                                <button
+                                                    mat-menu-item
+                                                    type="button"
+                                                    [disabled]="isCurrentUser(user)"
+                                                    (click)="toggleUserSituation(user)"
+                                                >
+                                                    <mat-icon>{{
+                                                        user.situation === 'ACTIVE' ? 'person_off' : 'person'
+                                                    }}</mat-icon>
+                                                    <span>{{
+                                                        user.situation === 'ACTIVE'
+                                                            ? 'Inativar usuário'
+                                                            : 'Reativar usuário'
+                                                    }}</span>
+                                                </button>
+                                            }
                                             <button mat-menu-item type="button" (click)="removeUser(user)">
                                                 <mat-icon>link_off</mat-icon>
                                                 <span>Remover deste condomínio</span>

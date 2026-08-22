@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/auth/services/auth.service';
 import { AUTH_ROUTES } from '../../../core/config/routes/auth-routes.config';
 import { TownhouseContextService } from '../../../core/townhouse/townhouse-context.service';
 import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
+import { APP_ROUTES } from '../../../core/config/routes/app-routes.config';
 
 @Component({
     selector: 'app-account-menu-content',
@@ -44,5 +45,10 @@ export class AccountMenuContent {
         if (slug) {
             void this.router.navigate(AUTH_ROUTES.login(slug));
         }
+    }
+
+    changePassword(): void {
+        this.close();
+        void this.router.navigate(APP_ROUTES.password);
     }
 }

@@ -5,6 +5,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { AuthService } from '../../core/auth/services/auth.service';
 import { AuthSessionService } from '../../core/auth/services/auth-session.service';
 import { SYSTEM_ADMIN_ROUTES } from '../../core/config/routes/system-admin-routes.config';
+import { APP_ROUTES } from '../../core/config/routes/app-routes.config';
 
 @Component({
     selector: 'app-system-admin',
@@ -16,6 +17,7 @@ export class SystemAdminLayout {
     readonly rootRoute = SYSTEM_ADMIN_ROUTES.root;
     readonly townhousesRoute = SYSTEM_ADMIN_ROUTES.townhouses;
     readonly usersRoute = SYSTEM_ADMIN_ROUTES.users;
+    readonly passwordRoute = APP_ROUTES.password;
 
     private readonly _authService = inject(AuthService);
     private readonly _authSessionService = inject(AuthSessionService);

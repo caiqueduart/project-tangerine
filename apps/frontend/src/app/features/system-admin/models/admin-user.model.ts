@@ -1,5 +1,8 @@
+import { UserRole } from '../../../shared/enums/user-role.enum';
+
 export type UserSituation = 'ACTIVE' | 'BLOCKED' | 'INACTIVE' | 'PENDING';
-export type UserAuditAction = 'CREATED' | 'REGISTRATION_REQUESTED' | 'UPDATED' | 'APPROVED';
+export type UserAuditAction =
+    'CREATED' | 'REGISTRATION_REQUESTED' | 'UPDATED' | 'APPROVED' | 'PASSWORD_CHANGED' | 'ACTIVATED';
 
 export interface AdminUser {
     readonly id: string;
@@ -8,6 +11,7 @@ export interface AdminUser {
     readonly phone: string;
     readonly email: string | null;
     readonly situation: UserSituation;
+    readonly role: UserRole;
     readonly house: {
         readonly id: number;
         readonly identifier: string;
@@ -24,10 +28,17 @@ export interface AdminUserFormValue {
     readonly lastName: string;
     readonly phone: string;
     readonly email: string | null;
-    readonly password?: string;
+    readonly townhouseId: number | null;
     readonly houseId: number | null;
     readonly situation?: UserSituation;
+    readonly role?: UserRole;
 }
+
+export interface ProvisionalPasswordResult {
+    readonly provisionalPassword: string;
+}
+
+export interface AdminUserCreationResult extends AdminUser, ProvisionalPasswordResult {}
 
 export interface AdminUserAudit {
     readonly id: string;

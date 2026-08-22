@@ -5,12 +5,18 @@ import { APP_SEGMENTS } from './core/config/routes/app-routes.config';
 import { AUTH_SEGMENTS } from './core/config/routes/auth-routes.config';
 import { SYSTEM_ADMIN_SEGMENTS } from './core/config/routes/system-admin-routes.config';
 import { TOWNHOUSE_SEGMENTS } from './core/config/routes/townhouse-routes.config';
+import { passwordGuard } from './core/auth/guards/password.guard';
 
 export const routes: Routes = [
     {
         path: APP_SEGMENTS.notFound,
         loadComponent: () =>
             import('./features/errors/not-found-screen/not-found-screen').then((m) => m.NotFoundScreen),
+    },
+    {
+        path: APP_SEGMENTS.password,
+        canActivate: [passwordGuard],
+        loadComponent: () => import('./features/auth/password-page/password-page').then((m) => m.PasswordPage),
     },
     {
         path: SYSTEM_ADMIN_SEGMENTS.root,

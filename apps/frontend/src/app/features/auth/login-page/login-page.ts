@@ -14,9 +14,12 @@ import { AuthService } from '../../../core/auth/services/auth.service';
 import { TownhouseContextService } from '../../../core/townhouse/townhouse-context.service';
 import { AUTH_ROUTES } from '../../../core/config/routes/auth-routes.config';
 import { SYSTEM_ADMIN_ROUTES } from '../../../core/config/routes/system-admin-routes.config';
+import { UserRole } from '../../../shared/enums/user-role.enum';
 import { TOWNHOUSE_ROUTES } from '../../../core/config/routes/townhouse-routes.config';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LOGIN_PAGE_ROUTE_DATA_KEY, LoginPageConfig } from './login-page.config';
+import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
+import { APP_ROUTES } from '../../../core/config/routes/app-routes.config';
 
 @Component({
     selector: 'app-login-page',
@@ -35,6 +38,7 @@ import { LOGIN_PAGE_ROUTE_DATA_KEY, LoginPageConfig } from './login-page.config'
 export class LoginPage {
     private readonly _townhouseContextService = inject(TownhouseContextService);
     private readonly _authService = inject(AuthService);
+    private readonly _authSessionService = inject(AuthSessionService);
     private readonly _destroyRef = inject(DestroyRef);
     private readonly _formBuilder = inject(FormBuilder);
     private readonly _route = inject(ActivatedRoute);
@@ -96,9 +100,26 @@ export class LoginPage {
     }
 
     private async _navigateAfterLogin(townhouseSlug?: string): Promise<void> {
+        const session = this._authSessionService.session();
         const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl');
 
+        if (session?.user.situation === 'PENDING') {
+            await this._router.navigate(APP_ROUTES.password);
+            return;
+        }
+
         if (!this.isTownhouseLogin) {
+            if (session?.user.role !== UserRole.SYSTEM_ADMIN) {
+                if (session?.house) {
+                    await this._router.navigate(TOWNHOUSE_ROUTES.home(session.house.townhouse.slug));
+                    return;
+                }
+
+                this._authService.logout();
+                this._snackbar.error('Este usuário ainda não possui uma área de acesso.');
+                return;
+            }
+
             const adminRootUrl = this._router.serializeUrl(this._router.createUrlTree(SYSTEM_ADMIN_ROUTES.root));
             const adminLoginUrl = this._router.serializeUrl(this._router.createUrlTree(SYSTEM_ADMIN_ROUTES.login));
 

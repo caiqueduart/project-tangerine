@@ -86,17 +86,20 @@
                             </td>
                             <td class="admin-list-users__actions">
                                 @if (user.situation === 'PENDING') {
-                                    <button mat-button type="button" (click)="approve(user)">
-                                        <mat-icon>check</mat-icon>
-                                        Aprovar
-                                    </button>
                                     <button
-                                        mat-icon-button
+                                        mat-button
                                         type="button"
-                                        aria-label="Rejeitar solicitação"
-                                        (click)="reject(user)"
+                                        [disabled]="regeneratingUserId() !== null"
+                                        (click)="regenerateProvisionalPassword(user)"
                                     >
-                                        <mat-icon>close</mat-icon>
+                                        @if (regeneratingUserId() === user.id) {
+                                            <mat-spinner diameter="18" aria-label="Gerando nova senha" />
+                                        } @else {
+                                            <mat-icon>key</mat-icon>
+                                        }
+                                        <span>{{
+                                            regeneratingUserId() === user.id ? 'Gerando senha' : 'Nova senha'
+                                        }}</span>
                                     </button>
                                 }
 

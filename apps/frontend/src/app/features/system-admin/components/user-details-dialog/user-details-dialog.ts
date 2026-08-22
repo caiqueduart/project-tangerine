@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import { LabelComponent, LabelTheme } from '../../../../shared/components/label/label.component';
+import { UserRole, USER_ROLE_LABELS } from '../../../../shared/enums/user-role.enum';
 import { AdminUserAudit, AdminUserDetails, UserAuditAction, UserSituation } from '../../models/admin-user.model';
 import { AdminUserService } from '../../services/admin-user.service';
 
@@ -50,7 +51,13 @@ export class UserDetailsDialog {
             REGISTRATION_REQUESTED: 'solicitou cadastro',
             UPDATED: 'atualizou o usuário',
             APPROVED: 'aprovou o cadastro',
+            PASSWORD_CHANGED: 'alterou a senha',
+            ACTIVATED: 'ativou o acesso no primeiro login',
         }[action];
+    }
+
+    roleText(role: UserRole): string {
+        return USER_ROLE_LABELS[role];
     }
 
     statusText(situation: UserSituation): string {

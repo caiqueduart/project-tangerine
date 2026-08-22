@@ -78,17 +78,6 @@
                     </button>
                 }
             </form>
-
-            @if (config.showAccountActions) {
-                <section class="login-page__access-request" aria-label="Solicitação de acesso">
-                    <p>Ainda não tem acesso?</p>
-
-                    <button mat-stroked-button type="button">
-                        <mat-icon>person_add</mat-icon>
-                        Solicitar cadastro
-                    </button>
-                </section>
-            }
         } @else {
             <div class="login-page__context-error" role="alert">
                 <mat-icon aria-hidden="true">location_off</mat-icon>

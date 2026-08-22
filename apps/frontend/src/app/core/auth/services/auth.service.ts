@@ -3,7 +3,13 @@ import { inject, Injectable } from '@angular/core';
 import { finalize, Observable, shareReplay, tap } from 'rxjs';
 import { AUTH_API_ROUTES } from '../../config/routes/auth-routes.config';
 import { AuthSessionService } from './auth-session.service';
-import { AccessToken, LoginCredentials, LoginResponse } from '../models/auth.model';
+import {
+    AccessToken,
+    ChangePasswordPayload,
+    CompleteFirstAccessPayload,
+    LoginCredentials,
+    LoginResponse,
+} from '../models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -37,6 +43,16 @@ export class AuthService {
             );
 
         return this._refreshRequest;
+    }
+
+    completeFirstAccess(payload: CompleteFirstAccessPayload): Observable<LoginResponse> {
+        return this._httpClient
+            .post<LoginResponse>(AUTH_API_ROUTES.completeFirstAccess, payload, { withCredentials: true })
+            .pipe(tap((response) => this._authSessionService.save(response)));
+    }
+
+    changePassword(payload: ChangePasswordPayload): Observable<void> {
+        return this._httpClient.post<void>(AUTH_API_ROUTES.changePassword, payload);
     }
 
     logout(): void {

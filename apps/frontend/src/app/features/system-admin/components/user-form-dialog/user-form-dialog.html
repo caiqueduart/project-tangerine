@@ -31,25 +31,34 @@
             <mat-error>Informe um e-mail válido.</mat-error>
         </mat-form-field>
 
-        @if (!isEditing) {
+        @if (isEditing) {
             <mat-form-field appearance="outline">
-                <mat-label>Senha inicial</mat-label>
-                <input matInput type="password" formControlName="password" autocomplete="new-password" />
-                @if (form.controls.password.hasError('minlength')) {
-                    <mat-error>A senha deve ter pelo menos 8 caracteres.</mat-error>
-                } @else {
-                    <mat-error>Informe a senha inicial.</mat-error>
-                }
-            </mat-form-field>
-        } @else {
-            <mat-form-field appearance="outline">
-                <mat-label>Situação</mat-label>
-                <mat-select formControlName="situation">
-                    @for (situation of situations; track situation.value) {
-                        <mat-option [value]="situation.value">{{ situation.label }}</mat-option>
+                <mat-label>Papel</mat-label>
+                <mat-select formControlName="role">
+                    @for (role of roles; track role.value) {
+                        <mat-option [value]="role.value">{{ role.label }}</mat-option>
                     }
                 </mat-select>
             </mat-form-field>
+
+            @if (!isPending) {
+                <mat-form-field appearance="outline">
+                    <mat-label>Situação</mat-label>
+                    <mat-select formControlName="situation">
+                        @for (situation of situations; track situation.value) {
+                            <mat-option [value]="situation.value">{{ situation.label }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            } @else {
+                <p class="user-form-dialog__pending-notice">
+                    O usuário permanecerá pendente até definir uma nova senha no primeiro acesso.
+                </p>
+            }
+        } @else {
+            <p class="user-form-dialog__pending-notice">
+                O sistema criará uma senha provisória e a exibirá uma única vez após o cadastro.
+            </p>
         }
 
         <section class="user-form-dialog__residence" aria-labelledby="user-residence-title">
