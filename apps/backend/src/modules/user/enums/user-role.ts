@@ -1,5 +1,1 @@
-export enum UserRole {
-    SYSTEM_ADMIN = 'SYSTEM_ADMIN',
-    TOWNHOUSE_MANAGER = 'TOWNHOUSE_MANAGER',
-    RESIDENT = 'RESIDENT',
-}
+export { UserRole } from '@repo/shared';

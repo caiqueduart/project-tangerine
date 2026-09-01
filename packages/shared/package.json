@@ -1,0 +1,29 @@
+{
+    "name": "@repo/shared",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/esm/index.d.ts",
+            "import": "./dist/esm/index.js",
+            "require": "./dist/cjs/index.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "npm run build:esm && npm run build:cjs && node ./scripts/write-cjs-package.mjs",
+        "build:cjs": "tsc -p tsconfig.cjs.json",
+        "build:esm": "tsc -p tsconfig.esm.json",
+        "check-types": "tsc -p tsconfig.json --noEmit"
+    },
+    "devDependencies": {
+        "@repo/typescript-config": "*",
+        "typescript": "^5.9.2"
+    }
+}

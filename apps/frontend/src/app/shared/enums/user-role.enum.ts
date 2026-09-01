@@ -1,8 +1,6 @@
-export enum UserRole {
-    RESIDENT = 'RESIDENT',
-    TOWNHOUSE_MANAGER = 'TOWNHOUSE_MANAGER',
-    SYSTEM_ADMIN = 'SYSTEM_ADMIN',
-}
+import { UserRole } from '@repo/shared';
+
+export { UserRole };
 
 export const USER_ROLE_LABELS: Readonly<Record<UserRole, string>> = {
     [UserRole.RESIDENT]: 'Morador',

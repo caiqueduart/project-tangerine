@@ -90,7 +90,6 @@ export class LoginPage {
             )
             .subscribe({
                 next: () => {
-                    this.loginForm.controls.password.reset();
                     void this._navigateAfterLogin(townhouse?.slug);
                 },
                 error: (error: unknown) => {
