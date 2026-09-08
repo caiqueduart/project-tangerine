@@ -4,15 +4,22 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { CreateHouseDto, CreateHousesBatchDto, GetHouseDto, HouseOptionDto, UpdateHouseDto } from './dtos/house.dto';
 import { House } from './entities/house.entity';
 import { Townhouse } from '../townhouse/entities/townhouse.entity';
+import { AuthenticatedActor } from '../authorization/models/authenticated-actor';
+import { HousePolicy } from '../authorization/policies/house.policy';
+import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 
 @Injectable()
 export class HouseService {
     constructor(
         @InjectRepository(House) private readonly _houseRepository: Repository<House>,
         @InjectRepository(Townhouse) private readonly _townhouseRepository: Repository<Townhouse>,
+        private readonly _housePolicy: HousePolicy,
+        private readonly _townhousePolicy: TownhousePolicy,
     ) {}
 
-    async register(data: CreateHouseDto): Promise<GetHouseDto> {
+    async register(data: CreateHouseDto, actor: AuthenticatedActor): Promise<GetHouseDto> {
+        this._townhousePolicy.assertCanManage(actor, data.townhouseId);
+
         await this._ensureTownhouseExists(data.townhouseId);
 
         const house = this._houseRepository.create({
@@ -23,7 +30,8 @@ export class HouseService {
         return this._save(house);
     }
 
-    async registerBatch(data: CreateHousesBatchDto): Promise<GetHouseDto[]> {
+    async registerBatch(data: CreateHousesBatchDto, actor: AuthenticatedActor): Promise<GetHouseDto[]> {
+        this._townhousePolicy.assertCanManage(actor, data.townhouseId);
         await this._ensureTownhouseExists(data.townhouseId);
 
         const identifiers = data.identifiers.map((identifier) => identifier.trim());
@@ -50,13 +58,17 @@ export class HouseService {
         }
     }
 
-    async getOne(id: number): Promise<GetHouseDto> {
+    async getOne(id: number, actor: AuthenticatedActor): Promise<GetHouseDto> {
         const house = await this._findOne(id);
+
+        this._housePolicy.assertCanRead(actor, house.id, house.townhouse.id);
 
         return this._toDto(house);
     }
 
-    async getOptions(townhouseId: number): Promise<HouseOptionDto[]> {
+    async getOptions(townhouseId: number, actor: AuthenticatedActor): Promise<HouseOptionDto[]> {
+        this._townhousePolicy.assertCanManage(actor, townhouseId);
+
         const houses = await this._houseRepository.find({
             select: { id: true, identifier: true },
             where: { townhouse: { id: townhouseId } },
@@ -66,10 +78,13 @@ export class HouseService {
         return houses.map(({ id, identifier }) => ({ id, identifier }));
     }
 
-    async updateOne(id: number, data: UpdateHouseDto): Promise<GetHouseDto> {
+    async updateOne(id: number, data: UpdateHouseDto, actor: AuthenticatedActor): Promise<GetHouseDto> {
         const house = await this._findOne(id);
 
+        this._townhousePolicy.assertCanManage(actor, house.townhouse.id);
+
         if (data.townhouseId !== undefined && data.townhouseId !== house.townhouse.id) {
+            this._townhousePolicy.assertCanManage(actor, data.townhouseId);
             await this._ensureTownhouseExists(data.townhouseId);
             house.townhouse = { id: data.townhouseId } as Townhouse;
         }
@@ -81,8 +96,10 @@ export class HouseService {
         return this._save(house);
     }
 
-    async deleteOne(id: number): Promise<void> {
+    async deleteOne(id: number, actor: AuthenticatedActor): Promise<void> {
         const house = await this._findOne(id);
+
+        this._townhousePolicy.assertCanManage(actor, house.townhouse.id);
 
         if ((house.residents?.length ?? 0) > 0) {
             throw new ConflictException('Não é possível excluir uma casa com moradores vinculados.');

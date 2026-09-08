@@ -4,9 +4,10 @@ import { TownhouseService } from './townhouse.service';
 import { HouseModule } from '../house/house.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Townhouse } from './entities/townhouse.entity';
+import { AuthorizationModule } from '../authorization/authorization.module';
 
 @Module({
-    imports: [HouseModule, TypeOrmModule.forFeature([Townhouse])],
+    imports: [AuthorizationModule, HouseModule, TypeOrmModule.forFeature([Townhouse])],
     controllers: [TownhouseController],
     providers: [TownhouseService],
 })

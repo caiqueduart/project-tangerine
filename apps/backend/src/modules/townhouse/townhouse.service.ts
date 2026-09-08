@@ -10,12 +10,19 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Townhouse } from './entities/townhouse.entity';
 import { QueryFailedError, Repository } from 'typeorm';
+import { AuthenticatedActor } from '../authorization/models/authenticated-actor';
+import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 
 @Injectable()
 export class TownhouseService {
-    constructor(@InjectRepository(Townhouse) private readonly _townhouseRepository: Repository<Townhouse>) {}
+    constructor(
+        @InjectRepository(Townhouse) private readonly _townhouseRepository: Repository<Townhouse>,
+        private readonly _townhousePolicy: TownhousePolicy,
+    ) {}
 
-    async post(data: CreateTownhouseDto): Promise<TownhouseDetailsDto> {
+    async post(data: CreateTownhouseDto, actor: AuthenticatedActor): Promise<TownhouseDetailsDto> {
+        this._townhousePolicy.assertCanCreate(actor);
+
         const townhouse = this._townhouseRepository.create({
             name: data.name.trim(),
             slug: data.slug.trim().toLowerCase(),
@@ -31,7 +38,9 @@ export class TownhouseService {
         }
     }
 
-    async getOne(id: number): Promise<TownhouseDetailsDto> {
+    async getOne(id: number, actor: AuthenticatedActor): Promise<TownhouseDetailsDto> {
+        this._townhousePolicy.assertCanManage(actor, id);
+
         const townhouse = await this._findOneWithRelations(id);
 
         return this._toDetailsDto(townhouse);
@@ -53,8 +62,10 @@ export class TownhouseService {
         };
     }
 
-    async getAll(): Promise<TownhouseListItemDto[]> {
+    async getAll(actor: AuthenticatedActor): Promise<TownhouseListItemDto[]> {
+        const townhouseId = this._townhousePolicy.getManagementScope(actor);
         const townhouses = await this._townhouseRepository.find({
+            where: townhouseId ? { id: townhouseId } : {},
             relations: { houses: { residents: true } },
             order: { name: 'ASC' },
         });
@@ -62,16 +73,20 @@ export class TownhouseService {
         return townhouses.map((townhouse) => this._toListItemDto(townhouse));
     }
 
-    async getOptions(): Promise<TownhouseOptionDto[]> {
+    async getOptions(actor: AuthenticatedActor): Promise<TownhouseOptionDto[]> {
+        const townhouseId = this._townhousePolicy.getManagementScope(actor);
         const townhouses = await this._townhouseRepository.find({
             select: { id: true, name: true },
+            where: townhouseId ? { id: townhouseId } : {},
             order: { name: 'ASC' },
         });
 
         return townhouses.map(({ id, name }) => ({ id, name }));
     }
 
-    async deleteOne(id: number): Promise<void> {
+    async deleteOne(id: number, actor: AuthenticatedActor): Promise<void> {
+        this._townhousePolicy.assertCanManage(actor, id);
+
         const townhouse = await this._findOneWithRelations(id);
 
         if (townhouse.houses.length > 0) {
@@ -81,7 +96,9 @@ export class TownhouseService {
         await this._townhouseRepository.remove(townhouse);
     }
 
-    async updateOne(id: number, data: UpdateTownhouseDto): Promise<TownhouseDetailsDto> {
+    async updateOne(id: number, data: UpdateTownhouseDto, actor: AuthenticatedActor): Promise<TownhouseDetailsDto> {
+        this._townhousePolicy.assertCanManage(actor, id);
+
         const townhouse = await this._findOneWithRelations(id);
 
         if (data.name !== undefined) {
