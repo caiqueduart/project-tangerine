@@ -17,13 +17,15 @@ describe('UserService', () => {
         userId: 'admin-id',
         role: UserRole.SYSTEM_ADMIN,
         situation: UserSituation.ACTIVE,
+        managedTownhouseIds: [],
     };
     const managerActor: AuthenticatedActor = {
         userId: 'manager-id',
-        role: UserRole.TOWNHOUSE_MANAGER,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
         houseId: 7,
-        townhouseId: 2,
+        residentialTownhouseId: 8,
+        managedTownhouseIds: [2],
     };
     const entityManager = {
         create: jest.fn((entity: { name: string }, data: object) => ({ ...data, entity: entity.name })),
@@ -87,7 +89,7 @@ describe('UserService', () => {
             expect.objectContaining({
                 passwordHash: 'password-hash',
                 situation: UserSituation.PENDING,
-                role: UserRole.RESIDENT,
+                role: UserRole.USER,
             }),
         );
         expect(entityManager.create).toHaveBeenCalledWith(UserAudit, {
@@ -210,7 +212,8 @@ function createUser(overrides: Partial<User> = {}): User {
         email: null,
         passwordHash: 'password-hash',
         situation: UserSituation.ACTIVE,
-        role: UserRole.RESIDENT,
+        role: UserRole.USER,
+        managerPermissions: [],
         ...overrides,
     } as User;
 }

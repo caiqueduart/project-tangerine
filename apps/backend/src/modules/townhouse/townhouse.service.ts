@@ -9,9 +9,10 @@ import {
 } from './dtos/townhouse.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Townhouse } from './entities/townhouse.entity';
-import { QueryFailedError, Repository } from 'typeorm';
+import { In, QueryFailedError, Repository } from 'typeorm';
 import { AuthenticatedActor } from '../authorization/models/authenticated-actor';
 import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
+import { TownhouseSituation } from './enums/townhouse-situation.enum';
 
 @Injectable()
 export class TownhouseService {
@@ -62,10 +63,22 @@ export class TownhouseService {
         };
     }
 
+    async getActiveForManagerPermission(id: number): Promise<Townhouse> {
+        const townhouse = await this._townhouseRepository.findOne({
+            where: { id, situation: TownhouseSituation.ACTIVE },
+        });
+
+        if (!townhouse) {
+            throw new NotFoundException('Condomínio ativo não encontrado.');
+        }
+
+        return townhouse;
+    }
+
     async getAll(actor: AuthenticatedActor): Promise<TownhouseListItemDto[]> {
-        const townhouseId = this._townhousePolicy.getManagementScope(actor);
+        const townhouseIds = this._townhousePolicy.getManagementScope(actor);
         const townhouses = await this._townhouseRepository.find({
-            where: townhouseId ? { id: townhouseId } : {},
+            where: townhouseIds ? { id: In([...townhouseIds]) } : {},
             relations: { houses: { residents: true } },
             order: { name: 'ASC' },
         });
@@ -74,10 +87,10 @@ export class TownhouseService {
     }
 
     async getOptions(actor: AuthenticatedActor): Promise<TownhouseOptionDto[]> {
-        const townhouseId = this._townhousePolicy.getManagementScope(actor);
+        const townhouseIds = this._townhousePolicy.getManagementScope(actor);
         const townhouses = await this._townhouseRepository.find({
             select: { id: true, name: true },
-            where: townhouseId ? { id: townhouseId } : {},
+            where: townhouseIds ? { id: In([...townhouseIds]) } : {},
             order: { name: 'ASC' },
         });
 

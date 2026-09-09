@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { AUTHENTICATED_ACTOR_KEY, REQUIRED_PERMISSIONS_KEY } from '../authorization.constants';
 import { Permission } from '../enums/permission';
 import { AuthenticatedActor } from '../models/authenticated-actor';
-import { ROLE_PERMISSIONS } from '../role-permissions';
+import { getActorPermissions } from '../role-permissions';
 
 type AuthorizationRequest = Request & Partial<Record<typeof AUTHENTICATED_ACTOR_KEY, AuthenticatedActor>>;
 
@@ -25,7 +25,7 @@ export class PermissionsGuard implements CanActivate {
 
         if (!actor) throw new UnauthorizedException();
 
-        const grantedPermissions = ROLE_PERMISSIONS[actor.role];
+        const grantedPermissions = getActorPermissions(actor);
         const isAuthorized = requiredPermissions.every((permission) => grantedPermissions.includes(permission));
 
         if (!isAuthorized) throw new ForbiddenException();

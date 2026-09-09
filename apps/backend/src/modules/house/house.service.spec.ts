@@ -21,19 +21,21 @@ describe('HouseService', () => {
         userId: 'admin-id',
         role: UserRole.SYSTEM_ADMIN,
         situation: UserSituation.ACTIVE,
+        managedTownhouseIds: [],
     };
     const manager: AuthenticatedActor = {
         userId: 'manager-id',
-        role: UserRole.TOWNHOUSE_MANAGER,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
-        townhouseId: 2,
+        managedTownhouseIds: [2],
     };
     const resident: AuthenticatedActor = {
         userId: 'resident-id',
-        role: UserRole.RESIDENT,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
         houseId: 7,
-        townhouseId: 2,
+        residentialTownhouseId: 2,
+        managedTownhouseIds: [],
     };
 
     beforeEach(() => {

@@ -26,7 +26,8 @@ describe('PendingUserGuard', () => {
     it('permite a rota de conclusão do primeiro acesso', () => {
         request[AUTHENTICATED_ACTOR_KEY] = {
             userId: 'pending-id',
-            role: UserRole.RESIDENT,
+            role: UserRole.USER,
+            managedTownhouseIds: [],
             situation: UserSituation.PENDING,
         };
         reflector.getAllAndOverride.mockReturnValue(true);
@@ -37,7 +38,8 @@ describe('PendingUserGuard', () => {
     it('bloqueia outras operações para usuário pendente', () => {
         request[AUTHENTICATED_ACTOR_KEY] = {
             userId: 'pending-id',
-            role: UserRole.RESIDENT,
+            role: UserRole.USER,
+            managedTownhouseIds: [],
             situation: UserSituation.PENDING,
         };
         reflector.getAllAndOverride.mockReturnValue(false);
@@ -48,7 +50,8 @@ describe('PendingUserGuard', () => {
     it('não restringe usuário ativo', () => {
         request[AUTHENTICATED_ACTOR_KEY] = {
             userId: 'active-id',
-            role: UserRole.RESIDENT,
+            role: UserRole.USER,
+            managedTownhouseIds: [],
             situation: UserSituation.ACTIVE,
         };
 

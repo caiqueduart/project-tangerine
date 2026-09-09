@@ -2,7 +2,26 @@ import { UserRole } from '../../../shared/enums/user-role.enum';
 
 export type UserSituation = 'ACTIVE' | 'BLOCKED' | 'INACTIVE' | 'PENDING';
 export type UserAuditAction =
-    'CREATED' | 'REGISTRATION_REQUESTED' | 'UPDATED' | 'APPROVED' | 'PASSWORD_CHANGED' | 'ACTIVATED';
+    | 'CREATED'
+    | 'REGISTRATION_REQUESTED'
+    | 'UPDATED'
+    | 'APPROVED'
+    | 'PASSWORD_CHANGED'
+    | 'ACTIVATED'
+    | 'MANAGER_PERMISSION_GRANTED'
+    | 'MANAGER_PERMISSION_REVOKED';
+
+export interface AdminUserManagerPermission {
+    readonly id: string;
+    readonly situation: 'ACTIVE' | 'REVOKED';
+    readonly grantedAt: string;
+    readonly revokedAt: string | null;
+    readonly townhouse: {
+        readonly id: number;
+        readonly name: string;
+        readonly slug: string;
+    };
+}
 
 export interface AdminUser {
     readonly id: string;
@@ -12,6 +31,7 @@ export interface AdminUser {
     readonly email: string | null;
     readonly situation: UserSituation;
     readonly role: UserRole;
+    readonly managerPermissions: readonly AdminUserManagerPermission[];
     readonly house: {
         readonly id: number;
         readonly identifier: string;

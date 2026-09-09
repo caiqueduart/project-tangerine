@@ -13,9 +13,9 @@ export class HousePolicy {
     assertCanRead(actor: AuthenticatedActor, houseId: number, townhouseId: number): void {
         if (actor.role === UserRole.SYSTEM_ADMIN) return;
 
-        if (actor.role === UserRole.TOWNHOUSE_MANAGER && actor.townhouseId === townhouseId) return;
+        if (actor.managedTownhouseIds.includes(townhouseId)) return;
 
-        if (actor.role === UserRole.RESIDENT && actor.houseId === houseId) return;
+        if (actor.houseId === houseId) return;
 
         throw new ForbiddenException();
     }

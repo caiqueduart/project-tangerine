@@ -1,7 +1,8 @@
 import { UserRole } from '../user/enums/user-role';
 import { Permission } from './enums/permission';
+import { AuthenticatedActor } from './models/authenticated-actor';
 
-const RESIDENT_PERMISSIONS = [
+const USER_PERMISSIONS = [
     Permission.TOWNHOUSE_READ,
     Permission.HOUSE_READ,
     Permission.CONTRIBUTION_READ,
@@ -10,8 +11,8 @@ const RESIDENT_PERMISSIONS = [
     Permission.ACCOUNTABILITY_READ,
 ] as const;
 
-const TOWNHOUSE_MANAGER_PERMISSIONS = [
-    ...RESIDENT_PERMISSIONS,
+const MANAGER_PERMISSIONS = [
+    ...USER_PERMISSIONS,
     Permission.HOUSE_CREATE,
     Permission.HOUSE_UPDATE,
     Permission.HOUSE_DELETE,
@@ -25,10 +26,15 @@ const TOWNHOUSE_MANAGER_PERMISSIONS = [
     Permission.CONTRIBUTION_REOPEN,
     Permission.CONTRIBUTION_CANCEL,
     Permission.ACCOUNTABILITY_CREATE,
+    Permission.MANAGER_PERMISSION_READ,
 ] as const;
 
 export const ROLE_PERMISSIONS: Readonly<Record<UserRole, readonly Permission[]>> = {
-    [UserRole.RESIDENT]: RESIDENT_PERMISSIONS,
-    [UserRole.TOWNHOUSE_MANAGER]: TOWNHOUSE_MANAGER_PERMISSIONS,
+    [UserRole.USER]: USER_PERMISSIONS,
     [UserRole.SYSTEM_ADMIN]: Object.values(Permission),
 };
+
+export function getActorPermissions(actor: AuthenticatedActor): readonly Permission[] {
+    if (actor.role === UserRole.SYSTEM_ADMIN) return ROLE_PERMISSIONS[UserRole.SYSTEM_ADMIN];
+    return actor.managedTownhouseIds.length ? MANAGER_PERMISSIONS : USER_PERMISSIONS;
+}

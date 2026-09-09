@@ -1,0 +1,29 @@
+<header class="manager-permission-dialog__header">
+    <h2 mat-dialog-title>Adicionar gestor</h2>
+    <p>Escolha um usuário ativo. A permissão será válida somente para este condomínio.</p>
+</header>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-dialog-content class="manager-permission-dialog__content">
+        <mat-form-field appearance="outline">
+            <mat-label>Usuário</mat-label>
+            <mat-select formControlName="userId">
+                @for (user of users; track user.id) {
+                    <mat-option [value]="user.id">
+                        {{ user.firstName }} {{ user.lastName }} · {{ user.email || user.phone }}
+                    </mat-option>
+                }
+            </mat-select>
+            <mat-error>Selecione um usuário.</mat-error>
+        </mat-form-field>
+
+        <p class="manager-permission-dialog__notice">
+            O vínculo residencial do usuário não será alterado por esta ação.
+        </p>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" mat-dialog-close>Cancelar</button>
+        <button mat-flat-button type="submit">Conceder permissão</button>
+    </mat-dialog-actions>
+</form>

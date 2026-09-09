@@ -6,5 +6,6 @@ export interface AuthenticatedActor {
     role: UserRole;
     situation: UserSituation;
     houseId?: number;
-    townhouseId?: number;
+    residentialTownhouseId?: number;
+    managedTownhouseIds: readonly number[];
 }

@@ -10,5 +10,6 @@ import { AuthorizationModule } from '../authorization/authorization.module';
     imports: [AuthorizationModule, HouseModule, TypeOrmModule.forFeature([Townhouse])],
     controllers: [TownhouseController],
     providers: [TownhouseService],
+    exports: [TownhouseService],
 })
 export class TownhouseModule {}

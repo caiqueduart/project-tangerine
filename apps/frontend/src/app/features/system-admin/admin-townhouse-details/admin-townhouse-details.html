@@ -214,7 +214,65 @@
                     }
                 </div>
             </mat-tab>
-            <mat-tab label="Gestores" disabled />
+            <mat-tab [label]="'Gestores (' + managers().length + ')'">
+                <div class="system-admin-townhouse-details__tab-content">
+                    <div class="system-admin-townhouse-details__section-header">
+                        <div>
+                            <h2>Gestores</h2>
+                            <p>Permissões administrativas válidas exclusivamente para este condomínio.</p>
+                        </div>
+
+                        <button
+                            mat-flat-button
+                            type="button"
+                            [disabled]="loadingManagerCandidates()"
+                            (click)="openAddManagerDialog()"
+                        >
+                            @if (loadingManagerCandidates()) {
+                                <mat-spinner diameter="18" aria-label="Carregando usuários" />
+                            } @else {
+                                <mat-icon>person_add</mat-icon>
+                            }
+                            Adicionar gestor
+                        </button>
+                    </div>
+
+                    @if (loadingManagers()) {
+                        <div class="system-admin-townhouse-details__feedback" role="status">
+                            <mat-spinner diameter="32" />
+                            <p>Carregando gestores...</p>
+                        </div>
+                    } @else if (managers().length === 0) {
+                        <div class="system-admin-townhouse-details__empty">
+                            <mat-icon>manage_accounts</mat-icon>
+                            <p>Nenhum gestor com permissão ativa.</p>
+                        </div>
+                    } @else {
+                        <ul class="system-admin-townhouse-details__records" aria-label="Gestores do condomínio">
+                            @for (permission of managers(); track permission.id) {
+                                <li>
+                                    <div>
+                                        <p>{{ permission.user.firstName }} {{ permission.user.lastName }}</p>
+                                        <span>
+                                            {{ permission.user.email || permission.user.phone }} · concedida em
+                                            {{ permission.grantedAt | date: 'dd/MM/yyyy' }}
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        mat-icon-button
+                                        type="button"
+                                        [attr.aria-label]="'Remover permissão de ' + permission.user.firstName"
+                                        (click)="removeManager(permission)"
+                                    >
+                                        <mat-icon>person_remove</mat-icon>
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </mat-tab>
         </mat-tab-group>
     }
 </section>

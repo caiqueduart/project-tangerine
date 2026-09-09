@@ -49,7 +49,7 @@
                     <dd>{{ user.email || 'Não informado' }}</dd>
                 </div>
                 <div>
-                    <dt>Papel</dt>
+                    <dt>Papel global</dt>
                     <dd>{{ roleText(user.role) }}</dd>
                 </div>
             </dl>
@@ -83,6 +83,23 @@
                 </dl>
             } @else {
                 <p class="user-details-dialog__empty">Este usuário não possui vínculo residencial.</p>
+            }
+        </section>
+
+        <section class="user-details-dialog__section" aria-labelledby="user-details-management-title">
+            <h3 id="user-details-management-title">Permissões de gestor</h3>
+
+            @if (user.managerPermissions.length) {
+                <ul class="user-details-dialog__permissions">
+                    @for (permission of user.managerPermissions; track permission.id) {
+                        <li>
+                            <span>{{ permission.townhouse.name }}</span>
+                            <span>Concedida em {{ permission.grantedAt | date: 'dd/MM/yyyy' }}</span>
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <p class="user-details-dialog__empty">Este usuário não administra nenhum condomínio.</p>
             }
         </section>
 

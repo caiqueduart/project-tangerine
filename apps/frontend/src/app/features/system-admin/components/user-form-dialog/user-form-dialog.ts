@@ -52,8 +52,7 @@ export class UserFormDialog {
         { value: 'BLOCKED', label: 'Bloqueado' },
     ];
     readonly roles: readonly { readonly value: UserRole; readonly label: string }[] = [
-        { value: UserRole.RESIDENT, label: USER_ROLE_LABELS[UserRole.RESIDENT] },
-        { value: UserRole.TOWNHOUSE_MANAGER, label: USER_ROLE_LABELS[UserRole.TOWNHOUSE_MANAGER] },
+        { value: UserRole.USER, label: USER_ROLE_LABELS[UserRole.USER] },
         { value: UserRole.SYSTEM_ADMIN, label: USER_ROLE_LABELS[UserRole.SYSTEM_ADMIN] },
     ];
     readonly townhouses = signal<readonly SystemAdminTownhouseOption[]>([]);
@@ -66,7 +65,7 @@ export class UserFormDialog {
         phone: [this._data.user?.phone ?? '', [Validators.required, Validators.maxLength(20)]],
         email: [this._data.user?.email ?? '', [Validators.email, Validators.maxLength(255)]],
         situation: [this._data.user?.situation ?? ('PENDING' as UserSituation)],
-        role: [this._data.user?.role ?? UserRole.RESIDENT],
+        role: [this._data.user?.role ?? UserRole.USER],
         townhouseId: [this._data.user?.house?.townhouse.id ?? (null as number | null)],
         houseId: [this._data.user?.house?.id ?? (null as number | null)],
     });

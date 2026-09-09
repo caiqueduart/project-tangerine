@@ -53,6 +53,8 @@ export class UserDetailsDialog {
             APPROVED: 'aprovou o cadastro',
             PASSWORD_CHANGED: 'alterou a senha',
             ACTIVATED: 'ativou o acesso no primeiro login',
+            MANAGER_PERMISSION_GRANTED: 'concedeu uma permissão de gestor',
+            MANAGER_PERMISSION_REVOKED: 'removeu uma permissão de gestor',
         }[action];
     }
 

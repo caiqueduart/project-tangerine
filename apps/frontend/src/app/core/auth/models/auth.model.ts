@@ -27,9 +27,14 @@ export interface AuthSessionHouse {
     townhouse: AuthSessionTownhouse;
 }
 
+export interface AuthSessionManagerPermission {
+    townhouse: AuthSessionTownhouse;
+}
+
 export interface AuthSession {
     user: AuthSessionUser;
     house: AuthSessionHouse | null;
+    managerPermissions: readonly AuthSessionManagerPermission[];
 }
 
 export interface LoginResponse extends AccessToken {

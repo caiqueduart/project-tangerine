@@ -33,7 +33,7 @@
 
         @if (isEditing) {
             <mat-form-field appearance="outline">
-                <mat-label>Papel</mat-label>
+                <mat-label>Papel global</mat-label>
                 <mat-select formControlName="role">
                     @for (role of roles; track role.value) {
                         <mat-option [value]="role.value">{{ role.label }}</mat-option>

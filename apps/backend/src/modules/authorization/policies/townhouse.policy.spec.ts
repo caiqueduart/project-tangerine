@@ -11,22 +11,25 @@ describe('TownhousePolicy', () => {
         userId: 'admin-id',
         role: UserRole.SYSTEM_ADMIN,
         situation: UserSituation.ACTIVE,
+        managedTownhouseIds: [],
     };
 
     const manager: AuthenticatedActor = {
         userId: 'manager-id',
-        role: UserRole.TOWNHOUSE_MANAGER,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
         houseId: 7,
-        townhouseId: 2,
+        residentialTownhouseId: 8,
+        managedTownhouseIds: [2, 4],
     };
 
     const resident: AuthenticatedActor = {
         userId: 'resident-id',
-        role: UserRole.RESIDENT,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
         houseId: 7,
-        townhouseId: 2,
+        residentialTownhouseId: 2,
+        managedTownhouseIds: [],
     };
 
     it('permite que o administrador do sistema gerencie qualquer condomínio', () => {
@@ -53,7 +56,7 @@ describe('TownhousePolicy', () => {
 
     it('limita a listagem do gestor ao próprio condomínio', () => {
         expect(policy.getManagementScope(systemAdmin)).toBeUndefined();
-        expect(policy.getManagementScope(manager)).toBe(2);
+        expect(policy.getManagementScope(manager)).toEqual([2, 4]);
         expect(() => policy.getManagementScope(resident)).toThrow(ForbiddenException);
     });
 });

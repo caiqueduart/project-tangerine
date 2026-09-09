@@ -13,15 +13,15 @@ export class TownhousePolicy {
     assertCanManage(actor: AuthenticatedActor, townhouseId: number): void {
         if (actor.role === UserRole.SYSTEM_ADMIN) return;
 
-        if (actor.role === UserRole.TOWNHOUSE_MANAGER && actor.townhouseId === townhouseId) return;
+        if (actor.managedTownhouseIds.includes(townhouseId)) return;
 
         throw new ForbiddenException();
     }
 
-    getManagementScope(actor: AuthenticatedActor): number | undefined {
+    getManagementScope(actor: AuthenticatedActor): readonly number[] | undefined {
         if (actor.role === UserRole.SYSTEM_ADMIN) return undefined;
 
-        if (actor.role === UserRole.TOWNHOUSE_MANAGER && actor.townhouseId) return actor.townhouseId;
+        if (actor.managedTownhouseIds.length) return actor.managedTownhouseIds;
 
         throw new ForbiddenException();
     }

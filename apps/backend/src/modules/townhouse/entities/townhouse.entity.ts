@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { House } from '../../house/entities/house.entity';
 import { TownhouseSituation } from '../enums/townhouse-situation.enum';
+import { ManagerPermission } from '../../manager-permission/entities/manager-permission.entity';
 
 @Entity()
 export class Townhouse {
@@ -24,4 +25,7 @@ export class Townhouse {
 
     @OneToMany(() => House, (house) => house.townhouse)
     houses: House[];
+
+    @OneToMany(() => ManagerPermission, (permission) => permission.townhouse)
+    managerPermissions?: ManagerPermission[];
 }

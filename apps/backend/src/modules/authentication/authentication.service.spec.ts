@@ -50,7 +50,18 @@ describe('AuthenticationService', () => {
             lastName: 'Silva',
             passwordHash: 'password-hash',
             situation: UserSituation.ACTIVE,
-            role: UserRole.RESIDENT,
+            role: UserRole.USER,
+            managerPermissions: [
+                {
+                    townhouseId: 4,
+                    situation: 'ACTIVE',
+                    townhouse: {
+                        id: 4,
+                        name: 'Condomínio das Flores',
+                        slug: 'flores',
+                    },
+                },
+            ],
             resident: {
                 house: {
                     id: 7,
@@ -79,9 +90,18 @@ describe('AuthenticationService', () => {
                     id: 'user-id',
                     firstName: 'Maria',
                     lastName: 'Silva',
-                    role: UserRole.RESIDENT,
+                    role: UserRole.USER,
                     situation: UserSituation.ACTIVE,
                 },
+                managerPermissions: [
+                    {
+                        townhouse: {
+                            id: 4,
+                            name: 'Condomínio das Flores',
+                            slug: 'flores',
+                        },
+                    },
+                ],
                 house: {
                     id: 7,
                     identifier: 'Casa 7',
@@ -161,7 +181,8 @@ describe('AuthenticationService', () => {
             lastName: 'Souza',
             passwordHash: 'temporary-hash',
             situation: UserSituation.PENDING,
-            role: UserRole.RESIDENT,
+            role: UserRole.USER,
+            managerPermissions: [],
         });
         hashService.compare.mockResolvedValue(true);
         jwtService.signAsync.mockResolvedValueOnce('access-token').mockResolvedValueOnce('refresh-token');

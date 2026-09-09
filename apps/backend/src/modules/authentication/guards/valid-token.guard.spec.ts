@@ -64,7 +64,7 @@ describe('ValidTokenGuard', () => {
         jwtService.verifyAsync.mockResolvedValue(payload);
         userService.findAuthenticatableUserById.mockResolvedValue({
             id: payload.id,
-            role: UserRole.TOWNHOUSE_MANAGER,
+            role: UserRole.USER,
             situation: UserSituation.ACTIVE,
             resident: {
                 house: {
@@ -72,16 +72,23 @@ describe('ValidTokenGuard', () => {
                     townhouse: { id: 2 },
                 },
             },
+            managerPermissions: [
+                {
+                    townhouseId: 4,
+                    situation: 'ACTIVE',
+                },
+            ],
         });
 
         await expect(guard.canActivate(context)).resolves.toBe(true);
         expect(userService.findAuthenticatableUserById).toHaveBeenCalledWith(payload.id);
         expect(request[AUTHENTICATED_ACTOR_KEY]).toEqual({
             userId: payload.id,
-            role: UserRole.TOWNHOUSE_MANAGER,
+            role: UserRole.USER,
             situation: UserSituation.ACTIVE,
             houseId: 7,
-            townhouseId: 2,
+            residentialTownhouseId: 2,
+            managedTownhouseIds: [4],
         });
     });
 

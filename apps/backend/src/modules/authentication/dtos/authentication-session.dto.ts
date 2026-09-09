@@ -1,6 +1,11 @@
 export class AuthenticationSessionDto {
     user: AuthenticationSessionUserDto;
     house: AuthenticationSessionHouseDto | null;
+    managerPermissions: AuthenticationSessionManagerPermissionDto[];
+}
+
+class AuthenticationSessionManagerPermissionDto {
+    townhouse: AuthenticationSessionTownhouseDto;
 }
 
 class AuthenticationSessionHouseDto {

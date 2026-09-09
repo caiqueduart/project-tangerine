@@ -7,6 +7,7 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { AccessTokenPayloadDto, AuthenticationTokenType } from '../dtos/token-payload.dto';
 import { Request } from 'express';
 import { UserService } from '../../user/user.service';
+import { ManagerPermissionSituation } from '../../manager-permission/enums/manager-permission-situation';
 import { AUTHENTICATED_ACTOR_KEY } from '../../authorization/authorization.constants';
 import { AuthenticatedActor } from '../../authorization/models/authenticated-actor';
 
@@ -63,7 +64,10 @@ export class ValidTokenGuard implements CanActivate {
             role: user.role,
             situation: user.situation,
             houseId: house?.id,
-            townhouseId: house?.townhouse.id,
+            residentialTownhouseId: house?.townhouse.id,
+            managedTownhouseIds: (user.managerPermissions ?? [])
+                .filter((permission) => permission.situation === ManagerPermissionSituation.ACTIVE)
+                .map((permission) => permission.townhouseId),
         };
 
         return true;

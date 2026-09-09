@@ -13,6 +13,7 @@ import { AuthenticationSessionDto } from './dtos/authentication-session.dto';
 import { LoginResultDto } from './dtos/login-result.dto';
 import { UserSituation } from '../user/enums/user-situation';
 import { ChangePasswordDto, CompleteFirstAccessDto } from '../user/dtos/password.dto';
+import { ManagerPermissionSituation } from '../manager-permission/enums/manager-permission-situation';
 
 @Injectable()
 export class AuthenticationService {
@@ -143,6 +144,15 @@ export class AuthenticationService {
                 role: user.role,
                 situation: user.situation,
             },
+            managerPermissions: (user.managerPermissions ?? [])
+                .filter((permission) => permission.situation === ManagerPermissionSituation.ACTIVE)
+                .map((permission) => ({
+                    townhouse: {
+                        id: permission.townhouse.id,
+                        name: permission.townhouse.name,
+                        slug: permission.townhouse.slug,
+                    },
+                })),
             house: house
                 ? {
                       id: house.id,

@@ -1,5 +1,5 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { TownhouseService } from './townhouse.service';
 import { Townhouse } from './entities/townhouse.entity';
 import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
@@ -18,19 +18,21 @@ describe('TownhouseService', () => {
         userId: 'admin-id',
         role: UserRole.SYSTEM_ADMIN,
         situation: UserSituation.ACTIVE,
+        managedTownhouseIds: [],
     };
     const manager: AuthenticatedActor = {
         userId: 'manager-id',
-        role: UserRole.TOWNHOUSE_MANAGER,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
-        townhouseId: 2,
+        managedTownhouseIds: [2],
     };
     const resident: AuthenticatedActor = {
         userId: 'resident-id',
-        role: UserRole.RESIDENT,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
         houseId: 7,
-        townhouseId: 2,
+        residentialTownhouseId: 2,
+        managedTownhouseIds: [],
     };
 
     beforeEach(() => {
@@ -84,7 +86,7 @@ describe('TownhouseService', () => {
         await expect(service.getOptions(manager)).resolves.toEqual([{ id: 2, name: 'Condomínio B' }]);
         expect(townhouseRepository.find).toHaveBeenCalledWith({
             select: { id: true, name: true },
-            where: { id: 2 },
+            where: { id: In([2]) },
             order: { name: 'ASC' },
         });
     });

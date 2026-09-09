@@ -19,10 +19,11 @@ describe('PermissionsGuard', () => {
     } as unknown as ExecutionContext;
     const actor: AuthenticatedActor = {
         userId: 'manager-id',
-        role: UserRole.TOWNHOUSE_MANAGER,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
         houseId: 7,
-        townhouseId: 2,
+        residentialTownhouseId: 2,
+        managedTownhouseIds: [2],
     };
 
     let guard: PermissionsGuard;

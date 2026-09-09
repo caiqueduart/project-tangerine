@@ -6,12 +6,14 @@ import { TownhouseModule } from './modules/townhouse/townhouse.module';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
+import { ManagerPermissionModule } from './modules/manager-permission/manager-permission.module';
 
 @Module({
     imports: [
         AuthenticationModule,
         UserModule,
         TownhouseModule,
+        ManagerPermissionModule,
         ConfigModule.forRoot(),
         TypeOrmModule.forRoot({
             type: 'postgres',

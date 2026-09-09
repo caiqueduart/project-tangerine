@@ -8,10 +8,11 @@ describe('HousePolicy', () => {
     const policy = new HousePolicy();
     const resident: AuthenticatedActor = {
         userId: 'resident-id',
-        role: UserRole.RESIDENT,
+        role: UserRole.USER,
         situation: UserSituation.ACTIVE,
         houseId: 7,
-        townhouseId: 2,
+        residentialTownhouseId: 2,
+        managedTownhouseIds: [],
     };
 
     it('permite que o usuário atue pela própria casa', () => {
@@ -30,9 +31,9 @@ describe('HousePolicy', () => {
     it('permite que o gestor consulte casas somente no próprio condomínio', () => {
         const manager: AuthenticatedActor = {
             userId: 'manager-id',
-            role: UserRole.TOWNHOUSE_MANAGER,
+            role: UserRole.USER,
             situation: UserSituation.ACTIVE,
-            townhouseId: 2,
+            managedTownhouseIds: [2],
         };
 
         expect(() => policy.assertCanRead(manager, 8, 2)).not.toThrow();
@@ -44,6 +45,7 @@ describe('HousePolicy', () => {
             userId: 'admin-id',
             role: UserRole.SYSTEM_ADMIN,
             situation: UserSituation.ACTIVE,
+            managedTownhouseIds: [],
         };
 
         expect(() => policy.assertCanRead(systemAdmin, 8, 3)).not.toThrow();

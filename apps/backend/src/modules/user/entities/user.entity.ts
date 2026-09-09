@@ -1,7 +1,8 @@
 import { UserSituation } from '../enums/user-situation';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Resident } from './resident.entity';
 import { UserRole } from '../enums/user-role';
+import { ManagerPermission } from '../../manager-permission/entities/manager-permission.entity';
 
 @Entity()
 export class User {
@@ -26,9 +27,12 @@ export class User {
     @Column({ type: 'enum', enum: UserSituation, nullable: false, default: UserSituation.PENDING })
     situation: UserSituation;
 
-    @Column({ type: 'enum', enum: UserRole, nullable: false, default: UserRole.RESIDENT })
+    @Column({ type: 'enum', enum: UserRole, enumName: 'user_role_enum', nullable: false, default: UserRole.USER })
     role: UserRole;
 
     @OneToOne(() => Resident, (resident) => resident.user)
     resident?: Resident;
+
+    @OneToMany(() => ManagerPermission, (permission) => permission.user)
+    managerPermissions?: ManagerPermission[];
 }

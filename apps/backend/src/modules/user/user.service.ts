@@ -25,6 +25,7 @@ import { UserAudit } from './entities/user-audit.entity';
 import { UserAuditAction } from './enums/user-audit-action';
 import { UserRole } from './enums/user-role';
 import { UserSituation } from './enums/user-situation';
+import { ManagerPermissionSituation } from '../manager-permission/enums/manager-permission-situation';
 
 interface ResidenceSelection {
     readonly townhouseId: number;
@@ -58,7 +59,7 @@ export class UserService {
                     email: dto.email?.trim().toLowerCase() || null,
                     phone: dto.phone.trim(),
                     situation: UserSituation.PENDING,
-                    role: UserRole.RESIDENT,
+                    role: UserRole.USER,
                 });
                 const savedUser = await manager.save(newUser);
 
@@ -123,12 +124,14 @@ export class UserService {
             throw new BadRequestException('Condomínio inválido.');
         }
 
-        const scopedTownhouseId = this._getScopedTownhouseId(actor, townhouseId);
+        const scopedTownhouseIds = this._getScopedTownhouseIds(actor, townhouseId);
 
         try {
             const users = await this._userRepository.find({
-                where: scopedTownhouseId ? { resident: { house: { townhouse: { id: scopedTownhouseId } } } } : {},
-                relations: { resident: { house: { townhouse: true } } },
+                where: scopedTownhouseIds?.length
+                    ? { resident: { house: { townhouse: { id: In([...scopedTownhouseIds]) } } } }
+                    : {},
+                relations: { managerPermissions: { townhouse: true }, resident: { house: { townhouse: true } } },
                 order: { firstName: 'ASC', lastName: 'ASC' },
             });
 
@@ -183,10 +186,6 @@ export class UserService {
                         dto.houseId ?? null,
                         actor,
                     );
-                }
-
-                if (user.role === UserRole.TOWNHOUSE_MANAGER && !user.resident) {
-                    throw new BadRequestException('O gestor de condomínio deve possuir vínculo residencial.');
                 }
 
                 await manager.save(user);
@@ -265,7 +264,7 @@ export class UserService {
             const normalizedLogin = login.trim();
             return await this._userRepository.findOne({
                 where: [{ email: normalizedLogin.toLowerCase() }, { phone: normalizedLogin }],
-                relations: { resident: { house: { townhouse: true } } },
+                relations: { managerPermissions: { townhouse: true }, resident: { house: { townhouse: true } } },
             });
         } catch (error) {
             if (error instanceof HttpException) throw error;
@@ -277,7 +276,7 @@ export class UserService {
         try {
             return await this._userRepository.findOne({
                 where: { id: userId, situation: In([UserSituation.ACTIVE, UserSituation.PENDING]) },
-                relations: { resident: { house: { townhouse: true } } },
+                relations: { managerPermissions: { townhouse: true }, resident: { house: { townhouse: true } } },
             });
         } catch (error) {
             if (error instanceof HttpException) throw error;
@@ -285,11 +284,31 @@ export class UserService {
         }
     }
 
+    async getActiveForManagerPermission(userId: string): Promise<User> {
+        const user = await this._findOne(userId);
+
+        if (user.situation !== UserSituation.ACTIVE) {
+            throw new ConflictException('A permissão de gestor só pode ser concedida a um usuário ativo.');
+        }
+
+        return user;
+    }
+
+    async recordAudit(userId: string, action: UserAuditAction, actorUserId: string): Promise<void> {
+        await this._userAuditRepository.save(
+            this._userAuditRepository.create({
+                userId,
+                action,
+                actorUserId,
+            }),
+        );
+    }
+
     private async _findOne(userId: string): Promise<User> {
         try {
             const user = await this._userRepository.findOne({
                 where: { id: userId },
-                relations: { resident: { house: { townhouse: true } } },
+                relations: { managerPermissions: { townhouse: true }, resident: { house: { townhouse: true } } },
             });
 
             if (!user) throw new NotFoundException('Usuário não encontrado.');
@@ -317,31 +336,32 @@ export class UserService {
     private _assertCanCreate(actor: AuthenticatedActor, residence: ResidenceSelection | null): void {
         if (actor.role === UserRole.SYSTEM_ADMIN) return;
 
-        if (actor.role !== UserRole.TOWNHOUSE_MANAGER || !residence) {
-            throw new ForbiddenException();
-        }
+        if (!residence) throw new ForbiddenException();
 
         this._townhousePolicy.assertCanManage(actor, residence.townhouseId);
     }
 
-    private _getScopedTownhouseId(actor: AuthenticatedActor, requestedTownhouseId?: number): number | undefined {
-        if (actor.role === UserRole.SYSTEM_ADMIN) return requestedTownhouseId;
-
-        if (actor.role !== UserRole.TOWNHOUSE_MANAGER || !actor.townhouseId) {
-            throw new ForbiddenException();
+    private _getScopedTownhouseIds(
+        actor: AuthenticatedActor,
+        requestedTownhouseId?: number,
+    ): readonly number[] | undefined {
+        if (actor.role === UserRole.SYSTEM_ADMIN) {
+            return requestedTownhouseId === undefined ? undefined : [requestedTownhouseId];
         }
 
         if (requestedTownhouseId !== undefined) {
             this._townhousePolicy.assertCanManage(actor, requestedTownhouseId);
+            return [requestedTownhouseId];
         }
 
-        return actor.townhouseId;
+        if (!actor.managedTownhouseIds.length) throw new ForbiddenException();
+        return actor.managedTownhouseIds;
     }
 
     private _assertCanManageUser(actor: AuthenticatedActor, user: User): void {
         if (actor.role === UserRole.SYSTEM_ADMIN) return;
 
-        if (actor.role !== UserRole.TOWNHOUSE_MANAGER || user.role === UserRole.SYSTEM_ADMIN) {
+        if (user.role === UserRole.SYSTEM_ADMIN) {
             throw new ForbiddenException();
         }
 
@@ -425,6 +445,19 @@ export class UserService {
             email: user.email,
             situation: user.situation,
             role: user.role,
+            managerPermissions: (user.managerPermissions ?? [])
+                .filter((permission) => permission.situation === ManagerPermissionSituation.ACTIVE)
+                .map((permission) => ({
+                    id: permission.id,
+                    situation: permission.situation,
+                    grantedAt: permission.grantedAt,
+                    revokedAt: permission.revokedAt,
+                    townhouse: {
+                        id: permission.townhouse.id,
+                        name: permission.townhouse.name,
+                        slug: permission.townhouse.slug,
+                    },
+                })),
             house: house
                 ? {
                       id: house.id,

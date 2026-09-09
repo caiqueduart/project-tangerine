@@ -27,6 +27,12 @@ import {
     ProvisionalPasswordDialog,
     ProvisionalPasswordDialogData,
 } from '../components/provisional-password-dialog/provisional-password-dialog';
+import {
+    ManagerPermissionDialog,
+    ManagerPermissionDialogData,
+} from '../components/manager-permission-dialog/manager-permission-dialog';
+import { AdminManagerPermission } from '../models/admin-manager-permission.model';
+import { AdminManagerPermissionService } from '../services/admin-manager-permission.service';
 
 @Component({
     selector: 'app-admin-townhouse-details',
@@ -48,6 +54,7 @@ export class AdminTownhouseDetails {
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _authSessionService = inject(AuthSessionService);
     private readonly _dialog = inject(MatDialog);
+    private readonly _managerPermissionService = inject(AdminManagerPermissionService);
     private readonly _router = inject(Router);
     private readonly _snackbar = inject(SnackbarService);
     private readonly _townhouseService = inject(AdminTownhouseService);
@@ -56,7 +63,10 @@ export class AdminTownhouseDetails {
 
     readonly townhouse = signal<SystemAdminTownhouseDetailsModel | null>(null);
     readonly loading = signal(true);
+    readonly loadingManagers = signal(true);
+    readonly loadingManagerCandidates = signal(false);
     readonly regeneratingUserId = signal<string | null>(null);
+    readonly managers = signal<readonly AdminManagerPermission[]>([]);
     readonly users = signal<readonly AdminUser[]>([]);
     readonly townhousesRoute = SYSTEM_ADMIN_ROUTES.townhouses;
 
@@ -77,6 +87,7 @@ export class AdminTownhouseDetails {
                 this.townhouse.set(townhouse);
                 this.loading.set(false);
                 this.loadUsers();
+                this.loadManagers();
             },
             error: (error: HttpErrorResponse) => {
                 this.loading.set(false);
@@ -356,6 +367,75 @@ export class AdminTownhouseDetails {
             });
     }
 
+    openAddManagerDialog(): void {
+        if (this.loadingManagerCandidates()) return;
+        this.loadingManagerCandidates.set(true);
+
+        this._userService
+            .getAll()
+            .pipe(finalize(() => this.loadingManagerCandidates.set(false)))
+            .subscribe({
+                next: (users) => {
+                    const managerUserIds = new Set(this.managers().map((permission) => permission.userId));
+                    const candidates = users.filter(
+                        (user) => user.situation === 'ACTIVE' && !managerUserIds.has(user.id),
+                    );
+
+                    if (!candidates.length) {
+                        this._snackbar.error('Não há usuários ativos disponíveis para receber esta permissão.');
+                        return;
+                    }
+
+                    this._dialog
+                        .open(ManagerPermissionDialog, {
+                            width: '540px',
+                            maxWidth: 'calc(100vw - 32px)',
+                            data: { users: candidates } satisfies ManagerPermissionDialogData,
+                        })
+                        .afterClosed()
+                        .subscribe((userId) => {
+                            if (!userId) return;
+
+                            this._managerPermissionService.grant(this._townhouseId, userId).subscribe({
+                                next: () => {
+                                    this._snackbar.success('Permissão de gestor concedida.');
+                                    this.loadManagers();
+                                },
+                                error: (error: HttpErrorResponse) =>
+                                    this._showError(error, 'Não foi possível conceder a permissão de gestor.'),
+                            });
+                        });
+                },
+                error: (error: HttpErrorResponse) =>
+                    this._showError(error, 'Não foi possível carregar os usuários disponíveis.'),
+            });
+    }
+
+    removeManager(permission: AdminManagerPermission): void {
+        const data: ConfirmationDialogData = {
+            title: 'Remover permissão de gestor?',
+            message: `${permission.user.firstName} perderá o acesso administrativo a este condomínio. O vínculo residencial será preservado.`,
+            confirmLabel: 'Remover permissão',
+            destructive: true,
+        };
+
+        this._dialog
+            .open(ConfirmationDialog, { width: '500px', maxWidth: 'calc(100vw - 32px)', data })
+            .afterClosed()
+            .subscribe((confirmed) => {
+                if (!confirmed) return;
+
+                this._managerPermissionService.revoke(this._townhouseId, permission.userId).subscribe({
+                    next: () => {
+                        this._snackbar.success('Permissão de gestor removida.');
+                        this.loadManagers();
+                    },
+                    error: (error: HttpErrorResponse) =>
+                        this._showError(error, 'Não foi possível remover a permissão de gestor.'),
+                });
+            });
+    }
+
     isCurrentUser(user: AdminUser): boolean {
         return user.id === this._authSessionService.session()?.user.id;
     }
@@ -365,6 +445,19 @@ export class AdminTownhouseDetails {
             next: (users) => this.users.set(users),
             error: (error: HttpErrorResponse) => this._showError(error, 'Não foi possível carregar os usuários.'),
         });
+    }
+
+    private loadManagers(): void {
+        this.loadingManagers.set(true);
+
+        this._managerPermissionService
+            .getActive(this._townhouseId)
+            .pipe(finalize(() => this.loadingManagers.set(false)))
+            .subscribe({
+                next: (managers) => this.managers.set(managers),
+                error: (error: HttpErrorResponse) =>
+                    this._showError(error, 'Não foi possível carregar os gestores do condomínio.'),
+            });
     }
 
     private _showError(error: HttpErrorResponse, fallback: string): void {
