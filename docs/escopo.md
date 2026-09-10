@@ -89,10 +89,8 @@ Funcionalidades previstas:
 
 - Cadastro de casa com número ou identificação.
 - Cadastro de um ou mais moradores por casa.
-- Definição de um ou mais responsáveis por casa.
 - Pré-cadastro de moradores exclusivamente por moradores com acesso administrativo ou administradores do sistema.
 - Cadastro de nome, telefone obrigatório, e-mail opcional e vínculo residencial.
-- Indicação, no pré-cadastro, de que o morador é responsável pela residência.
 - Geração de senha provisória pelo sistema, sem definição manual pelo administrador.
 - Comunicação manual do telefone ou e-mail de acesso e da senha provisória ao morador, sempre por WhatsApp e também
   por e-mail quando disponível.
@@ -101,8 +99,8 @@ Funcionalidades previstas:
 Regras importantes:
 
 - Uma casa pode ter mais de um morador usuário.
-- Uma casa pode ter mais de um morador responsável, sem limite máximo.
 - Um morador sempre atua em nome de uma casa.
+- O vínculo residencial deve registrar quando o usuário foi associado à casa no sistema.
 - O gestor de condomínio somente pode pré-cadastrar moradores no condomínio que administra. O condomínio deve ficar
   inalterável, e a seleção de uma casa desse condomínio é obrigatória.
 - O administrador do sistema pode pré-cadastrar usuários em qualquer condomínio ou sem vínculo residencial.

@@ -1,5 +1,5 @@
 import { User } from './user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
 import { House } from '../../house/entities/house.entity';
 
 @Entity()
@@ -20,4 +20,7 @@ export class Resident {
     })
     @JoinColumn({ name: 'houseId' })
     house: House;
+
+    @CreateDateColumn({ type: 'timestamptz' })
+    createdAt: Date;
 }

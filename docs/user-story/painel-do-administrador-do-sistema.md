@@ -156,7 +156,6 @@ Critérios de aceite:
 - O administrador deve conseguir selecionar o usuário e o condomínio da permissão.
 - A permissão deve valer somente para o condomínio selecionado.
 - O sistema deve permitir mais de um gestor ativo no mesmo condomínio.
-- A permissão de gestor não deve tornar o usuário responsável por uma casa automaticamente.
 - Após a concessão, o usuário deve conseguir acessar o painel administrativo do condomínio.
 - O sistema deve registrar o usuário afetado, o administrador responsável e a data e hora da concessão.
 - O sistema não deve criar permissões duplicadas para o mesmo usuário no mesmo condomínio.
@@ -213,7 +212,7 @@ Critérios de aceite:
 - Quando houver vínculo residencial, condomínio e casa devem ser informados em conjunto; informar somente um deles deve
   impedir a conclusão do pré-cadastro.
 - A ausência de condomínio e casa não deve criar vínculo de morador.
-- Quando houver vínculo residencial, o administrador deve conseguir indicar se o usuário é responsável pela residência.
+- Quando houver vínculo residencial, o sistema deve registrar sua data e hora de criação.
 - O sistema não deve permitir duplicidade de telefone ou e-mail.
 - O sistema deve gerar a senha provisória, sem permitir que o administrador a defina manualmente.
 - A senha provisória deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número, e usar uma

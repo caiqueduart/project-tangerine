@@ -61,9 +61,9 @@ O sistema deve vincular todo morador a uma casa antes que ele possa acessar as �
 
 O sistema deve permitir que uma casa tenha mais de um morador usuário.
 
-### RF-005 - Responsáveis da casa
+### RF-005 - Data do vínculo residencial
 
-O sistema deve permitir marcar um ou mais moradores como responsáveis por uma casa, sem limite de responsáveis por casa.
+O sistema deve registrar a data e hora em que o vínculo entre o morador e a casa foi criado.
 
 ### RF-006 - Desativação de moradores
 
@@ -368,17 +368,9 @@ Após o primeiro pagamento, valor total, valor por casa e casas participantes n�
 
 Após o primeiro pagamento, informações que não alteram o valor por casa podem continuar editáveis, como título, descrição, prazo, anexos e observações.
 
-### RN-026 - Responsáveis da casa
+### RN-026 - Criação do vínculo residencial
 
-Uma casa pode ter mais de um morador responsável, sem limite máximo de responsáveis.
-
-### RN-027 - Atribuição de responsável
-
-Qualquer morador com acesso administrativo ou administrador do sistema pode atribuir ou remover a marcação de responsável de uma casa.
-
-### RN-028 - Indicação de responsável no pré-cadastro
-
-O administrador deve poder indicar no pré-cadastro se o morador é responsável pela residência selecionada.
+Todo vínculo residencial deve registrar automaticamente sua data e hora de criação.
 
 ### RN-029 - Vínculo residencial no pré-cadastro
 

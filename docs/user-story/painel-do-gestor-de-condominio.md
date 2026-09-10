@@ -101,7 +101,7 @@ Precondições:
 Critérios de aceite:
 
 - O sistema deve listar somente moradores vinculados a casas do condomínio administrado.
-- Para cada morador, o sistema deve apresentar, no mínimo, nome, casa, situação do acesso e indicação de responsável pela residência.
+- Para cada morador, o sistema deve apresentar, no mínimo, nome, casa e situação do acesso.
 - O gestor deve conseguir localizar moradores por nome, telefone, e-mail ou identificação da casa.
 - O gestor deve conseguir acessar os detalhes de um morador listado.
 - O sistema deve diferenciar moradores ativos, inativos, bloqueados e pendentes de definição da senha pessoal.
@@ -122,7 +122,6 @@ Critérios de aceite:
 - O gestor deve conseguir informar nome, telefone obrigatório, e-mail opcional e casa do morador.
 - O condomínio deve ser preenchido com o condomínio administrado e não deve permitir alteração pelo gestor.
 - A seleção de uma casa do condomínio administrado deve ser obrigatória.
-- O gestor deve conseguir indicar se o morador é responsável pela residência.
 - O sistema não deve permitir duplicidade de telefone ou e-mail.
 - O sistema deve gerar a senha provisória, sem permitir que o gestor a defina manualmente.
 - A senha provisória deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número, e usar uma
@@ -160,23 +159,6 @@ Critérios de aceite:
   no histórico.
 - O gestor não deve conseguir gerar senha provisória para usuários ativos, inativos, bloqueados ou pertencentes a outro
   condomínio.
-
-### US-GES-009 - Gerenciar responsáveis de uma casa
-
-Como gestor de condomínio, quero definir os responsáveis de uma casa para manter corretamente os papéis dos moradores da residência.
-
-Precondições:
-
-- O gestor deve atender às precondições da US-GES-001.
-- O morador e a casa devem pertencer ao condomínio administrado.
-
-Critérios de aceite:
-
-- O gestor deve conseguir atribuir ou remover a indicação de responsável de um morador vinculado à casa.
-- Uma casa deve poder possuir mais de um morador responsável.
-- A indicação de responsável não deve conceder permissão administrativa no condomínio.
-- A alteração não deve mudar o histórico de pagamentos ou comprovantes da casa.
-- O sistema deve registrar quem realizou a alteração e quando ela ocorreu.
 
 ### US-GES-010 - Desativar e reativar o acesso de um morador
 

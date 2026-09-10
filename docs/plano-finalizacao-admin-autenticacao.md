@@ -63,13 +63,10 @@ canal habilitado no ambiente.
 No frontend, criar as páginas de solicitação e redefinição, ligar o botão “Esqueci minha senha” e tratar convite inválido,
 expirado ou já utilizado.
 
-## 5. Completar vínculo residencial e responsáveis
+## 5. Registrar a criação do vínculo residencial
 
-Adicionar ao vínculo de morador a indicação de responsável pela residência. Incluir o campo no banco, DTOs, respostas,
-formulários de criação e edição e detalhes de usuário e casa.
-
-Permitir múltiplos responsáveis na mesma casa. Alterar essa indicação não deve conceder permissão de gestor nem afetar
-históricos financeiros.
+Adicionar ao vínculo de morador a data e hora de criação. Incluir o campo no banco por migration para preservar a
+rastreabilidade dos vínculos residenciais existentes e novos.
 
 ## 6. Completar a auditoria administrativa
 
@@ -133,7 +130,6 @@ Antes de encerrar o ciclo, executar:
 2. Modelo de permissões de gestor e migrations.
 3. Bloqueio por situação do condomínio.
 4. Recuperação de senha e ajustes de sessão.
-5. Responsáveis pela residência.
+5. Data de criação do vínculo residencial.
 6. Auditoria administrativa.
 7. Configuração de implantação, testes e aceite final.
-

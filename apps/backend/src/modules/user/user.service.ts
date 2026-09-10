@@ -414,6 +414,11 @@ export class UserService {
 
         const house = await this._findHouse(manager, residence, actor);
         const resident = user.resident ?? manager.create(Resident, { userId: user.id, user });
+
+        if (user.resident && resident.houseId !== house.id) {
+            resident.createdAt = new Date();
+        }
+
         resident.houseId = house.id;
         resident.house = house;
         return manager.save(resident);

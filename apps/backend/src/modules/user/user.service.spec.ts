@@ -5,6 +5,7 @@ import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 import { HashService } from '../common/services/hash.service';
 import { ProvisionalPasswordService } from '../common/services/provisional-password.service';
 import { House } from '../house/entities/house.entity';
+import { Resident } from './entities/resident.entity';
 import { UserAudit } from './entities/user-audit.entity';
 import { User } from './entities/user.entity';
 import { UserAuditAction } from './enums/user-audit-action';
@@ -138,6 +139,33 @@ describe('UserService', () => {
             where: { id: 10, townhouse: { id: 2 } },
             relations: { townhouse: true },
         });
+    });
+
+    it('renova a data de criação do vínculo ao trocar o usuário de casa', async () => {
+        const originalCreatedAt = new Date('2025-01-01T00:00:00.000Z');
+        const user = createUser({
+            resident: {
+                userId: 'user-id',
+                houseId: 7,
+                house: {
+                    id: 7,
+                    townhouse: { id: 1 },
+                },
+                createdAt: originalCreatedAt,
+            } as Resident,
+        });
+        userRepository.findOne.mockResolvedValue(user);
+        entityManager.findOne.mockResolvedValue({
+            id: 10,
+            identifier: 'Casa 10',
+            townhouse: { id: 2, name: 'Corumbá II', slug: 'corumba-ii' },
+        });
+
+        await service.update(user.id, { townhouseId: 2, houseId: 10 }, systemAdmin);
+
+        expect(user.resident?.houseId).toBe(10);
+        expect(user.resident?.createdAt).toEqual(expect.any(Date));
+        expect(user.resident?.createdAt).not.toEqual(originalCreatedAt);
     });
 
     it('não permite que o administrador aprove manualmente um usuário pendente', async () => {
