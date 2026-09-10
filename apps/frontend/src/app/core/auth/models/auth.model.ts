@@ -3,6 +3,7 @@ import { UserRole } from '../../../shared/enums/user-role.enum';
 export interface LoginCredentials {
     uid: string;
     password: string;
+    townhouseSlug?: string;
 }
 
 export type AuthUserSituation = 'ACTIVE' | 'BLOCKED' | 'INACTIVE' | 'PENDING';

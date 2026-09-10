@@ -18,7 +18,12 @@ export class AuthService {
     private _refreshRequest: Observable<AccessToken> | null = null;
 
     login(credentials: LoginCredentials, townhouseSlug?: string): Observable<LoginResponse> {
-        return this._httpClient.post<LoginResponse>(AUTH_API_ROUTES.login, credentials, { withCredentials: true }).pipe(
+        const payload: LoginCredentials = {
+            ...credentials,
+            ...(townhouseSlug && { townhouseSlug }),
+        };
+
+        return this._httpClient.post<LoginResponse>(AUTH_API_ROUTES.login, payload, { withCredentials: true }).pipe(
             tap((response) => {
                 this._authSessionService.save(response, townhouseSlug);
             }),

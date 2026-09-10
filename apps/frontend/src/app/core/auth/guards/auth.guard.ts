@@ -6,10 +6,12 @@ import { AUTH_ROUTES } from '../../config/routes/auth-routes.config';
 import { TOWNHOUSE_PARAMS } from '../../config/routes/townhouse-routes.config';
 import { AuthService } from '../services/auth.service';
 import { AuthSessionService } from '../services/auth-session.service';
+import { TownhouseContextService } from '../../townhouse/townhouse-context.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
     const authSessionService = inject(AuthSessionService);
+    const townhouseContextService = inject(TownhouseContextService);
     const router = inject(Router);
     const slug = getTownhouseSlug(route);
     const loginUrl = createLoginUrl(router, slug, state);
@@ -19,7 +21,12 @@ export const authGuard: CanActivateFn = (route, state) => {
         return router.createUrlTree(APP_ROUTES.password);
     }
 
-    if (!session || !slug || authSessionService.townhouseSlug !== slug) {
+    if (
+        !session ||
+        !slug ||
+        authSessionService.townhouseSlug !== slug ||
+        townhouseContextService.currentTownhouse()?.slug !== slug
+    ) {
         return loginUrl;
     }
 

@@ -6,6 +6,7 @@ import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 import { AuthenticatedActor } from '../authorization/models/authenticated-actor';
 import { UserRole } from '../user/enums/user-role';
 import { UserSituation } from '../user/enums/user-situation';
+import { TownhouseSituation } from './enums/townhouse-situation.enum';
 
 describe('TownhouseService', () => {
     const townhouseRepository = {
@@ -45,6 +46,7 @@ describe('TownhouseService', () => {
             id: 1,
             name: 'Condomínio Corumbá',
             slug: 'corumba',
+            situation: TownhouseSituation.ACTIVE,
         });
 
         await expect(service.getOneBySlug('CORUMBA')).resolves.toEqual({
@@ -61,6 +63,17 @@ describe('TownhouseService', () => {
         townhouseRepository.findOne.mockResolvedValue(null);
 
         await expect(service.getOneBySlug('inexistente')).rejects.toThrow(NotFoundException);
+    });
+
+    it('retorna 403 quando o slug pertence a um condomínio inativo', async () => {
+        townhouseRepository.findOne.mockResolvedValue({
+            id: 1,
+            name: 'Condomínio Corumbá',
+            slug: 'corumba',
+            situation: TownhouseSituation.INACTIVE,
+        });
+
+        await expect(service.getOneBySlug('corumba')).rejects.toThrow(ForbiddenException);
     });
 
     it('retorna somente id e nome nas opções de condomínio', async () => {

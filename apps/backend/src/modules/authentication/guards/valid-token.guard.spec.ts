@@ -7,6 +7,7 @@ import { UserService } from '../../user/user.service';
 import { AuthenticationTokenType } from '../dtos/token-payload.dto';
 import { ValidTokenGuard } from './valid-token.guard';
 import { UserSituation } from '../../user/enums/user-situation';
+import { TownhouseSituation } from '../../townhouse/enums/townhouse-situation.enum';
 
 describe('ValidTokenGuard', () => {
     const jwtConfiguration = {
@@ -58,6 +59,7 @@ describe('ValidTokenGuard', () => {
         const payload = {
             id: 'manager-id',
             tokenType: AuthenticationTokenType.ACCESS,
+            townhouseId: 4,
         };
         reflector.getAllAndOverride.mockReturnValue(false);
         request.headers.authorization = 'Bearer access-token';
@@ -69,13 +71,14 @@ describe('ValidTokenGuard', () => {
             resident: {
                 house: {
                     id: 7,
-                    townhouse: { id: 2 },
+                    townhouse: { id: 2, situation: TownhouseSituation.ACTIVE },
                 },
             },
             managerPermissions: [
                 {
                     townhouseId: 4,
                     situation: 'ACTIVE',
+                    townhouse: { id: 4, situation: TownhouseSituation.ACTIVE },
                 },
             ],
         });
@@ -86,10 +89,62 @@ describe('ValidTokenGuard', () => {
             userId: payload.id,
             role: UserRole.USER,
             situation: UserSituation.ACTIVE,
-            houseId: 7,
-            residentialTownhouseId: 2,
+            townhouseId: 4,
+            houseId: undefined,
+            residentialTownhouseId: undefined,
             managedTownhouseIds: [4],
         });
+    });
+
+    it('mantém o acesso do administrador do sistema sem contexto de condomínio', async () => {
+        const payload = {
+            id: 'admin-id',
+            tokenType: AuthenticationTokenType.ACCESS,
+        };
+        reflector.getAllAndOverride.mockReturnValue(false);
+        request.headers.authorization = 'Bearer access-token';
+        jwtService.verifyAsync.mockResolvedValue(payload);
+        userService.findAuthenticatableUserById.mockResolvedValue({
+            id: payload.id,
+            role: UserRole.SYSTEM_ADMIN,
+            situation: UserSituation.ACTIVE,
+            managerPermissions: [],
+        });
+
+        await expect(guard.canActivate(context)).resolves.toBe(true);
+        expect(request[AUTHENTICATED_ACTOR_KEY]).toEqual({
+            userId: payload.id,
+            role: UserRole.SYSTEM_ADMIN,
+            situation: UserSituation.ACTIVE,
+            townhouseId: undefined,
+            houseId: undefined,
+            residentialTownhouseId: undefined,
+            managedTownhouseIds: [],
+        });
+    });
+
+    it('rejeita o token quando o condomínio do contexto está inativo', async () => {
+        reflector.getAllAndOverride.mockReturnValue(false);
+        request.headers.authorization = 'Bearer access-token';
+        jwtService.verifyAsync.mockResolvedValue({
+            id: 'resident-id',
+            tokenType: AuthenticationTokenType.ACCESS,
+            townhouseId: 2,
+        });
+        userService.findAuthenticatableUserById.mockResolvedValue({
+            id: 'resident-id',
+            role: UserRole.USER,
+            situation: UserSituation.ACTIVE,
+            managerPermissions: [],
+            resident: {
+                house: {
+                    id: 7,
+                    townhouse: { id: 2, situation: TownhouseSituation.INACTIVE },
+                },
+            },
+        });
+
+        await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
     });
 
     it('rejeita um token inválido antes de consultar o usuário', async () => {

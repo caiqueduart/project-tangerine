@@ -159,6 +159,10 @@ export class LoginPage {
     }
 
     private _getLoginErrorMessage(error: unknown): string {
+        if (error instanceof HttpErrorResponse && error.status === 403) {
+            return 'O acesso a este condomínio está suspenso.';
+        }
+
         if (error instanceof HttpErrorResponse && error.status === 401) {
             return 'Telefone, e-mail ou senha inválidos.';
         }

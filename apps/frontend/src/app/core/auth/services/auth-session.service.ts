@@ -25,7 +25,7 @@ export class AuthSessionService {
     }
 
     save(response: LoginResponse, townhouseSlug?: string): void {
-        const sessionTownhouseSlug = response.session.house?.townhouse.slug ?? townhouseSlug;
+        const sessionTownhouseSlug = townhouseSlug ?? response.session.house?.townhouse.slug;
 
         localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
         localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(response.session));

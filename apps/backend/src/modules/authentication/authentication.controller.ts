@@ -56,10 +56,7 @@ export class AuthenticationController {
         @CurrentActor() actor: AuthenticatedActor,
         @Res({ passthrough: true }) response: Response,
     ): Promise<LoginResponseDto> {
-        const { refreshToken, ...loginResponse } = await this._authenticationService.completeFirstAccess(
-            actor.userId,
-            body,
-        );
+        const { refreshToken, ...loginResponse } = await this._authenticationService.completeFirstAccess(actor, body);
 
         response.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
             ...this._refreshTokenCookieOptions,

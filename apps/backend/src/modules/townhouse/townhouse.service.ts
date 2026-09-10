@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
     CreateTownhouseDto,
     GetTownhouseDto,
@@ -54,6 +54,10 @@ export class TownhouseService {
 
         if (!townhouse) {
             throw new NotFoundException('Condomínio não encontrado.');
+        }
+
+        if (townhouse.situation === TownhouseSituation.INACTIVE) {
+            throw new ForbiddenException('Condomínio inativo.');
         }
 
         return {

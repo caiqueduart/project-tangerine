@@ -6,6 +6,7 @@ import { AUTH_SEGMENTS } from './core/config/routes/auth-routes.config';
 import { SYSTEM_ADMIN_SEGMENTS } from './core/config/routes/system-admin-routes.config';
 import { TOWNHOUSE_SEGMENTS } from './core/config/routes/townhouse-routes.config';
 import { passwordGuard } from './core/auth/guards/password.guard';
+import { townhouseContextGuard } from './core/townhouse/townhouse-context.guard';
 
 export const routes: Routes = [
     {
@@ -24,6 +25,8 @@ export const routes: Routes = [
     },
     {
         path: TOWNHOUSE_SEGMENTS.root,
+        canActivate: [townhouseContextGuard],
+        runGuardsAndResolvers: 'always',
         loadComponent: () => import('./core/townhouse/townhouse-shell/townhouse-shell').then((m) => m.TownhouseShell),
         children: [
             {

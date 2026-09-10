@@ -7,9 +7,14 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { AccessTokenPayloadDto, AuthenticationTokenType } from '../dtos/token-payload.dto';
 import { Request } from 'express';
 import { UserService } from '../../user/user.service';
-import { ManagerPermissionSituation } from '../../manager-permission/enums/manager-permission-situation';
 import { AUTHENTICATED_ACTOR_KEY } from '../../authorization/authorization.constants';
 import { AuthenticatedActor } from '../../authorization/models/authenticated-actor';
+import { UserRole } from '../../user/enums/user-role';
+import {
+    getActiveManagedTownhouseIds,
+    getActiveResidentialTownhouseId,
+    hasActiveTownhouseAccess,
+} from '../../user/user-townhouse-access';
 
 type AuthenticatedRequest = Request & Partial<Record<typeof AUTHENTICATED_ACTOR_KEY, AuthenticatedActor>>;
 
@@ -58,16 +63,26 @@ export class ValidTokenGuard implements CanActivate {
         if (!user) throw new UnauthorizedException();
 
         const house = user.resident?.house;
+        const townhouseId = payload.townhouseId;
+
+        if (user.role !== UserRole.SYSTEM_ADMIN && (!townhouseId || !hasActiveTownhouseAccess(user, townhouseId))) {
+            throw new UnauthorizedException();
+        }
+
+        const activeResidentialTownhouseId = getActiveResidentialTownhouseId(user);
+        const isResidentialContext = townhouseId !== undefined && activeResidentialTownhouseId === townhouseId;
+        const managedTownhouseIds = townhouseId
+            ? getActiveManagedTownhouseIds(user).filter((managedTownhouseId) => managedTownhouseId === townhouseId)
+            : [];
 
         request[AUTHENTICATED_ACTOR_KEY] = {
             userId: user.id,
             role: user.role,
             situation: user.situation,
-            houseId: house?.id,
-            residentialTownhouseId: house?.townhouse.id,
-            managedTownhouseIds: (user.managerPermissions ?? [])
-                .filter((permission) => permission.situation === ManagerPermissionSituation.ACTIVE)
-                .map((permission) => permission.townhouseId),
+            townhouseId,
+            houseId: isResidentialContext ? house?.id : undefined,
+            residentialTownhouseId: isResidentialContext ? activeResidentialTownhouseId : undefined,
+            managedTownhouseIds,
         };
 
         return true;

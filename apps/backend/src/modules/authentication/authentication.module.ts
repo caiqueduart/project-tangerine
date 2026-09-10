@@ -9,11 +9,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ValidTokenGuard } from './guards/valid-token.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { PendingUserGuard } from './guards/pending-user.guard';
+import { TownhouseModule } from '../townhouse/townhouse.module';
 
 @Module({
     imports: [
         CommonModule,
         UserModule,
+        TownhouseModule,
         ConfigModule.forFeature(jwtConfig),
         JwtModule.registerAsync(jwtConfig.asProvider()),
     ],

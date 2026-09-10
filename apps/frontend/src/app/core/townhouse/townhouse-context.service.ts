@@ -11,7 +11,7 @@ interface TownhouseResponse {
     slug: string;
 }
 
-export type TownhouseContextError = 'not-found' | 'unavailable';
+export type TownhouseContextError = 'inactive' | 'not-found' | 'unavailable';
 
 @Injectable({ providedIn: 'root' })
 export class TownhouseContextService {
@@ -42,14 +42,23 @@ export class TownhouseContextService {
             })),
             tap((townhouse) => this._finishLoading(normalizedSlug, townhouse, null)),
             catchError((error: unknown) => {
-                const contextError: TownhouseContextError = error instanceof HttpErrorResponse && error.status === 404 ? 'not-found' : 'unavailable';
+                const contextError: TownhouseContextError =
+                    error instanceof HttpErrorResponse && error.status === 404
+                        ? 'not-found'
+                        : error instanceof HttpErrorResponse && error.status === 403
+                          ? 'inactive'
+                          : 'unavailable';
                 this._finishLoading(normalizedSlug, null, contextError);
                 return of(null);
             }),
         );
     }
 
-    private _finishLoading(requestedSlug: string, townhouse: TownhouseContextModel | null, error: TownhouseContextError | null): void {
+    private _finishLoading(
+        requestedSlug: string,
+        townhouse: TownhouseContextModel | null,
+        error: TownhouseContextError | null,
+    ): void {
         if (this._slug() !== requestedSlug) {
             return;
         }

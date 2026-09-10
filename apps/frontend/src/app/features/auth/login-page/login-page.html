@@ -82,7 +82,10 @@
             <div class="login-page__context-error" role="alert">
                 <mat-icon aria-hidden="true">location_off</mat-icon>
 
-                @if (townhouseError() === 'not-found') {
+                @if (townhouseError() === 'inactive') {
+                    <h1 id="login-title">Condomínio temporariamente inativo</h1>
+                    <p>O acesso a este condomínio está suspenso. Entre em contato com a administração.</p>
+                } @else if (townhouseError() === 'not-found') {
                     <h1 id="login-title">Condomínio não encontrado</h1>
                     <p>Não encontramos um condomínio para este endereço.</p>
                 } @else {

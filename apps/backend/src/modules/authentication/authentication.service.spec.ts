@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationTokenType } from './dtos/token-payload.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -6,6 +6,8 @@ import { HashService } from '../common/services/hash.service';
 import { UserService } from '../user/user.service';
 import { UserSituation } from '../user/enums/user-situation';
 import { UserRole } from '../user/enums/user-role';
+import { TownhouseService } from '../townhouse/townhouse.service';
+import { TownhouseSituation } from '../townhouse/enums/townhouse-situation.enum';
 
 describe('AuthenticationService', () => {
     const jwtConfiguration = {
@@ -26,9 +28,12 @@ describe('AuthenticationService', () => {
     };
     const userService = {
         findUserByLogin: jest.fn(),
-        get: jest.fn(),
+        findAuthenticatableUserById: jest.fn(),
         completeFirstAccess: jest.fn(),
         changePassword: jest.fn(),
+    };
+    const townhouseService = {
+        getOneBySlug: jest.fn(),
     };
 
     let service: AuthenticationService;
@@ -40,6 +45,7 @@ describe('AuthenticationService', () => {
             jwtService as unknown as JwtService,
             hashService as unknown as HashService,
             userService as unknown as UserService,
+            townhouseService as unknown as TownhouseService,
         );
     });
 
@@ -59,6 +65,7 @@ describe('AuthenticationService', () => {
                         id: 4,
                         name: 'Condomínio das Flores',
                         slug: 'flores',
+                        situation: TownhouseSituation.ACTIVE,
                     },
                 },
             ],
@@ -70,16 +77,19 @@ describe('AuthenticationService', () => {
                         id: 2,
                         name: 'Condomínio Corumbá II',
                         slug: 'corumba-ii',
+                        situation: TownhouseSituation.ACTIVE,
                     },
                 },
             },
         });
         hashService.compare.mockResolvedValue(true);
+        townhouseService.getOneBySlug.mockResolvedValue({ id: 2, slug: 'corumba-ii' });
         jwtService.signAsync.mockResolvedValueOnce('access-token').mockResolvedValueOnce('refresh-token');
 
         const result = await service.login({
             uid: 'maria@email.com',
             password: '1234',
+            townhouseSlug: 'corumba-ii',
         });
 
         expect(result).toEqual({
@@ -119,6 +129,7 @@ describe('AuthenticationService', () => {
             {
                 id: 'user-id',
                 tokenType: AuthenticationTokenType.ACCESS,
+                townhouseId: 2,
             },
             {
                 audience: jwtConfiguration.audience,
@@ -132,6 +143,7 @@ describe('AuthenticationService', () => {
             {
                 id: 'user-id',
                 tokenType: AuthenticationTokenType.REFRESH,
+                townhouseId: 2,
             },
             {
                 audience: jwtConfiguration.audience,
@@ -142,12 +154,44 @@ describe('AuthenticationService', () => {
         );
     });
 
+    it('mantém o login do administrador do sistema sem contexto de condomínio', async () => {
+        userService.findUserByLogin.mockResolvedValue({
+            id: 'admin-id',
+            firstName: 'Admin',
+            lastName: 'Sistema',
+            passwordHash: 'password-hash',
+            situation: UserSituation.ACTIVE,
+            role: UserRole.SYSTEM_ADMIN,
+            managerPermissions: [],
+        });
+        hashService.compare.mockResolvedValue(true);
+        jwtService.signAsync.mockResolvedValueOnce('access-token').mockResolvedValueOnce('refresh-token');
+
+        await expect(service.login({ uid: 'admin@email.com', password: '1234' })).resolves.toMatchObject({
+            accessToken: 'access-token',
+            refreshToken: 'refresh-token',
+        });
+        expect(townhouseService.getOneBySlug).not.toHaveBeenCalled();
+    });
+
     it('gera somente um novo access token quando o refresh token é válido', async () => {
         jwtService.verifyAsync.mockResolvedValue({
             id: 'user-id',
             tokenType: AuthenticationTokenType.REFRESH,
+            townhouseId: 2,
         });
-        userService.get.mockResolvedValue({ id: 'user-id', situation: UserSituation.ACTIVE });
+        userService.findAuthenticatableUserById.mockResolvedValue({
+            id: 'user-id',
+            situation: UserSituation.ACTIVE,
+            role: UserRole.USER,
+            managerPermissions: [],
+            resident: {
+                house: {
+                    id: 7,
+                    townhouse: { id: 2, situation: TownhouseSituation.ACTIVE },
+                },
+            },
+        });
         jwtService.signAsync.mockResolvedValueOnce('new-access-token');
 
         const result = await service.refreshAccessToken('valid-refresh-token');
@@ -157,11 +201,12 @@ describe('AuthenticationService', () => {
             issuer: jwtConfiguration.issuer,
             secret: jwtConfiguration.refreshSecret,
         });
-        expect(userService.get).toHaveBeenCalledWith('user-id');
+        expect(userService.findAuthenticatableUserById).toHaveBeenCalledWith('user-id');
         expect(jwtService.signAsync).toHaveBeenCalledWith(
             {
                 id: 'user-id',
                 tokenType: AuthenticationTokenType.ACCESS,
+                townhouseId: 2,
             },
             {
                 audience: jwtConfiguration.audience,
@@ -183,11 +228,28 @@ describe('AuthenticationService', () => {
             situation: UserSituation.PENDING,
             role: UserRole.USER,
             managerPermissions: [],
+            resident: {
+                house: {
+                    id: 7,
+                    identifier: 'Casa 7',
+                    townhouse: {
+                        id: 2,
+                        name: 'Condomínio Corumbá II',
+                        slug: 'corumba-ii',
+                        situation: TownhouseSituation.ACTIVE,
+                    },
+                },
+            },
         });
         hashService.compare.mockResolvedValue(true);
+        townhouseService.getOneBySlug.mockResolvedValue({ id: 2, slug: 'corumba-ii' });
         jwtService.signAsync.mockResolvedValueOnce('access-token').mockResolvedValueOnce('refresh-token');
 
-        const login = await service.login({ uid: '11999999999', password: 'CasaSol2748' });
+        const login = await service.login({
+            uid: '11999999999',
+            password: 'CasaSol2748',
+            townhouseSlug: 'corumba-ii',
+        });
 
         expect(login.session.user.situation).toBe(UserSituation.PENDING);
 
@@ -195,8 +257,20 @@ describe('AuthenticationService', () => {
         jwtService.verifyAsync.mockResolvedValue({
             id: 'pending-id',
             tokenType: AuthenticationTokenType.REFRESH,
+            townhouseId: 2,
         });
-        userService.get.mockResolvedValue({ id: 'pending-id', situation: UserSituation.PENDING });
+        userService.findAuthenticatableUserById.mockResolvedValue({
+            id: 'pending-id',
+            situation: UserSituation.PENDING,
+            role: UserRole.USER,
+            managerPermissions: [],
+            resident: {
+                house: {
+                    id: 7,
+                    townhouse: { id: 2, situation: TownhouseSituation.ACTIVE },
+                },
+            },
+        });
         jwtService.signAsync.mockResolvedValue('new-access-token');
 
         await expect(service.refreshAccessToken('refresh-token')).resolves.toEqual({
@@ -211,7 +285,7 @@ describe('AuthenticationService', () => {
         });
 
         await expect(service.refreshAccessToken('access-token')).rejects.toThrow(UnauthorizedException);
-        expect(userService.get).not.toHaveBeenCalled();
+        expect(userService.findAuthenticatableUserById).not.toHaveBeenCalled();
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 
@@ -219,7 +293,7 @@ describe('AuthenticationService', () => {
         jwtService.verifyAsync.mockRejectedValue(new Error('invalid token'));
 
         await expect(service.refreshAccessToken('invalid-refresh-token')).rejects.toThrow(UnauthorizedException);
-        expect(userService.get).not.toHaveBeenCalled();
+        expect(userService.findAuthenticatableUserById).not.toHaveBeenCalled();
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 
@@ -228,9 +302,42 @@ describe('AuthenticationService', () => {
             id: 'removed-user-id',
             tokenType: AuthenticationTokenType.REFRESH,
         });
-        userService.get.mockRejectedValue(new Error('user not found'));
+        userService.findAuthenticatableUserById.mockRejectedValue(new Error('user not found'));
 
         await expect(service.refreshAccessToken('valid-refresh-token')).rejects.toThrow(UnauthorizedException);
+        expect(jwtService.signAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejeita o login quando o condomínio solicitado está inativo', async () => {
+        userService.findUserByLogin.mockResolvedValue({
+            id: 'user-id',
+            passwordHash: 'password-hash',
+            situation: UserSituation.ACTIVE,
+            role: UserRole.USER,
+        });
+        hashService.compare.mockResolvedValue(true);
+        townhouseService.getOneBySlug.mockRejectedValue(new ForbiddenException());
+
+        await expect(
+            service.login({ uid: 'user@email.com', password: '1234', townhouseSlug: 'condominio-inativo' }),
+        ).rejects.toThrow(ForbiddenException);
+        expect(jwtService.signAsync).not.toHaveBeenCalled();
+    });
+
+    it('rejeita o login de um usuário sem vínculo com o condomínio solicitado', async () => {
+        userService.findUserByLogin.mockResolvedValue({
+            id: 'user-id',
+            passwordHash: 'password-hash',
+            situation: UserSituation.ACTIVE,
+            role: UserRole.USER,
+            managerPermissions: [],
+        });
+        hashService.compare.mockResolvedValue(true);
+        townhouseService.getOneBySlug.mockResolvedValue({ id: 3, slug: 'outro-condominio' });
+
+        await expect(
+            service.login({ uid: 'user@email.com', password: '1234', townhouseSlug: 'outro-condominio' }),
+        ).rejects.toThrow(UnauthorizedException);
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 
@@ -248,12 +355,35 @@ describe('AuthenticationService', () => {
         expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 
+    it('rejeita refresh token quando o condomínio do contexto foi inativado', async () => {
+        jwtService.verifyAsync.mockResolvedValue({
+            id: 'user-id',
+            tokenType: AuthenticationTokenType.REFRESH,
+            townhouseId: 2,
+        });
+        userService.findAuthenticatableUserById.mockResolvedValue({
+            id: 'user-id',
+            situation: UserSituation.ACTIVE,
+            role: UserRole.USER,
+            managerPermissions: [],
+            resident: {
+                house: {
+                    id: 7,
+                    townhouse: { id: 2, situation: TownhouseSituation.INACTIVE },
+                },
+            },
+        });
+
+        await expect(service.refreshAccessToken('valid-refresh-token')).rejects.toThrow(UnauthorizedException);
+        expect(jwtService.signAsync).not.toHaveBeenCalled();
+    });
+
     it('rejeita refresh token de usuário que deixou de estar ativo', async () => {
         jwtService.verifyAsync.mockResolvedValue({
             id: 'inactive-user-id',
             tokenType: AuthenticationTokenType.REFRESH,
         });
-        userService.get.mockResolvedValue({ id: 'inactive-user-id', situation: UserSituation.INACTIVE });
+        userService.findAuthenticatableUserById.mockResolvedValue(null);
 
         await expect(service.refreshAccessToken('valid-refresh-token')).rejects.toThrow(UnauthorizedException);
         expect(jwtService.signAsync).not.toHaveBeenCalled();
