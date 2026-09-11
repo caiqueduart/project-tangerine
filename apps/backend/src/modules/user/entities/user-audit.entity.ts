@@ -10,7 +10,7 @@ export class UserAudit {
     @Column({ type: 'uuid' })
     userId: string;
 
-    @Column({ type: 'enum', enum: UserAuditAction })
+    @Column({ type: 'enum', enum: UserAuditAction, enumName: 'user_audit_action_enum' })
     action: UserAuditAction;
 
     @Column({ type: 'uuid', nullable: true })

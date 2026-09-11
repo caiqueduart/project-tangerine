@@ -32,6 +32,14 @@ interface ResidenceSelection {
     readonly houseId: number;
 }
 
+export interface SystemAdminBootstrapInput {
+    readonly firstName: string;
+    readonly lastName: string;
+    readonly phone: string;
+    readonly email: string;
+    readonly password: string;
+}
+
 @Injectable()
 export class UserService {
     constructor(
@@ -41,6 +49,52 @@ export class UserService {
         private readonly _provisionalPasswordService: ProvisionalPasswordService,
         private readonly _townhousePolicy: TownhousePolicy,
     ) {}
+
+    async bootstrapSystemAdmin(input: SystemAdminBootstrapInput): Promise<'created' | 'existing'> {
+        const phone = input.phone.trim();
+        const email = input.email.trim().toLowerCase();
+        const matchingUsers = await this._userRepository.find({
+            where: [{ phone }, { email }],
+        });
+
+        if (matchingUsers.length) {
+            const existingAdmin = matchingUsers.find(
+                (user) =>
+                    user.phone === phone &&
+                    user.email === email &&
+                    user.role === UserRole.SYSTEM_ADMIN &&
+                    user.situation === UserSituation.ACTIVE,
+            );
+
+            if (matchingUsers.length === 1 && existingAdmin) return 'existing';
+
+            throw new ConflictException();
+        }
+
+        const passwordHash = await this._hashService.hash(input.password);
+
+        try {
+            await this._userRepository.manager.transaction(async (manager) => {
+                const user = await manager.save(
+                    manager.create(User, {
+                        firstName: input.firstName.trim(),
+                        lastName: input.lastName.trim(),
+                        phone,
+                        email,
+                        passwordHash,
+                        situation: UserSituation.ACTIVE,
+                        role: UserRole.SYSTEM_ADMIN,
+                    }),
+                );
+
+                await this._saveAudit(manager, user.id, UserAuditAction.CREATED, null);
+            });
+
+            return 'created';
+        } catch (error) {
+            this._handlePersistenceError(error, 'Erro ao criar o administrador inicial.');
+        }
+    }
 
     async create(dto: CreateUserDto, actor: AuthenticatedActor): Promise<CreateUserResultDto> {
         const residence = this._getResidenceSelection(dto.townhouseId, dto.houseId);

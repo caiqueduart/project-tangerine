@@ -72,6 +72,58 @@ describe('UserService', () => {
         );
     });
 
+    it('cria e audita o primeiro administrador do sistema', async () => {
+        userRepository.find.mockResolvedValue([]);
+
+        await expect(
+            service.bootstrapSystemAdmin({
+                firstName: 'Admin',
+                lastName: 'Tangerine',
+                phone: '11999999999',
+                email: 'ADMIN@EXAMPLE.COM',
+                password: 'SenhaSegura9',
+            }),
+        ).resolves.toBe('created');
+
+        expect(hashService.hash).toHaveBeenCalledWith('SenhaSegura9');
+        expect(entityManager.create).toHaveBeenCalledWith(
+            User,
+            expect.objectContaining({
+                email: 'admin@example.com',
+                situation: UserSituation.ACTIVE,
+                role: UserRole.SYSTEM_ADMIN,
+            }),
+        );
+        expect(entityManager.create).toHaveBeenCalledWith(UserAudit, {
+            userId: 'new-user-id',
+            action: UserAuditAction.CREATED,
+            actorUserId: null,
+        });
+    });
+
+    it('não altera o administrador inicial quando ele já existe', async () => {
+        userRepository.find.mockResolvedValue([
+            createUser({
+                phone: '11999999999',
+                email: 'admin@example.com',
+                role: UserRole.SYSTEM_ADMIN,
+            }),
+        ]);
+
+        await expect(
+            service.bootstrapSystemAdmin({
+                firstName: 'Admin',
+                lastName: 'Tangerine',
+                phone: '11999999999',
+                email: 'admin@example.com',
+                password: 'SenhaSegura9',
+            }),
+        ).resolves.toBe('existing');
+
+        expect(hashService.hash).not.toHaveBeenCalled();
+        expect(userRepository.manager.transaction).not.toHaveBeenCalled();
+    });
+
     it('pré-cadastra um usuário pendente sem vínculo pelo administrador do sistema', async () => {
         const result = await service.create(
             {

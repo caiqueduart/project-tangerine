@@ -21,22 +21,6 @@ renovação.
 
 Aplicar limitação de tentativas ao endpoint público de login, com respostas que não permitam descobrir se o telefone ou e-mail está cadastrado.
 
-## 3. Preparar a configuração mínima de execução
-
-Substituir conversões booleanas incorretas, como `Boolean('false')`, e validar na inicialização as variáveis obrigatórias de
-banco e JWT, incluindo tempos de expiração válidos.
-
-O `synchronize` deve ficar restrito ao desenvolvimento local e ser rejeitado em produção. A inicialização de um banco vazio
-deve usar migrations que representem todo o esquema atual, não somente alterações incrementais recentes.
-
-Também devem ser adicionados:
-
-- `.env.example` sem segredos;
-- origem CORS e URL da API configuráveis por ambiente;
-- configuração e scripts para gerar e executar migrations;
-- instruções curtas para instalação, configuração, migration e inicialização;
-- procedimento idempotente para criar o primeiro administrador do sistema sem edição manual do banco.
-
 ## Fora deste plano
 
 - recuperação de senha por convite, pois depende da definição de um canal de entrega; continua como requisito de produto e

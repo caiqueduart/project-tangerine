@@ -9,10 +9,10 @@ export default registerAs('jwt', () => {
 
     return {
         secret,
-        refreshSecret: process.env.JWT_REFRESH_SECRET ?? secret,
-        audience: process.env.JWT_AUDIENCE,
-        issuer: process.env.JWT_ISSUER,
-        ttl: Number(process.env.JWT_TTL),
-        refreshTtl: Number(process.env.JWT_REFRESH_TTL),
+        refreshSecret: process.env.JWT_REFRESH_SECRET || secret,
+        audience: process.env.JWT_AUDIENCE || 'project-tangerine-web',
+        issuer: process.env.JWT_ISSUER || 'project-tangerine-api',
+        ttl: Number(process.env.JWT_TTL || 900),
+        refreshTtl: Number(process.env.JWT_REFRESH_TTL || 3600),
     };
 });
