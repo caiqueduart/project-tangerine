@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+services:
+    - type: web
+      name: tangerine-backend
+      runtime: node
+      plan: free
+      autoDeployTrigger: off
+      buildCommand: >-
+          npm ci --include=dev --workspace backend --workspace @repo/shared --include-workspace-root &&
+          npm run build -- --filter=backend &&
+          npm prune --omit=dev --workspace backend --workspace @repo/shared --include-workspace-root
+      startCommand: npm run migration:run:prod --workspace backend && npm run start:prod --workspace backend
+      envVars:
+          - key: NODE_VERSION
+            value: '24'
+          - key: NODE_ENV
+            value: production
+          - key: API_PREFIX
+            value: api
+          - key: DATABASE_SYNCHRONIZE
+            value: 'false'
+          - key: DATABASE_SSL
+            value: 'true'
+          - key: DATABASE_URL
+            sync: false
+          - key: CORS_ORIGINS
+            sync: false
+          - key: JWT_SECRET
+            generateValue: true
+          - key: JWT_REFRESH_SECRET
+            generateValue: true
