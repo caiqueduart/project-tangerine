@@ -9,14 +9,14 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, QueryFailedError, Repository } from 'typeorm';
+import { Brackets, EntityManager, In, QueryFailedError, Repository, SelectQueryBuilder } from 'typeorm';
 import { AuthenticatedActor } from '../authorization/models/authenticated-actor';
 import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 import { HashService } from '../common/services/hash.service';
 import { ProvisionalPasswordService } from '../common/services/provisional-password.service';
 import { House } from '../house/entities/house.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { CreateUserResultDto, GetUserDetailsDto, GetUserDto } from './dtos/get-user.dto';
+import { CreateUserResultDto, GetUserDetailsDto, GetUserDto, PaginatedUsersDto } from './dtos/get-user.dto';
 import { ProvisionalPasswordDto } from './dtos/password.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { Resident } from './entities/resident.entity';
@@ -30,6 +30,14 @@ import { ManagerPermissionSituation } from '../manager-permission/enums/manager-
 interface ResidenceSelection {
     readonly townhouseId: number;
     readonly houseId: number;
+}
+
+interface ListUsersInput {
+    readonly page: number;
+    readonly pageSize: number;
+    readonly search?: string;
+    readonly situation?: UserSituation;
+    readonly townhouseId?: number;
 }
 
 export interface SystemAdminBootstrapInput {
@@ -173,27 +181,87 @@ export class UserService {
         };
     }
 
-    async getAll(actor: AuthenticatedActor, townhouseId?: number): Promise<GetUserDto[]> {
+    async getAll(actor: AuthenticatedActor, input: ListUsersInput): Promise<PaginatedUsersDto> {
+        const { page, pageSize, search, situation, townhouseId } = input;
+
         if (townhouseId !== undefined && (!Number.isInteger(townhouseId) || townhouseId <= 0)) {
             throw new BadRequestException('Condomínio inválido.');
+        }
+
+        if (!Number.isInteger(page) || page <= 0 || !Number.isInteger(pageSize) || pageSize <= 0 || pageSize > 1000) {
+            throw new BadRequestException('Paginação inválida.');
         }
 
         const scopedTownhouseIds = this._getScopedTownhouseIds(actor, townhouseId);
 
         try {
-            const users = await this._userRepository.find({
-                where: scopedTownhouseIds?.length
-                    ? { resident: { house: { townhouse: { id: In([...scopedTownhouseIds]) } } } }
-                    : {},
-                relations: { managerPermissions: { townhouse: true }, resident: { house: { townhouse: true } } },
-                order: { firstName: 'ASC', lastName: 'ASC' },
+            const baseQuery = this._createUsersListQuery(scopedTownhouseIds);
+            const totalsQuery = baseQuery.clone();
+            const pendingQuery = baseQuery.clone().andWhere('user.situation = :pendingSituation', {
+                pendingSituation: UserSituation.PENDING,
             });
 
-            return users.map((user) => this._toGetUserDto(user));
+            if (situation) {
+                baseQuery.andWhere('user.situation = :situation', { situation });
+            }
+
+            const normalizedSearch = search?.trim();
+            if (normalizedSearch) {
+                const searchTerm = `%${normalizedSearch}%`;
+                baseQuery.andWhere(
+                    new Brackets((query) => {
+                        query
+                            .where('user.firstName ILIKE :searchTerm', { searchTerm })
+                            .orWhere('user.lastName ILIKE :searchTerm', { searchTerm })
+                            .orWhere("CONCAT(user.firstName, ' ', user.lastName) ILIKE :searchTerm", { searchTerm })
+                            .orWhere('user.email ILIKE :searchTerm', { searchTerm })
+                            .orWhere('user.phone ILIKE :searchTerm', { searchTerm })
+                            .orWhere('house.identifier ILIKE :searchTerm', { searchTerm })
+                            .orWhere('townhouse.name ILIKE :searchTerm', { searchTerm });
+                    }),
+                );
+            }
+
+            const [usersAndCount, totalUsers, pendingCount] = await Promise.all([
+                baseQuery
+                    .orderBy('user.firstName', 'ASC')
+                    .addOrderBy('user.lastName', 'ASC')
+                    .skip((page - 1) * pageSize)
+                    .take(pageSize)
+                    .getManyAndCount(),
+                totalsQuery.getCount(),
+                pendingQuery.getCount(),
+            ]);
+            const [users, total] = usersAndCount;
+
+            return {
+                items: users.map((user) => this._toGetUserDto(user)),
+                total,
+                totalUsers,
+                pendingCount,
+                page,
+                pageSize,
+            };
         } catch (error) {
             if (error instanceof HttpException) throw error;
             throw new InternalServerErrorException('Erro ao consultar usuários.');
         }
+    }
+
+    private _createUsersListQuery(scopedTownhouseIds?: readonly number[]): SelectQueryBuilder<User> {
+        const query = this._userRepository
+            .createQueryBuilder('user')
+            .leftJoinAndSelect('user.managerPermissions', 'managerPermission')
+            .leftJoinAndSelect('managerPermission.townhouse', 'managedTownhouse')
+            .leftJoinAndSelect('user.resident', 'resident')
+            .leftJoinAndSelect('resident.house', 'house')
+            .leftJoinAndSelect('house.townhouse', 'townhouse');
+
+        if (scopedTownhouseIds?.length) {
+            query.andWhere('townhouse.id IN (:...scopedTownhouseIds)', { scopedTownhouseIds });
+        }
+
+        return query;
     }
 
     async update(userId: string, dto: UpdateUserDto, actor: AuthenticatedActor): Promise<GetUserDto> {

@@ -35,6 +35,15 @@ export class GetUserDto {
     managerPermissions: GetUserManagerPermissionDto[];
 }
 
+export class PaginatedUsersDto {
+    items: GetUserDto[];
+    total: number;
+    totalUsers: number;
+    pendingCount: number;
+    page: number;
+    pageSize: number;
+}
+
 export class CreateUserResultDto extends GetUserDto {
     provisionalPassword: string;
 }

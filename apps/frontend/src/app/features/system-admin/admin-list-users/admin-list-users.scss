@@ -21,17 +21,6 @@
         }
     }
 
-    &__tools {
-        display: grid;
-        gap: 12px;
-        margin-bottom: 20px;
-
-        mat-button-toggle-group {
-            max-width: 100%;
-            overflow-x: auto;
-        }
-    }
-
     &__feedback {
         align-items: center;
         background: var(--color-card-background);
@@ -125,8 +114,6 @@
     }
 
     &__table &__actions {
-        align-items: center;
-        display: flex;
         position: absolute;
         right: 8px;
         top: 50%;
@@ -135,10 +122,17 @@
         &::before {
             content: none;
         }
+    }
 
-        > button:last-of-type mat-icon {
-            color: var(--color-error);
-        }
+    &__actions-content {
+        align-items: center;
+        display: flex;
+        gap: 4px;
+        justify-content: flex-end;
+    }
+
+    &__more-button {
+        color: var(--color-text-secondary);
     }
 }
 
@@ -147,12 +141,6 @@
         &__header {
             align-items: center;
             flex-direction: row;
-        }
-
-        &__tools {
-            align-items: center;
-            grid-template-columns: minmax(300px, 480px) auto;
-            justify-content: space-between;
         }
 
         &__table {
@@ -197,7 +185,6 @@
         &__table &__actions {
             display: table-cell;
             position: static;
-            text-align: right;
             transform: none;
             white-space: nowrap;
         }

@@ -2,7 +2,7 @@
     <header class="admin-list-users__header">
         <div>
             <h1 id="admin-list-users-title">Usuários</h1>
-            <p>{{ users().length }} cadastrados</p>
+            <p>{{ totalUsers() }} cadastrados</p>
         </div>
 
         <button mat-flat-button type="button" (click)="openForm()">
@@ -11,7 +11,7 @@
         </button>
     </header>
 
-    <div class="admin-list-users__tools">
+    <div class="admin-user-list-tools">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-icon matPrefix>search</mat-icon>
             <mat-label>Buscar usuário</mat-label>
@@ -21,7 +21,7 @@
         <mat-button-toggle-group
             aria-label="Filtrar usuários por situação"
             [value]="filter()"
-            (change)="filter.set($event.value)"
+            (change)="updateFilter($event.value)"
         >
             <mat-button-toggle value="ALL">Todos</mat-button-toggle>
             <mat-button-toggle value="ACTIVE">Ativos</mat-button-toggle>
@@ -35,7 +35,7 @@
             <mat-spinner diameter="32" />
             <p>Carregando usuários...</p>
         </div>
-    } @else if (filteredUsers().length === 0) {
+    } @else if (users().length === 0) {
         <div class="admin-list-users__feedback">
             <mat-icon>group_off</mat-icon>
             <p>Nenhum usuário encontrado.</p>
@@ -54,7 +54,7 @@
                 </thead>
 
                 <tbody>
-                    @for (user of filteredUsers(); track user.id) {
+                    @for (user of users(); track user.id) {
                         <tr>
                             <td data-label="Usuário">
                                 <button
@@ -85,53 +85,59 @@
                                 />
                             </td>
                             <td class="admin-list-users__actions">
-                                @if (user.situation === 'PENDING') {
-                                    <button
-                                        mat-button
-                                        type="button"
-                                        [disabled]="regeneratingUserId() !== null"
-                                        (click)="regenerateProvisionalPassword(user)"
-                                    >
-                                        @if (regeneratingUserId() === user.id) {
-                                            <mat-spinner diameter="18" aria-label="Gerando nova senha" />
-                                        } @else {
-                                            <mat-icon>key</mat-icon>
-                                        }
-                                        <span>{{
-                                            regeneratingUserId() === user.id ? 'Gerando senha' : 'Nova senha'
-                                        }}</span>
-                                    </button>
-                                }
-
-                                <button
-                                    mat-icon-button
-                                    type="button"
-                                    [matMenuTriggerFor]="userMenu"
-                                    aria-label="Ações do usuário"
-                                >
-                                    <mat-icon>more_vert</mat-icon>
-                                </button>
-                                <mat-menu #userMenu="matMenu">
-                                    <button mat-menu-item type="button" (click)="openForm(user)">
-                                        <mat-icon>edit</mat-icon>
-                                        <span>Editar informações</span>
-                                    </button>
-                                    @if (user.situation !== 'PENDING') {
+                                <div class="admin-list-users__actions-content">
+                                    @if (user.situation === 'PENDING') {
                                         <button
-                                            mat-menu-item
+                                            mat-button
                                             type="button"
-                                            [disabled]="isCurrentUser(user)"
-                                            (click)="toggleSituation(user)"
+                                            [disabled]="regeneratingUserId() !== null"
+                                            (click)="regenerateProvisionalPassword(user)"
                                         >
-                                            <mat-icon>{{
-                                                user.situation === 'ACTIVE' ? 'person_off' : 'person'
-                                            }}</mat-icon>
+                                            @if (regeneratingUserId() === user.id) {
+                                                <mat-spinner diameter="18" aria-label="Gerando nova senha" />
+                                            } @else {
+                                                <mat-icon>key</mat-icon>
+                                            }
                                             <span>{{
-                                                user.situation === 'ACTIVE' ? 'Inativar usuário' : 'Reativar usuário'
+                                                regeneratingUserId() === user.id ? 'Gerando senha' : 'Nova senha'
                                             }}</span>
                                         </button>
                                     }
-                                </mat-menu>
+
+                                    <button
+                                        mat-icon-button
+                                        class="admin-list-users__more-button"
+                                        type="button"
+                                        [matMenuTriggerFor]="userMenu"
+                                        aria-label="Ações do usuário"
+                                    >
+                                        <mat-icon>more_vert</mat-icon>
+                                    </button>
+
+                                    <mat-menu #userMenu="matMenu">
+                                        <button mat-menu-item type="button" (click)="openForm(user)">
+                                            <mat-icon>edit</mat-icon>
+                                            <span>Editar informações</span>
+                                        </button>
+                                        @if (user.situation !== 'PENDING') {
+                                            <button
+                                                mat-menu-item
+                                                type="button"
+                                                [disabled]="isCurrentUser(user)"
+                                                (click)="toggleSituation(user)"
+                                            >
+                                                <mat-icon>{{
+                                                    user.situation === 'ACTIVE' ? 'person_off' : 'person'
+                                                }}</mat-icon>
+                                                <span>{{
+                                                    user.situation === 'ACTIVE'
+                                                        ? 'Inativar usuário'
+                                                        : 'Reativar usuário'
+                                                }}</span>
+                                            </button>
+                                        }
+                                    </mat-menu>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -139,4 +145,14 @@
             </table>
         </div>
     }
+
+    <mat-paginator
+        class="admin-user-paginator"
+        [length]="total()"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 25, 50]"
+        aria-label="Paginação de usuários"
+        (page)="updatePage($event)"
+    />
 </section>

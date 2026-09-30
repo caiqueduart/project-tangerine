@@ -5,7 +5,8 @@ import { Permission } from '../authorization/enums/permission';
 import { PermissionsGuard } from '../authorization/guards/permissions.guard';
 import type { AuthenticatedActor } from '../authorization/models/authenticated-actor';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { CreateUserResultDto, GetUserDetailsDto, GetUserDto } from './dtos/get-user.dto';
+import { CreateUserResultDto, GetUserDetailsDto, GetUserDto, PaginatedUsersDto } from './dtos/get-user.dto';
+import { ListUsersQueryDto } from './dtos/list-users-query.dto';
 import { ProvisionalPasswordDto } from './dtos/password.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserService } from './user.service';
@@ -23,11 +24,14 @@ export class UserController {
 
     @RequirePermissions(Permission.USER_READ)
     @Get('all')
-    getAll(
-        @CurrentActor() actor: AuthenticatedActor,
-        @Query('townhouseId') townhouseId?: string,
-    ): Promise<GetUserDto[]> {
-        return this._userService.getAll(actor, townhouseId ? Number(townhouseId) : undefined);
+    getAll(@CurrentActor() actor: AuthenticatedActor, @Query() query: ListUsersQueryDto): Promise<PaginatedUsersDto> {
+        return this._userService.getAll(actor, {
+            page: Number(query.page ?? 1),
+            pageSize: Number(query.pageSize ?? 10),
+            search: query.search,
+            situation: query.situation,
+            townhouseId: query.townhouseId ? Number(query.townhouseId) : undefined,
+        });
     }
 
     @RequirePermissions(Permission.USER_READ)

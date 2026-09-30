@@ -1,14 +1,19 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatTabChangeEvent, MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize, Subject } from 'rxjs';
 import { SYSTEM_ADMIN_ROUTES } from '../../../core/config/routes/system-admin-routes.config';
 import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
 import { LabelComponent } from '../../../shared/components/label/label.component';
@@ -20,7 +25,7 @@ import {
     SystemAdminHouse,
     SystemAdminTownhouseDetails as SystemAdminTownhouseDetailsModel,
 } from '../models/admin-townhouse.model';
-import { AdminUser } from '../models/admin-user.model';
+import { AdminUser, UserSituation } from '../models/admin-user.model';
 import { AdminTownhouseService } from '../services/admin-townhouse.service';
 import { AdminUserService } from '../services/admin-user.service';
 import {
@@ -34,14 +39,20 @@ import {
 import { AdminManagerPermission } from '../models/admin-manager-permission.model';
 import { AdminManagerPermissionService } from '../services/admin-manager-permission.service';
 
+type UserFilter = 'ALL' | Extract<UserSituation, 'ACTIVE' | 'INACTIVE' | 'PENDING'>;
+
 @Component({
     selector: 'app-admin-townhouse-details',
     imports: [
         DatePipe,
         MatButtonModule,
+        MatButtonToggleModule,
         MatDialogModule,
+        MatFormFieldModule,
         MatIconModule,
+        MatInputModule,
         MatMenuModule,
+        MatPaginatorModule,
         MatProgressSpinnerModule,
         MatTabsModule,
         RouterLink,
@@ -54,6 +65,7 @@ export class AdminTownhouseDetails {
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _authSessionService = inject(AuthSessionService);
     private readonly _dialog = inject(MatDialog);
+    private readonly _destroyRef = inject(DestroyRef);
     private readonly _managerPermissionService = inject(AdminManagerPermissionService);
     private readonly _router = inject(Router);
     private readonly _snackbar = inject(SnackbarService);
@@ -63,14 +75,31 @@ export class AdminTownhouseDetails {
 
     readonly townhouse = signal<SystemAdminTownhouseDetailsModel | null>(null);
     readonly loading = signal(true);
-    readonly loadingManagers = signal(true);
+    readonly loadingUsers = signal(false);
+    readonly loadingManagers = signal(false);
     readonly loadingManagerCandidates = signal(false);
     readonly regeneratingUserId = signal<string | null>(null);
     readonly managers = signal<readonly AdminManagerPermission[]>([]);
     readonly users = signal<readonly AdminUser[]>([]);
+    readonly usersLoaded = signal(false);
+    readonly managersLoaded = signal(false);
+    readonly userSearch = signal('');
+    readonly userFilter = signal<UserFilter>('ALL');
+    readonly userTotal = signal(0);
+    readonly pendingUserCount = signal(0);
+    readonly userPageIndex = signal(0);
+    readonly userPageSize = signal(10);
     readonly townhousesRoute = SYSTEM_ADMIN_ROUTES.townhouses;
+    private readonly _userSearchChanges = new Subject<string>();
 
     constructor() {
+        this._userSearchChanges
+            .pipe(debounceTime(350), distinctUntilChanged(), takeUntilDestroyed(this._destroyRef))
+            .subscribe((search) => {
+                this.userSearch.set(search);
+                this.userPageIndex.set(0);
+                this.loadUsers();
+            });
         this.loadTownhouse();
     }
 
@@ -86,13 +115,37 @@ export class AdminTownhouseDetails {
             next: (townhouse) => {
                 this.townhouse.set(townhouse);
                 this.loading.set(false);
-                this.loadUsers();
-                this.loadManagers();
             },
             error: (error: HttpErrorResponse) => {
                 this.loading.set(false);
             },
         });
+    }
+
+    changeTab(event: MatTabChangeEvent): void {
+        if (event.index === 1 && !this.usersLoaded()) {
+            this.loadUsers();
+        }
+
+        if (event.index === 2 && !this.managersLoaded()) {
+            this.loadManagers();
+        }
+    }
+
+    updateUserSearch(event: Event): void {
+        this._userSearchChanges.next((event.target as HTMLInputElement).value.trim());
+    }
+
+    updateUserFilter(filter: UserFilter): void {
+        this.userFilter.set(filter);
+        this.userPageIndex.set(0);
+        this.loadUsers();
+    }
+
+    updateUserPage(event: PageEvent): void {
+        this.userPageIndex.set(event.pageIndex);
+        this.userPageSize.set(event.pageSize);
+        this.loadUsers();
     }
 
     openEditDialog(): void {
@@ -360,6 +413,7 @@ export class AdminTownhouseDetails {
                     next: () => {
                         this._snackbar.success('Vínculo residencial removido.');
                         this.loadTownhouse();
+                        this.loadUsers();
                     },
                     error: (error: HttpErrorResponse) =>
                         this._showError(error, 'Não foi possível remover o vínculo do usuário.'),
@@ -372,10 +426,10 @@ export class AdminTownhouseDetails {
         this.loadingManagerCandidates.set(true);
 
         this._userService
-            .getAll()
+            .getAll({ page: 1, pageSize: 1000, situation: 'ACTIVE' })
             .pipe(finalize(() => this.loadingManagerCandidates.set(false)))
             .subscribe({
-                next: (users) => {
+                next: ({ items: users }) => {
                     const managerUserIds = new Set(this.managers().map((permission) => permission.userId));
                     const candidates = users.filter(
                         (user) => user.situation === 'ACTIVE' && !managerUserIds.has(user.id),
@@ -441,10 +495,28 @@ export class AdminTownhouseDetails {
     }
 
     private loadUsers(): void {
-        this._userService.getAll(this._townhouseId).subscribe({
-            next: (users) => this.users.set(users),
-            error: (error: HttpErrorResponse) => this._showError(error, 'Não foi possível carregar os usuários.'),
-        });
+        this.loadingUsers.set(true);
+        const filter = this.userFilter();
+        const situation: UserSituation | undefined = filter === 'ALL' ? undefined : filter;
+
+        this._userService
+            .getAll({
+                townhouseId: this._townhouseId,
+                page: this.userPageIndex() + 1,
+                pageSize: this.userPageSize(),
+                search: this.userSearch() || undefined,
+                situation,
+            })
+            .pipe(finalize(() => this.loadingUsers.set(false)))
+            .subscribe({
+                next: (response) => {
+                    this.users.set(response.items);
+                    this.userTotal.set(response.total);
+                    this.pendingUserCount.set(response.pendingCount);
+                    this.usersLoaded.set(true);
+                },
+                error: (error: HttpErrorResponse) => this._showError(error, 'Não foi possível carregar os usuários.'),
+            });
     }
 
     private loadManagers(): void {
@@ -454,7 +526,10 @@ export class AdminTownhouseDetails {
             .getActive(this._townhouseId)
             .pipe(finalize(() => this.loadingManagers.set(false)))
             .subscribe({
-                next: (managers) => this.managers.set(managers),
+                next: (managers) => {
+                    this.managers.set(managers);
+                    this.managersLoaded.set(true);
+                },
                 error: (error: HttpErrorResponse) =>
                     this._showError(error, 'Não foi possível carregar os gestores do condomínio.'),
             });

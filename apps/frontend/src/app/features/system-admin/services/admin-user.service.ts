@@ -7,6 +7,8 @@ import {
     AdminUserCreationResult,
     AdminUserDetails,
     AdminUserFormValue,
+    AdminUserListParams,
+    AdminUserPage,
     ProvisionalPasswordResult,
 } from '../models/admin-user.model';
 
@@ -14,10 +16,14 @@ import {
 export class AdminUserService {
     private readonly _httpClient = inject(HttpClient);
 
-    getAll(townhouseId?: number): Observable<AdminUser[]> {
-        const params = townhouseId ? new HttpParams().set('townhouseId', townhouseId) : undefined;
+    getAll(options: AdminUserListParams): Observable<AdminUserPage> {
+        let params = new HttpParams().set('page', options.page).set('pageSize', options.pageSize);
 
-        return this._httpClient.get<AdminUser[]>(USER_API_ROUTES.all, { params });
+        if (options.townhouseId) params = params.set('townhouseId', options.townhouseId);
+        if (options.search) params = params.set('search', options.search);
+        if (options.situation) params = params.set('situation', options.situation);
+
+        return this._httpClient.get<AdminUserPage>(USER_API_ROUTES.all, { params });
     }
 
     create(payload: AdminUserFormValue): Observable<AdminUserCreationResult> {

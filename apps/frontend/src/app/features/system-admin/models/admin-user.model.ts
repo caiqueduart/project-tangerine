@@ -43,6 +43,23 @@ export interface AdminUser {
     } | null;
 }
 
+export interface AdminUserListParams {
+    readonly page: number;
+    readonly pageSize: number;
+    readonly search?: string;
+    readonly situation?: UserSituation;
+    readonly townhouseId?: number;
+}
+
+export interface AdminUserPage {
+    readonly items: readonly AdminUser[];
+    readonly total: number;
+    readonly totalUsers: number;
+    readonly pendingCount: number;
+    readonly page: number;
+    readonly pageSize: number;
+}
+
 export interface AdminUserFormValue {
     readonly firstName: string;
     readonly lastName: string;

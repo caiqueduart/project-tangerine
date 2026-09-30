@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -15,7 +16,7 @@ export interface UserDetailsDialogData {
 
 @Component({
     selector: 'app-user-details-dialog',
-    imports: [DatePipe, LabelComponent, MatDialogModule, MatIconModule, MatProgressSpinnerModule],
+    imports: [DatePipe, LabelComponent, MatButtonModule, MatDialogModule, MatIconModule, MatProgressSpinnerModule],
     templateUrl: './user-details-dialog.html',
     styleUrl: './user-details-dialog.scss',
 })

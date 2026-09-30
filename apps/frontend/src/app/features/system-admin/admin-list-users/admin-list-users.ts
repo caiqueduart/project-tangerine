@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -8,7 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { finalize } from 'rxjs';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { debounceTime, distinctUntilChanged, finalize, Subject } from 'rxjs';
 import { AuthSessionService } from '../../../core/auth/services/auth-session.service';
 import { LabelComponent, LabelTheme } from '../../../shared/components/label/label.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -35,6 +37,7 @@ type UserFilter = 'ALL' | Extract<UserSituation, 'ACTIVE' | 'INACTIVE' | 'PENDIN
         MatIconModule,
         MatInputModule,
         MatMenuModule,
+        MatPaginatorModule,
         MatProgressSpinnerModule,
     ],
     templateUrl: './admin-list-users.html',
@@ -43,6 +46,7 @@ type UserFilter = 'ALL' | Extract<UserSituation, 'ACTIVE' | 'INACTIVE' | 'PENDIN
 export class AdminListUsers {
     private readonly _authSessionService = inject(AuthSessionService);
     private readonly _dialog = inject(MatDialog);
+    private readonly _destroyRef = inject(DestroyRef);
     private readonly _snackbar = inject(SnackbarService);
     private readonly _userService = inject(AdminUserService);
 
@@ -51,47 +55,65 @@ export class AdminListUsers {
     readonly regeneratingUserId = signal<string | null>(null);
     readonly search = signal('');
     readonly filter = signal<UserFilter>('ALL');
-    readonly pendingCount = computed(() => this.users().filter((user) => user.situation === 'PENDING').length);
-    readonly filteredUsers = computed(() => {
-        const search = this.search().trim().toLocaleLowerCase('pt-BR');
-        const filter = this.filter();
-
-        return this.users().filter((user) => {
-            const matchesFilter = filter === 'ALL' || user.situation === filter;
-            const searchableValues = [
-                user.firstName,
-                user.lastName,
-                user.email ?? '',
-                user.phone,
-                user.house?.identifier ?? '',
-                user.house?.townhouse.name ?? '',
-            ];
-
-            return matchesFilter && searchableValues.some((value) => value.toLocaleLowerCase('pt-BR').includes(search));
-        });
-    });
+    readonly total = signal(0);
+    readonly totalUsers = signal(0);
+    readonly pendingCount = signal(0);
+    readonly pageIndex = signal(0);
+    readonly pageSize = signal(10);
+    private readonly _searchChanges = new Subject<string>();
 
     constructor() {
+        this._searchChanges
+            .pipe(debounceTime(350), distinctUntilChanged(), takeUntilDestroyed(this._destroyRef))
+            .subscribe((search) => {
+                this.search.set(search);
+                this.pageIndex.set(0);
+                this.loadUsers();
+            });
         this.loadUsers();
     }
 
     loadUsers(): void {
         this.loading.set(true);
 
-        this._userService.getAll().subscribe({
-            next: (users) => {
-                this.users.set(users);
-                this.loading.set(false);
-            },
-            error: (error: HttpErrorResponse) => {
-                this._showError(error, 'Não foi possível carregar os usuários.');
-                this.loading.set(false);
-            },
-        });
+        const filter = this.filter();
+        const situation: UserSituation | undefined = filter === 'ALL' ? undefined : filter;
+        this._userService
+            .getAll({
+                page: this.pageIndex() + 1,
+                pageSize: this.pageSize(),
+                search: this.search() || undefined,
+                situation,
+            })
+            .subscribe({
+                next: (response) => {
+                    this.users.set(response.items);
+                    this.total.set(response.total);
+                    this.totalUsers.set(response.totalUsers);
+                    this.pendingCount.set(response.pendingCount);
+                    this.loading.set(false);
+                },
+                error: (error: HttpErrorResponse) => {
+                    this._showError(error, 'Não foi possível carregar os usuários.');
+                    this.loading.set(false);
+                },
+            });
     }
 
     updateSearch(event: Event): void {
-        this.search.set((event.target as HTMLInputElement).value);
+        this._searchChanges.next((event.target as HTMLInputElement).value.trim());
+    }
+
+    updateFilter(filter: UserFilter): void {
+        this.filter.set(filter);
+        this.pageIndex.set(0);
+        this.loadUsers();
+    }
+
+    updatePage(event: PageEvent): void {
+        this.pageIndex.set(event.pageIndex);
+        this.pageSize.set(event.pageSize);
+        this.loadUsers();
     }
 
     openForm(user?: AdminUser): void {

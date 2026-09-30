@@ -67,7 +67,11 @@
             </article>
         </div>
 
-        <mat-tab-group class="system-admin-townhouse-details__tabs" animationDuration="150ms">
+        <mat-tab-group
+            class="system-admin-townhouse-details__tabs"
+            animationDuration="150ms"
+            (selectedTabChange)="changeTab($event)"
+        >
             <mat-tab label="Casas">
                 <div class="system-admin-townhouse-details__tab-content">
                     <div class="system-admin-townhouse-details__section-header">
@@ -119,7 +123,7 @@
                     }
                 </div>
             </mat-tab>
-            <mat-tab [label]="'Usuários (' + users().length + ')'">
+            <mat-tab [label]="'Usuários (' + townhouse.residentCount + ')'">
                 <div class="system-admin-townhouse-details__tab-content">
                     <div class="system-admin-townhouse-details__section-header">
                         <div>
@@ -128,7 +132,33 @@
                         </div>
                     </div>
 
-                    @if (users().length === 0) {
+                    <div class="admin-user-list-tools">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-icon matPrefix>search</mat-icon>
+                            <mat-label>Buscar usuário</mat-label>
+                            <input matInput placeholder="Nome, telefone ou e-mail" (input)="updateUserSearch($event)" />
+                        </mat-form-field>
+
+                        <mat-button-toggle-group
+                            aria-label="Filtrar usuários por situação"
+                            [value]="userFilter()"
+                            (change)="updateUserFilter($event.value)"
+                        >
+                            <mat-button-toggle value="ALL">Todos</mat-button-toggle>
+                            <mat-button-toggle value="ACTIVE">Ativos</mat-button-toggle>
+                            <mat-button-toggle value="INACTIVE">Inativos</mat-button-toggle>
+                            <mat-button-toggle value="PENDING">
+                                Pendentes ({{ pendingUserCount() }})
+                            </mat-button-toggle>
+                        </mat-button-toggle-group>
+                    </div>
+
+                    @if (loadingUsers()) {
+                        <div class="system-admin-townhouse-details__feedback" role="status">
+                            <mat-spinner diameter="32" />
+                            <p>Carregando usuários...</p>
+                        </div>
+                    } @else if (users().length === 0) {
                         <div class="system-admin-townhouse-details__empty">
                             <mat-icon>group_off</mat-icon>
                             <p>Nenhum usuário vinculado.</p>
@@ -212,9 +242,19 @@
                             }
                         </ul>
                     }
+
+                    <mat-paginator
+                        class="admin-user-paginator"
+                        [length]="userTotal()"
+                        [pageIndex]="userPageIndex()"
+                        [pageSize]="userPageSize()"
+                        [pageSizeOptions]="[10, 25, 50]"
+                        aria-label="Paginação de usuários do condomínio"
+                        (page)="updateUserPage($event)"
+                    />
                 </div>
             </mat-tab>
-            <mat-tab [label]="'Gestores (' + managers().length + ')'">
+            <mat-tab [label]="managersLoaded() ? 'Gestores (' + managers().length + ')' : 'Gestores'">
                 <div class="system-admin-townhouse-details__tab-content">
                     <div class="system-admin-townhouse-details__section-header">
                         <div>

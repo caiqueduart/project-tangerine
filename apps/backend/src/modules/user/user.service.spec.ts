@@ -37,6 +37,7 @@ describe('UserService', () => {
         ),
     };
     const userRepository = {
+        createQueryBuilder: jest.fn(),
         find: jest.fn(),
         findOne: jest.fn(),
         manager: {
@@ -122,6 +123,49 @@ describe('UserService', () => {
 
         expect(hashService.hash).not.toHaveBeenCalled();
         expect(userRepository.manager.transaction).not.toHaveBeenCalled();
+    });
+
+    it('pagina e filtra usuários respeitando o condomínio solicitado', async () => {
+        const user = createUser();
+        const totalsQuery = createUsersQueryBuilder();
+        const pendingQuery = createUsersQueryBuilder();
+        const usersQuery = createUsersQueryBuilder();
+        usersQuery.clone.mockReturnValueOnce(totalsQuery).mockReturnValueOnce(pendingQuery);
+        usersQuery.getManyAndCount.mockResolvedValue([[user], 1]);
+        totalsQuery.getCount.mockResolvedValue(12);
+        pendingQuery.getCount.mockResolvedValue(4);
+        userRepository.createQueryBuilder.mockReturnValue(usersQuery);
+
+        await expect(
+            service.getAll(systemAdmin, {
+                page: 2,
+                pageSize: 5,
+                search: 'Ana',
+                situation: UserSituation.ACTIVE,
+                townhouseId: 7,
+            }),
+        ).resolves.toEqual({
+            items: [expect.objectContaining({ id: user.id })],
+            total: 1,
+            totalUsers: 12,
+            pendingCount: 4,
+            page: 2,
+            pageSize: 5,
+        });
+
+        expect(usersQuery.andWhere).toHaveBeenCalledWith('townhouse.id IN (:...scopedTownhouseIds)', {
+            scopedTownhouseIds: [7],
+        });
+        expect(usersQuery.andWhere).toHaveBeenCalledWith('user.situation = :situation', {
+            situation: UserSituation.ACTIVE,
+        });
+        expect(usersQuery.skip).toHaveBeenCalledWith(5);
+        expect(usersQuery.take).toHaveBeenCalledWith(5);
+    });
+
+    it('rejeita paginação de usuários fora dos limites', async () => {
+        await expect(service.getAll(systemAdmin, { page: 0, pageSize: 10 })).rejects.toThrow('Paginação inválida.');
+        await expect(service.getAll(systemAdmin, { page: 1, pageSize: 1001 })).rejects.toThrow('Paginação inválida.');
     });
 
     it('pré-cadastra um usuário pendente sem vínculo pelo administrador do sistema', async () => {
@@ -296,4 +340,26 @@ function createUser(overrides: Partial<User> = {}): User {
         managerPermissions: [],
         ...overrides,
     } as User;
+}
+
+function createUsersQueryBuilder() {
+    const query = {
+        addOrderBy: jest.fn(),
+        andWhere: jest.fn(),
+        clone: jest.fn(),
+        getCount: jest.fn(),
+        getManyAndCount: jest.fn(),
+        leftJoinAndSelect: jest.fn(),
+        orderBy: jest.fn(),
+        skip: jest.fn(),
+        take: jest.fn(),
+    };
+
+    Object.values(query).forEach((method) => {
+        if (method !== query.getCount && method !== query.getManyAndCount && method !== query.clone) {
+            method.mockReturnValue(query);
+        }
+    });
+
+    return query;
 }

@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -43,7 +43,10 @@ export class PasswordPage {
     private readonly _router = inject(Router);
     private readonly _snackbar = inject(SnackbarService);
 
-    readonly isFirstAccess = computed(() => this._authSessionService.session()?.user.situation === 'PENDING');
+    private readonly _sessionOnEntry = this._authSessionService.session();
+
+    readonly isFirstAccess = this._sessionOnEntry?.user.situation === 'PENDING';
+    readonly welcomeMessage = `Olá, ${this._sessionOnEntry?.user.firstName}! Boas-vindas ao ${this._sessionOnEntry?.house?.townhouse.name ?? 'Tangerine'}.`;
     readonly passwordVisible = signal(false);
     readonly submitting = signal(false);
     readonly form = this._formBuilder.nonNullable.group({
@@ -61,7 +64,7 @@ export class PasswordPage {
     });
 
     constructor() {
-        if (!this.isFirstAccess()) {
+        if (!this.isFirstAccess) {
             this.form.controls.currentPassword.addValidators(Validators.required);
         }
     }
@@ -82,7 +85,7 @@ export class PasswordPage {
             return;
         }
 
-        const isFirstAccess = this.isFirstAccess();
+        const isFirstAccess = this.isFirstAccess;
         this.submitting.set(true);
         const request: Observable<unknown> = isFirstAccess
             ? this._authService.completeFirstAccess({ newPassword })
