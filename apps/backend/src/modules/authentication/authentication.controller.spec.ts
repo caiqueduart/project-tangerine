@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ConfigType } from '@nestjs/config';
+import { ConfigService, ConfigType } from '@nestjs/config';
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
 import { REFRESH_TOKEN_COOKIE } from './authentication.constants';
@@ -13,6 +13,7 @@ describe('AuthenticationController', () => {
     const jwtConfiguration = {
         refreshTtl: 3600,
     };
+    let configService: ConfigService;
     const response = {
         clearCookie: jest.fn(),
         cookie: jest.fn(),
@@ -22,9 +23,11 @@ describe('AuthenticationController', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        configService = new ConfigService({ API_PREFIX: '', NODE_ENV: 'test' });
         controller = new AuthenticationController(
             authenticationService as unknown as AuthenticationService,
             jwtConfiguration as unknown as ConfigType<typeof jwtConfig>,
+            configService,
         );
     });
 
@@ -90,5 +93,25 @@ describe('AuthenticationController', () => {
             sameSite: 'strict',
             secure: false,
         });
+    });
+
+    it('grava e remove o cookie no mesmo caminho público em produção', async () => {
+        configService.set('API_PREFIX', 'api');
+        configService.set('NODE_ENV', 'production');
+        authenticationService.login.mockResolvedValue({
+            accessToken: 'access-token',
+            refreshToken: 'refresh-token',
+            session: {},
+        });
+
+        await controller.login({ uid: 'user', password: 'password' }, response as unknown as Response);
+        controller.logout(response as unknown as Response);
+
+        const options = { httpOnly: true, path: '/api/auth', sameSite: 'strict', secure: true };
+        expect(response.cookie).toHaveBeenCalledWith(REFRESH_TOKEN_COOKIE, 'refresh-token', {
+            ...options,
+            maxAge: 3_600_000,
+        });
+        expect(response.clearCookie).toHaveBeenCalledWith(REFRESH_TOKEN_COOKIE, options);
     });
 });

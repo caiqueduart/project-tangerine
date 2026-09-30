@@ -7,6 +7,9 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     const configService = app.get(ConfigService);
+    const apiPrefix = configService.getOrThrow<string>('API_PREFIX');
+
+    if (apiPrefix) app.setGlobalPrefix(apiPrefix);
 
     app.enableCors({
         origin: configService.getOrThrow<string[]>('CORS_ORIGINS'),
@@ -14,7 +17,7 @@ async function bootstrap() {
     });
     app.use(cookieParser());
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
-    await app.listen(configService.getOrThrow<number>('PORT'));
+    await app.listen(configService.getOrThrow<number>('PORT'), '0.0.0.0');
 }
 
 void bootstrap();

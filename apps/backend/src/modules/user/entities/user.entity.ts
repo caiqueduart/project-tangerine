@@ -27,7 +27,7 @@ export class User {
     @Column({ type: 'enum', enum: UserSituation, nullable: false, default: UserSituation.PENDING })
     situation: UserSituation;
 
-    @Column({ type: 'enum', enum: UserRole, enumName: 'user_role_enum', nullable: false, default: UserRole.USER })
+    @Column({ type: 'enum', enum: UserRole, nullable: false, default: UserRole.USER })
     role: UserRole;
 
     @OneToOne(() => Resident, (resident) => resident.user)

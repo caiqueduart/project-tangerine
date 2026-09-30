@@ -18,6 +18,7 @@ export class AuthenticationController {
     constructor(
         private readonly _authenticationService: AuthenticationService,
         @Inject(jwtConfig.KEY) private readonly _jwtConfiguration: config.ConfigType<typeof jwtConfig>,
+        private readonly _configService: config.ConfigService,
     ) {}
 
     @Public()
@@ -73,11 +74,13 @@ export class AuthenticationController {
     }
 
     private get _refreshTokenCookieOptions(): CookieOptions {
+        const prefix = this._configService.getOrThrow<string>('API_PREFIX');
+
         return {
             httpOnly: true,
-            path: '/auth',
+            path: `${prefix ? `/${prefix}` : ''}/auth`,
             sameSite: 'strict',
-            secure: process.env.NODE_ENV === 'production',
+            secure: this._configService.getOrThrow<string>('NODE_ENV') === 'production',
         };
     }
 }

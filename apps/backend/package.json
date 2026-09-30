@@ -21,7 +21,11 @@
         "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/database/data-source.ts",
         "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
         "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
-        "bootstrap:admin": "ts-node src/database/scripts/bootstrap-system-admin.ts"
+        "migration:run:prod": "typeorm migration:run -d dist/database/data-source.js",
+        "migration:revert:prod": "typeorm migration:revert -d dist/database/data-source.js",
+        "migration:show:prod": "typeorm migration:show -d dist/database/data-source.js",
+        "bootstrap:admin": "ts-node src/database/scripts/bootstrap-system-admin.ts",
+        "bootstrap:admin:prod": "node dist/database/scripts/bootstrap-system-admin.js"
     },
     "dependencies": {
         "@nestjs/common": "^11.0.1",
