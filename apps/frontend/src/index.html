@@ -15,6 +15,20 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     </head>
     <body>
-        <app-root></app-root>
+        <app-root>
+            <main class="system-loading">
+                <span class="system-loading__spinner" aria-hidden="true"></span>
+                <p role="status">Carregando o sistema…</p>
+
+                <div class="system-loading__help">
+                    <p>Está demorando mais que o esperado. Verifique sua conexão ou tente novamente.</p>
+                    <button class="system-loading__retry" type="button" onclick="window.location.reload()">
+                        Tentar novamente
+                    </button>
+                </div>
+            </main>
+        </app-root>
+
+        <noscript>Ative o JavaScript no navegador para acessar o sistema.</noscript>
     </body>
 </html>

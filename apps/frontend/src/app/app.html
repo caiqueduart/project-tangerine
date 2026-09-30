@@ -1,1 +1,7 @@
-<router-outlet></router-outlet>
+<div [hidden]="!ready()">
+    <router-outlet></router-outlet>
+</div>
+
+@if (!ready()) {
+    <app-system-loading [failed]="failed()" (retry)="retry()" />
+}

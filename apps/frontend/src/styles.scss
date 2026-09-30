@@ -4,6 +4,7 @@
 @use 'styles/mixins';
 @use 'styles/material-overwrites';
 @use 'styles/variables' as *;
+@use 'styles/system-loading';
 
 html {
     height: 100%;

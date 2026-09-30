@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, finalize, map, Observable, of, tap, timeout } from 'rxjs';
 import { TownhouseContextModel } from '../config/models/townhouse-context.model';
 import { TOWNHOUSE_API_ROUTES } from '../config/routes/townhouse-routes.config';
 
@@ -19,7 +19,7 @@ export class TownhouseContextService {
     private readonly title = inject(Title);
     private readonly _slug = signal<string | null>(null);
     private readonly _currentTownhouse = signal<TownhouseContextModel | null>(null);
-    private readonly _loading = signal(true);
+    private readonly _loading = signal(false);
     private readonly _error = signal<TownhouseContextError | null>(null);
 
     readonly slug = this._slug.asReadonly();
@@ -36,6 +36,7 @@ export class TownhouseContextService {
         this._error.set(null);
 
         return this.http.get<TownhouseResponse>(TOWNHOUSE_API_ROUTES.bySlug(normalizedSlug)).pipe(
+            timeout(15_000),
             map((townhouse) => ({
                 ...townhouse,
                 subtitle: 'Gestão do condomínio',
@@ -50,6 +51,11 @@ export class TownhouseContextService {
                           : 'unavailable';
                 this._finishLoading(normalizedSlug, null, contextError);
                 return of(null);
+            }),
+            finalize(() => {
+                if (this._slug() === normalizedSlug) {
+                    this._loading.set(false);
+                }
             }),
         );
     }

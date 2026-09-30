@@ -1,0 +1,16 @@
+<main class="system-loading">
+    @if (failed()) {
+        <p role="alert">Não foi possível iniciar o sistema. Verifique sua conexão e tente novamente.</p>
+
+        <button mat-flat-button type="button" (click)="retry.emit()">Tentar novamente</button>
+    } @else {
+        <span class="system-loading__spinner" aria-hidden="true"></span>
+
+        <p role="status">Carregando o sistema…</p>
+
+        <div class="system-loading__help">
+            <p>Está demorando mais que o esperado. Verifique sua conexão ou tente novamente.</p>
+            <button mat-button type="button" (click)="retry.emit()">Tentar novamente</button>
+        </div>
+    }
+</main>

@@ -64,6 +64,10 @@ export class LoginPage {
         this.passwordVisible.update((visible) => !visible);
     }
 
+    retryTownhouse(): void {
+        void this._router.navigateByUrl(this._router.url, { onSameUrlNavigation: 'reload' });
+    }
+
     submit(): void {
         const townhouse = this.townhouse();
 
