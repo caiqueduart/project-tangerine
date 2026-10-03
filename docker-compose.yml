@@ -1,0 +1,23 @@
+# Banco PostgreSQL somente para desenvolvimento local. Nunca use estas credenciais em produção.
+services:
+    db:
+        image: postgres:17-alpine
+        container_name: tangerine-db
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER: tangerine
+            POSTGRES_PASSWORD: tangerine
+            POSTGRES_DB: project_tangerine
+        ports:
+            # 5433 no host para não conflitar com um PostgreSQL instalado no Windows.
+            - '5433:5432'
+        volumes:
+            - tangerine-db-data:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U tangerine -d project_tangerine']
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+volumes:
+    tangerine-db-data:
