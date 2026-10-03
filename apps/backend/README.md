@@ -11,12 +11,21 @@ npm ci
 npm run build --workspace @repo/shared
 ```
 
-Copie `.env.example` para `.env` neste diretório e preencha as credenciais do PostgreSQL e `JWT_SECRET`. Em banco vazio, mantenha `DATABASE_SYNCHRONIZE=false` e aplique as migrations antes de iniciar:
+Suba o banco de desenvolvimento com Docker (requer Docker Desktop). Ele usa o `docker-compose.yml` da raiz e guarda os dados no volume `tangerine-db-data`:
+
+```sh
+npm run db:up
+```
+
+Copie `.env.example` para `.env` neste diretório; os dados do banco já correspondem ao container. Preencha `JWT_SECRET`, sem `DATABASE_URL`, e nunca aponte o ambiente local para o banco de produção. Mantenha `DATABASE_SYNCHRONIZE=false` e aplique as migrations antes de iniciar:
 
 ```sh
 npm run migration:run --workspace backend
-npm run start:dev --workspace backend
+npm run bootstrap:admin --workspace backend
+npm run dev
 ```
+
+`bootstrap:admin` cria o administrador inicial com as variáveis `SYSTEM_ADMIN_*` do `.env`. Para parar o banco, use `npm run db:down`; os dados permanecem no volume.
 
 Os comandos acima são executados na raiz do monorepo. As rotas locais usam `http://localhost:3000`, sem prefixo por padrão.
 
