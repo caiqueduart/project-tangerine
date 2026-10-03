@@ -10,6 +10,8 @@ import { ValidTokenGuard } from './guards/valid-token.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { PendingUserGuard } from './guards/pending-user.guard';
 import { TownhouseModule } from '../townhouse/townhouse.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { loginThrottlerOptions } from './configs/login-throttler.config';
 
 @Module({
     imports: [
@@ -18,6 +20,7 @@ import { TownhouseModule } from '../townhouse/townhouse.module';
         TownhouseModule,
         ConfigModule.forFeature(jwtConfig),
         JwtModule.registerAsync(jwtConfig.asProvider()),
+        ThrottlerModule.forRoot(loginThrottlerOptions),
     ],
     providers: [
         AuthenticationService,

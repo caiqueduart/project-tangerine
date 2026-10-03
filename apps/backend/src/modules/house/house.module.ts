@@ -3,12 +3,13 @@ import { HouseController } from './house.controller';
 import { HouseService } from './house.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { House } from './entities/house.entity';
-import { Townhouse } from '../townhouse/entities/townhouse.entity';
 import { AuthorizationModule } from '../authorization/authorization.module';
+import { TownhouseModule } from '../townhouse/townhouse.module';
 
 @Module({
-    imports: [AuthorizationModule, TypeOrmModule.forFeature([House, Townhouse])],
+    imports: [AuthorizationModule, TownhouseModule, TypeOrmModule.forFeature([House])],
     controllers: [HouseController],
     providers: [HouseService],
+    exports: [HouseService],
 })
 export class HouseModule {}

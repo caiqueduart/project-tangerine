@@ -30,6 +30,9 @@ export class User {
     @Column({ type: 'enum', enum: UserRole, nullable: false, default: UserRole.USER })
     role: UserRole;
 
+    @Column({ type: 'timestamptz', nullable: true })
+    provisionalPasswordExpiresAt: Date | null;
+
     @OneToOne(() => Resident, (resident) => resident.user)
     resident?: Resident;
 

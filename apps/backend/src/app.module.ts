@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { normalizeEnvironment } from './config/environment';
 import { createDatabaseOptions } from './database/database-options';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
+import { HouseModule } from './modules/house/house.module';
 import { ManagerPermissionModule } from './modules/manager-permission/manager-permission.module';
 import { TownhouseModule } from './modules/townhouse/townhouse.module';
 import { UserModule } from './modules/user/user.module';
@@ -23,6 +24,7 @@ import { UserModule } from './modules/user/user.module';
         AuthenticationModule,
         UserModule,
         TownhouseModule,
+        HouseModule,
         ManagerPermissionModule,
     ],
     controllers: [AppController],

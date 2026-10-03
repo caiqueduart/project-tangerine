@@ -1,4 +1,5 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { AuthenticationErrorCode } from '@repo/shared';
 import { LoginDto } from './dtos/login.dto';
 import { UserService } from '../user/user.service';
 import { HashService } from '../common/services/hash.service';
@@ -8,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AccessTokenPayloadDto, AuthenticationTokenType, RefreshTokenPayloadDto } from './dtos/token-payload.dto';
 import { AuthenticationTokensDto } from './dtos/authentication-tokens.dto';
 import { User } from '../user/entities/user.entity';
-import { AccessTokenDto } from './dtos/access-token.dto';
+import { LoginResponseDto } from './dtos/login-response.dto';
 import { AuthenticationSessionDto } from './dtos/authentication-session.dto';
 import { LoginResultDto } from './dtos/login-result.dto';
 import { UserSituation } from '../user/enums/user-situation';
@@ -51,6 +52,14 @@ export class AuthenticationService {
             throw new UnauthorizedException('Acesso inativo ou bloqueado.');
         }
 
+        if (this._isProvisionalPasswordExpired(user)) {
+            throw new UnauthorizedException({
+                statusCode: HttpStatus.UNAUTHORIZED,
+                code: AuthenticationErrorCode.PROVISIONAL_PASSWORD_EXPIRED,
+                message: 'Senha provisória expirada. Solicite uma nova ao gestor.',
+            });
+        }
+
         const townhouseId = await this._resolveTownhouseContext(user, credentials.townhouseSlug);
         const tokens = await this._generateRefreshAndAccessTokens(user, townhouseId);
 
@@ -60,9 +69,10 @@ export class AuthenticationService {
         };
     }
 
-    async refreshAccessToken(refreshToken: string | undefined): Promise<AccessTokenDto> {
+    async refreshAccessToken(refreshToken: string | undefined): Promise<LoginResponseDto> {
         const unauthorizedMessage = 'Refresh token inválido ou expirado.';
         let payload: RefreshTokenPayloadDto;
+        let user: User;
 
         if (!refreshToken) {
             throw new UnauthorizedException(unauthorizedMessage);
@@ -83,11 +93,13 @@ export class AuthenticationService {
         }
 
         try {
-            const user = await this._userService.findAuthenticatableUserById(payload.id);
+            const authenticatableUser = await this._userService.findAuthenticatableUserById(payload.id);
 
-            if (!user) {
+            if (!authenticatableUser) {
                 throw new UnauthorizedException(unauthorizedMessage);
             }
+
+            user = authenticatableUser;
 
             if (user.role !== UserRole.SYSTEM_ADMIN) {
                 const townhouseId = payload.townhouseId;
@@ -112,7 +124,8 @@ export class AuthenticationService {
             this._jwtConfiguration.secret,
         );
 
-        return { accessToken };
+        // A sessão acompanha cada refresh para que o frontend reflita mudanças de papel, casa ou gestão.
+        return { accessToken, session: this._generateAuthenticationSessionData(user) };
     }
 
     async completeFirstAccess(actor: AuthenticatedActor, dto: CompleteFirstAccessDto): Promise<LoginResultDto> {
@@ -196,6 +209,14 @@ export class AuthenticationService {
                       }
                     : null,
         };
+    }
+
+    private _isProvisionalPasswordExpired(user: User): boolean {
+        return (
+            user.situation === UserSituation.PENDING &&
+            !!user.provisionalPasswordExpiresAt &&
+            user.provisionalPasswordExpiresAt.getTime() <= Date.now()
+        );
     }
 
     private async _resolveTownhouseContext(user: User, townhouseSlug?: string): Promise<number | undefined> {

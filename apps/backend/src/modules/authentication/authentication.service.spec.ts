@@ -1,4 +1,5 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { AuthenticationErrorCode } from '@repo/shared';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationTokenType } from './dtos/token-payload.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -182,13 +183,21 @@ describe('AuthenticationService', () => {
         });
         userService.findAuthenticatableUserById.mockResolvedValue({
             id: 'user-id',
+            firstName: 'Maria',
+            lastName: 'Silva',
             situation: UserSituation.ACTIVE,
             role: UserRole.USER,
             managerPermissions: [],
             resident: {
                 house: {
                     id: 7,
-                    townhouse: { id: 2, situation: TownhouseSituation.ACTIVE },
+                    identifier: 'Casa 7',
+                    townhouse: {
+                        id: 2,
+                        name: 'Condomínio Corumbá II',
+                        slug: 'corumba-ii',
+                        situation: TownhouseSituation.ACTIVE,
+                    },
                 },
             },
         });
@@ -216,7 +225,47 @@ describe('AuthenticationService', () => {
             },
         );
         expect(jwtService.signAsync).toHaveBeenCalledTimes(1);
-        expect(result).toEqual({ accessToken: 'new-access-token' });
+        expect(result).toEqual({
+            accessToken: 'new-access-token',
+            session: {
+                user: {
+                    id: 'user-id',
+                    firstName: 'Maria',
+                    lastName: 'Silva',
+                    role: UserRole.USER,
+                    situation: UserSituation.ACTIVE,
+                },
+                managerPermissions: [],
+                house: {
+                    id: 7,
+                    identifier: 'Casa 7',
+                    townhouse: { id: 2, name: 'Condomínio Corumbá II', slug: 'corumba-ii' },
+                },
+            },
+        });
+    });
+
+    it('rejeita o login com senha provisória expirada informando o código do erro', async () => {
+        userService.findUserByLogin.mockResolvedValue({
+            id: 'pending-id',
+            passwordHash: 'temporary-hash',
+            situation: UserSituation.PENDING,
+            role: UserRole.USER,
+            provisionalPasswordExpiresAt: new Date(Date.now() - 1000),
+            managerPermissions: [],
+        });
+        hashService.compare.mockResolvedValue(true);
+
+        const error = await service
+            .login({ uid: '11999999999', password: 'CasaSol2748', townhouseSlug: 'corumba-ii' })
+            .catch((reason: unknown) => reason);
+
+        expect(error).toBeInstanceOf(UnauthorizedException);
+        expect((error as UnauthorizedException).getResponse()).toMatchObject({
+            code: AuthenticationErrorCode.PROVISIONAL_PASSWORD_EXPIRED,
+        });
+        expect(townhouseService.getOneBySlug).not.toHaveBeenCalled();
+        expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 
     it('permite login e renovação de token para usuário pendente', async () => {
@@ -273,8 +322,9 @@ describe('AuthenticationService', () => {
         });
         jwtService.signAsync.mockResolvedValue('new-access-token');
 
-        await expect(service.refreshAccessToken('refresh-token')).resolves.toEqual({
+        await expect(service.refreshAccessToken('refresh-token')).resolves.toMatchObject({
             accessToken: 'new-access-token',
+            session: { user: { situation: UserSituation.PENDING } },
         });
     });
 

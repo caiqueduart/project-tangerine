@@ -1,10 +1,10 @@
-import { Body, Controller, HttpCode, HttpStatus, Inject, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import * as config from '@nestjs/config';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import type { CookieOptions, Request, Response } from 'express';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dtos/login.dto';
 import { Public } from './decorators/public.decorator';
-import { AccessTokenDto } from './dtos/access-token.dto';
 import { LoginResponseDto } from './dtos/login-response.dto';
 import { REFRESH_TOKEN_COOKIE } from './authentication.constants';
 import jwtConfig from './configs/jwt.config';
@@ -22,6 +22,7 @@ export class AuthenticationController {
     ) {}
 
     @Public()
+    @UseGuards(ThrottlerGuard)
     @Post('login')
     async login(
         @Body() credentials: LoginDto,
@@ -39,7 +40,7 @@ export class AuthenticationController {
 
     @Public()
     @Post('refresh')
-    refreshAccessToken(@Req() request: Request): Promise<AccessTokenDto> {
+    refreshAccessToken(@Req() request: Request): Promise<LoginResponseDto> {
         const cookies = request.cookies as Record<string, string | undefined> | undefined;
         return this._authenticationService.refreshAccessToken(cookies?.[REFRESH_TOKEN_COOKIE]);
     }

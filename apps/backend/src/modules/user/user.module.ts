@@ -7,9 +7,10 @@ import { CommonModule } from '../common/common.module';
 import { Resident } from './entities/resident.entity';
 import { UserAudit } from './entities/user-audit.entity';
 import { AuthorizationModule } from '../authorization/authorization.module';
+import { HouseModule } from '../house/house.module';
 
 @Module({
-    imports: [AuthorizationModule, CommonModule, TypeOrmModule.forFeature([User, Resident, UserAudit])],
+    imports: [AuthorizationModule, CommonModule, HouseModule, TypeOrmModule.forFeature([User, Resident, UserAudit])],
     exports: [UserService],
     providers: [UserService],
     controllers: [UserController],

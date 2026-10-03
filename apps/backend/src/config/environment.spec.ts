@@ -42,6 +42,7 @@ describe('normalizeEnvironment', () => {
         expect(environment.DATABASE_SSL).toBe(true);
         expect(environment.JWT_TTL).toBe(900);
         expect(environment.JWT_REFRESH_TTL).toBe(3600);
+        expect(environment.PROVISIONAL_PASSWORD_TTL_HOURS).toBe(72);
     });
 
     it.each([
@@ -51,6 +52,7 @@ describe('normalizeEnvironment', () => {
         ['JWT_TTL', 'NaN'],
         ['JWT_REFRESH_TTL', '0'],
         ['JWT_TTL', '1.5'],
+        ['PROVISIONAL_PASSWORD_TTL_HOURS', '0'],
         ['NODE_ENV', 'prod'],
         ['API_PREFIX', '/api/'],
         ['DATABASE_SSL', 'maybe'],

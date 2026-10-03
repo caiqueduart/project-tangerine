@@ -4,7 +4,7 @@ import { AuthenticatedActor } from '../authorization/models/authenticated-actor'
 import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 import { HashService } from '../common/services/hash.service';
 import { ProvisionalPasswordService } from '../common/services/provisional-password.service';
-import { House } from '../house/entities/house.entity';
+import { HouseService } from '../house/house.service';
 import { Resident } from './entities/resident.entity';
 import { UserAudit } from './entities/user-audit.entity';
 import { User } from './entities/user.entity';
@@ -51,11 +51,16 @@ describe('UserService', () => {
         hash: jest.fn().mockResolvedValue('password-hash'),
         compare: jest.fn(),
     };
+    const provisionalPasswordExpiresAt = new Date('2026-10-06T12:00:00.000Z');
     const provisionalPasswordService = {
         generate: jest.fn().mockReturnValue('Casa2748'),
+        getExpirationDate: jest.fn().mockReturnValue(provisionalPasswordExpiresAt),
     };
     const townhousePolicy = {
         assertCanManage: jest.fn(),
+    };
+    const houseService = {
+        findInTownhouse: jest.fn(),
     };
 
     let service: UserService;
@@ -64,12 +69,14 @@ describe('UserService', () => {
         jest.clearAllMocks();
         hashService.hash.mockResolvedValue('password-hash');
         provisionalPasswordService.generate.mockReturnValue('Casa2748');
+        provisionalPasswordService.getExpirationDate.mockReturnValue(provisionalPasswordExpiresAt);
         service = new UserService(
             userRepository as unknown as Repository<User>,
             userAuditRepository as unknown as Repository<UserAudit>,
             hashService as unknown as HashService,
             provisionalPasswordService as unknown as ProvisionalPasswordService,
             townhousePolicy as unknown as TownhousePolicy,
+            houseService as unknown as HouseService,
         );
     });
 
@@ -187,6 +194,7 @@ describe('UserService', () => {
                 passwordHash: 'password-hash',
                 situation: UserSituation.PENDING,
                 role: UserRole.USER,
+                provisionalPasswordExpiresAt,
             }),
         );
         expect(entityManager.create).toHaveBeenCalledWith(UserAudit, {
@@ -195,6 +203,7 @@ describe('UserService', () => {
             actorUserId: systemAdmin.userId,
         });
         expect(result.provisionalPassword).toBe('Casa2748');
+        expect(result.provisionalPasswordExpiresAt).toBe(provisionalPasswordExpiresAt);
         expect(result).not.toHaveProperty('passwordHash');
     });
 
@@ -213,7 +222,7 @@ describe('UserService', () => {
     });
 
     it('valida que a casa pertence ao condomínio no pré-cadastro', async () => {
-        entityManager.findOne.mockResolvedValue({
+        houseService.findInTownhouse.mockResolvedValue({
             id: 10,
             identifier: 'Casa 10',
             townhouse: { id: 2, name: 'Corumbá II', slug: 'corumba-ii' },
@@ -231,10 +240,7 @@ describe('UserService', () => {
         );
 
         expect(townhousePolicy.assertCanManage).toHaveBeenCalledWith(managerActor, 2);
-        expect(entityManager.findOne).toHaveBeenCalledWith(House, {
-            where: { id: 10, townhouse: { id: 2 } },
-            relations: { townhouse: true },
-        });
+        expect(houseService.findInTownhouse).toHaveBeenCalledWith(10, 2, entityManager);
     });
 
     it('renova a data de criação do vínculo ao trocar o usuário de casa', async () => {
@@ -251,7 +257,7 @@ describe('UserService', () => {
             } as Resident,
         });
         userRepository.findOne.mockResolvedValue(user);
-        entityManager.findOne.mockResolvedValue({
+        houseService.findInTownhouse.mockResolvedValue({
             id: 10,
             identifier: 'Casa 10',
             townhouse: { id: 2, name: 'Corumbá II', slug: 'corumba-ii' },
@@ -273,7 +279,11 @@ describe('UserService', () => {
     });
 
     it('substitui a senha e ativa o usuário no primeiro acesso com duas auditorias', async () => {
-        const user = createUser({ situation: UserSituation.PENDING, passwordHash: 'temporary-hash' });
+        const user = createUser({
+            situation: UserSituation.PENDING,
+            passwordHash: 'temporary-hash',
+            provisionalPasswordExpiresAt,
+        });
         userRepository.findOne.mockResolvedValue(user);
 
         const result = await service.completeFirstAccess(user.id, 'MinhaSenha9');
@@ -281,6 +291,7 @@ describe('UserService', () => {
         expect(hashService.hash).toHaveBeenCalledWith('MinhaSenha9');
         expect(result.passwordHash).toBe('password-hash');
         expect(result.situation).toBe(UserSituation.ACTIVE);
+        expect(result.provisionalPasswordExpiresAt).toBeNull();
         expect(entityManager.create).toHaveBeenCalledWith(UserAudit, {
             userId: user.id,
             action: UserAuditAction.PASSWORD_CHANGED,
@@ -301,6 +312,7 @@ describe('UserService', () => {
             provisionalPassword: 'Casa2748',
         });
         expect(user.passwordHash).toBe('password-hash');
+        expect(user.provisionalPasswordExpiresAt).toBe(provisionalPasswordExpiresAt);
         expect(entityManager.create).toHaveBeenCalledWith(UserAudit, {
             userId: user.id,
             action: UserAuditAction.PASSWORD_CHANGED,

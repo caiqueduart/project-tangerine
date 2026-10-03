@@ -9,7 +9,7 @@ export class CreateTownhouseDto {
     name: string;
 
     @IsString()
-    @MaxLength(100)
+    @MaxLength(30)
     @IsNotEmpty()
     @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
         message: 'slug deve conter apenas letras minúsculas, números e hífens.',

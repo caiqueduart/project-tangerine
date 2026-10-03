@@ -1,9 +1,9 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { CreateHouseDto, CreateHousesBatchDto, GetHouseDto, HouseOptionDto, UpdateHouseDto } from './dtos/house.dto';
 import { House } from './entities/house.entity';
-import { Townhouse } from '../townhouse/entities/townhouse.entity';
+import { TownhouseService } from '../townhouse/townhouse.service';
 import { AuthenticatedActor } from '../authorization/models/authenticated-actor';
 import { HousePolicy } from '../authorization/policies/house.policy';
 import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
@@ -12,15 +12,15 @@ import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 export class HouseService {
     constructor(
         @InjectRepository(House) private readonly _houseRepository: Repository<House>,
-        @InjectRepository(Townhouse) private readonly _townhouseRepository: Repository<Townhouse>,
         private readonly _housePolicy: HousePolicy,
         private readonly _townhousePolicy: TownhousePolicy,
+        private readonly _townhouseService: TownhouseService,
     ) {}
 
     async register(data: CreateHouseDto, actor: AuthenticatedActor): Promise<GetHouseDto> {
         this._townhousePolicy.assertCanManage(actor, data.townhouseId);
 
-        await this._ensureTownhouseExists(data.townhouseId);
+        await this._townhouseService.assertExists(data.townhouseId);
 
         const house = this._houseRepository.create({
             identifier: data.identifier.trim(),
@@ -32,7 +32,7 @@ export class HouseService {
 
     async registerBatch(data: CreateHousesBatchDto, actor: AuthenticatedActor): Promise<GetHouseDto[]> {
         this._townhousePolicy.assertCanManage(actor, data.townhouseId);
-        await this._ensureTownhouseExists(data.townhouseId);
+        await this._townhouseService.assertExists(data.townhouseId);
 
         const identifiers = data.identifiers.map((identifier) => identifier.trim());
         const normalizedIdentifiers = identifiers.map((identifier) => identifier.toLocaleLowerCase('pt-BR'));
@@ -83,12 +83,6 @@ export class HouseService {
 
         this._townhousePolicy.assertCanManage(actor, house.townhouse.id);
 
-        if (data.townhouseId !== undefined && data.townhouseId !== house.townhouse.id) {
-            this._townhousePolicy.assertCanManage(actor, data.townhouseId);
-            await this._ensureTownhouseExists(data.townhouseId);
-            house.townhouse = { id: data.townhouseId } as Townhouse;
-        }
-
         if (data.identifier !== undefined) {
             house.identifier = data.identifier.trim();
         }
@@ -108,6 +102,21 @@ export class HouseService {
         await this._houseRepository.remove(house);
     }
 
+    // Recebe o EntityManager de quem chama para participar da mesma transação (ex.: pré-cadastro de usuário).
+    async findInTownhouse(houseId: number, townhouseId: number, manager?: EntityManager): Promise<House> {
+        const repository = manager?.getRepository(House) ?? this._houseRepository;
+        const house = await repository.findOne({
+            where: { id: houseId, townhouse: { id: townhouseId } },
+            relations: { townhouse: true },
+        });
+
+        if (!house) {
+            throw new NotFoundException('Casa não encontrada no condomínio informado.');
+        }
+
+        return house;
+    }
+
     private async _findOne(id: number): Promise<House> {
         const house = await this._houseRepository.findOne({
             where: { id },
@@ -119,14 +128,6 @@ export class HouseService {
         }
 
         return house;
-    }
-
-    private async _ensureTownhouseExists(id: number): Promise<void> {
-        const exists = await this._townhouseRepository.existsBy({ id });
-
-        if (!exists) {
-            throw new NotFoundException('Condomínio não encontrado.');
-        }
     }
 
     private async _save(house: House): Promise<GetHouseDto> {

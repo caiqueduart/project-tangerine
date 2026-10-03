@@ -10,6 +10,7 @@ import { TownhouseSituation } from './enums/townhouse-situation.enum';
 
 describe('TownhouseService', () => {
     const townhouseRepository = {
+        createQueryBuilder: jest.fn(),
         find: jest.fn(),
         findOne: jest.fn(),
     };
@@ -104,6 +105,25 @@ describe('TownhouseService', () => {
         });
     });
 
+    it('lista condomínios com contagens agregadas no banco, sem carregar casas e moradores', async () => {
+        const createdAt = new Date('2026-01-01T00:00:00.000Z');
+        const countsQuery = createRawQueryBuilder([{ id: 2, houseCount: '3', residentCount: '5' }]);
+        townhouseRepository.find.mockResolvedValue([
+            { id: 1, name: 'Condomínio A', slug: 'a', situation: TownhouseSituation.ACTIVE, createdAt },
+            { id: 2, name: 'Condomínio B', slug: 'b', situation: TownhouseSituation.ACTIVE, createdAt },
+        ]);
+        townhouseRepository.createQueryBuilder.mockReturnValue(countsQuery);
+
+        const result = await service.getAll(systemAdmin);
+
+        expect(townhouseRepository.find).toHaveBeenCalledWith({ where: {}, order: { name: 'ASC' } });
+        expect(countsQuery.where).toHaveBeenCalledWith('townhouse.id IN (:...townhouseIds)', { townhouseIds: [1, 2] });
+        expect(result.map(({ id, houseCount, residentCount }) => ({ id, houseCount, residentCount }))).toEqual([
+            { id: 1, houseCount: 0, residentCount: 0 },
+            { id: 2, houseCount: 3, residentCount: 5 },
+        ]);
+    });
+
     it('impede que morador use listagens administrativas de condomínios', async () => {
         await expect(service.getAll(resident)).rejects.toThrow(ForbiddenException);
         expect(townhouseRepository.find).not.toHaveBeenCalled();
@@ -114,3 +134,32 @@ describe('TownhouseService', () => {
         expect(townhouseRepository.findOne).not.toHaveBeenCalled();
     });
 });
+
+function createRawQueryBuilder(rows: unknown[]) {
+    const query = {
+        leftJoin: jest.fn(),
+        innerJoin: jest.fn(),
+        select: jest.fn(),
+        addSelect: jest.fn(),
+        where: jest.fn(),
+        groupBy: jest.fn(),
+        addGroupBy: jest.fn(),
+        orderBy: jest.fn(),
+        getRawMany: jest.fn().mockResolvedValue(rows),
+    };
+
+    for (const method of [
+        'leftJoin',
+        'innerJoin',
+        'select',
+        'addSelect',
+        'where',
+        'groupBy',
+        'addGroupBy',
+        'orderBy',
+    ] as const) {
+        query[method].mockReturnValue(query);
+    }
+
+    return query;
+}

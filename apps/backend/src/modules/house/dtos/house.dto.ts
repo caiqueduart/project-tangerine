@@ -8,7 +8,7 @@ import {
     IsString,
     MaxLength,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType, PickType } from '@nestjs/mapped-types';
 
 export class CreateHouseDto {
     @IsString()
@@ -22,7 +22,8 @@ export class CreateHouseDto {
     townhouseId: number;
 }
 
-export class UpdateHouseDto extends PartialType(CreateHouseDto) {}
+// Uma casa não pode trocar de condomínio; somente a identificação é editável.
+export class UpdateHouseDto extends PartialType(PickType(CreateHouseDto, ['identifier'] as const)) {}
 
 export class CreateHousesBatchDto {
     @IsNumber()

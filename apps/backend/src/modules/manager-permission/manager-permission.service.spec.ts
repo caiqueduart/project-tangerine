@@ -30,11 +30,17 @@ describe('ManagerPermissionService', () => {
         situation: UserSituation.ACTIVE,
     } as User;
     const townhouse = { id: 2, name: 'Corumbá II', slug: 'corumba-ii' } as Townhouse;
+    const entityManager = {
+        getRepository: jest.fn(),
+    };
     const managerPermissionRepository = {
         create: jest.fn((data: object) => data),
         find: jest.fn(),
         findOne: jest.fn(),
         save: jest.fn((permission: ManagerPermission) => Promise.resolve({ id: 'permission-id', ...permission })),
+        manager: {
+            transaction: jest.fn((operation: (manager: typeof entityManager) => unknown) => operation(entityManager)),
+        },
     };
     const townhousePolicy = { assertCanManage: jest.fn() };
     const townhouseService = { getActiveForManagerPermission: jest.fn() };
@@ -44,6 +50,7 @@ describe('ManagerPermissionService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        entityManager.getRepository.mockReturnValue(managerPermissionRepository);
         managerPermissionRepository.findOne.mockResolvedValue(null);
         townhouseService.getActiveForManagerPermission.mockResolvedValue(townhouse);
         userService.getActiveForManagerPermission.mockResolvedValue(user);
@@ -70,6 +77,7 @@ describe('ManagerPermissionService', () => {
             user.id,
             UserAuditAction.MANAGER_PERMISSION_GRANTED,
             actor.userId,
+            entityManager,
         );
         expect(result).toEqual(
             expect.objectContaining({
@@ -126,6 +134,7 @@ describe('ManagerPermissionService', () => {
             user.id,
             UserAuditAction.MANAGER_PERMISSION_REVOKED,
             actor.userId,
+            entityManager,
         );
     });
 

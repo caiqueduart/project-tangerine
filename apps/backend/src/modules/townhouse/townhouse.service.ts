@@ -3,6 +3,7 @@ import {
     CreateTownhouseDto,
     GetTownhouseDto,
     TownhouseDetailsDto,
+    TownhouseHouseDto,
     TownhouseListItemDto,
     TownhouseOptionDto,
     UpdateTownhouseDto,
@@ -13,6 +14,13 @@ import { In, QueryFailedError, Repository } from 'typeorm';
 import { AuthenticatedActor } from '../authorization/models/authenticated-actor';
 import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 import { TownhouseSituation } from './enums/townhouse-situation.enum';
+
+interface TownhouseCounts {
+    readonly houseCount: number;
+    readonly residentCount: number;
+}
+
+const EMPTY_COUNTS: TownhouseCounts = { houseCount: 0, residentCount: 0 };
 
 @Injectable()
 export class TownhouseService {
@@ -32,7 +40,7 @@ export class TownhouseService {
         try {
             const savedTownhouse = await this._townhouseRepository.save(townhouse);
 
-            return this._toDetailsDto({ ...savedTownhouse, houses: [] });
+            return { ...this._toListItemDto(savedTownhouse, EMPTY_COUNTS), houses: [] };
         } catch (error) {
             this._handleUniqueConstraint(error);
             throw error;
@@ -42,9 +50,7 @@ export class TownhouseService {
     async getOne(id: number, actor: AuthenticatedActor): Promise<TownhouseDetailsDto> {
         this._townhousePolicy.assertCanManage(actor, id);
 
-        const townhouse = await this._findOneWithRelations(id);
-
-        return this._toDetailsDto(townhouse);
+        return this._getDetails(await this._findOne(id));
     }
 
     async getOneBySlug(slug: string): Promise<GetTownhouseDto> {
@@ -79,15 +85,25 @@ export class TownhouseService {
         return townhouse;
     }
 
+    async assertExists(id: number): Promise<void> {
+        const exists = await this._townhouseRepository.existsBy({ id });
+
+        if (!exists) {
+            throw new NotFoundException('Condomínio não encontrado.');
+        }
+    }
+
     async getAll(actor: AuthenticatedActor): Promise<TownhouseListItemDto[]> {
         const townhouseIds = this._townhousePolicy.getManagementScope(actor);
         const townhouses = await this._townhouseRepository.find({
             where: townhouseIds ? { id: In([...townhouseIds]) } : {},
-            relations: { houses: { residents: true } },
             order: { name: 'ASC' },
         });
+        const countsByTownhouseId = await this._getCounts(townhouses.map(({ id }) => id));
 
-        return townhouses.map((townhouse) => this._toListItemDto(townhouse));
+        return townhouses.map((townhouse) =>
+            this._toListItemDto(townhouse, countsByTownhouseId.get(townhouse.id) ?? EMPTY_COUNTS),
+        );
     }
 
     async getOptions(actor: AuthenticatedActor): Promise<TownhouseOptionDto[]> {
@@ -104,9 +120,10 @@ export class TownhouseService {
     async deleteOne(id: number, actor: AuthenticatedActor): Promise<void> {
         this._townhousePolicy.assertCanManage(actor, id);
 
-        const townhouse = await this._findOneWithRelations(id);
+        const townhouse = await this._findOne(id);
+        const counts = (await this._getCounts([id])).get(id) ?? EMPTY_COUNTS;
 
-        if (townhouse.houses.length > 0) {
+        if (counts.houseCount > 0) {
             throw new ConflictException('Remova as casas antes de excluir o condomínio.');
         }
 
@@ -116,7 +133,7 @@ export class TownhouseService {
     async updateOne(id: number, data: UpdateTownhouseDto, actor: AuthenticatedActor): Promise<TownhouseDetailsDto> {
         this._townhousePolicy.assertCanManage(actor, id);
 
-        const townhouse = await this._findOneWithRelations(id);
+        const townhouse = await this._findOne(id);
 
         if (data.name !== undefined) {
             townhouse.name = data.name.trim();
@@ -132,19 +149,16 @@ export class TownhouseService {
 
         try {
             await this._townhouseRepository.save(townhouse);
-            return this._toDetailsDto(townhouse);
         } catch (error) {
             this._handleUniqueConstraint(error);
             throw error;
         }
+
+        return this._getDetails(townhouse);
     }
 
-    private async _findOneWithRelations(id: number): Promise<Townhouse> {
-        const townhouse = await this._townhouseRepository.findOne({
-            where: { id },
-            relations: { houses: { residents: true } },
-            order: { houses: { identifier: 'ASC' } },
-        });
+    private async _findOne(id: number): Promise<Townhouse> {
+        const townhouse = await this._townhouseRepository.findOne({ where: { id } });
 
         if (!townhouse) {
             throw new NotFoundException('Condomínio não encontrado.');
@@ -153,28 +167,71 @@ export class TownhouseService {
         return townhouse;
     }
 
-    private _toListItemDto(townhouse: Townhouse): TownhouseListItemDto {
-        const houses = townhouse.houses ?? [];
+    private async _getDetails(townhouse: Townhouse): Promise<TownhouseDetailsDto> {
+        const houses = await this._getHouses(townhouse.id);
 
+        return {
+            ...this._toListItemDto(townhouse, {
+                houseCount: houses.length,
+                residentCount: houses.reduce((total, house) => total + house.residentCount, 0),
+            }),
+            houses,
+        };
+    }
+
+    // Conta casas e moradores no banco em vez de carregar todos os registros relacionados.
+    private async _getCounts(townhouseIds: readonly number[]): Promise<Map<number, TownhouseCounts>> {
+        if (!townhouseIds.length) return new Map();
+
+        const rows = await this._townhouseRepository
+            .createQueryBuilder('townhouse')
+            .leftJoin('townhouse.houses', 'house')
+            .leftJoin('house.residents', 'resident')
+            .select('townhouse.id', 'id')
+            .addSelect('COUNT(DISTINCT house.id)', 'houseCount')
+            .addSelect('COUNT(resident.userId)', 'residentCount')
+            .where('townhouse.id IN (:...townhouseIds)', { townhouseIds })
+            .groupBy('townhouse.id')
+            .getRawMany<{ id: number; houseCount: string; residentCount: string }>();
+
+        return new Map(
+            rows.map((row) => [
+                Number(row.id),
+                { houseCount: Number(row.houseCount), residentCount: Number(row.residentCount) },
+            ]),
+        );
+    }
+
+    private async _getHouses(townhouseId: number): Promise<TownhouseHouseDto[]> {
+        const rows = await this._townhouseRepository
+            .createQueryBuilder('townhouse')
+            .innerJoin('townhouse.houses', 'house')
+            .leftJoin('house.residents', 'resident')
+            .select('house.id', 'id')
+            .addSelect('house.identifier', 'identifier')
+            .addSelect('COUNT(resident.userId)', 'residentCount')
+            .where('townhouse.id = :townhouseId', { townhouseId })
+            .groupBy('house.id')
+            .addGroupBy('house.identifier')
+            .orderBy('house.identifier', 'ASC')
+            .getRawMany<{ id: number; identifier: string; residentCount: string }>();
+
+        return rows.map((row) => ({
+            id: Number(row.id),
+            identifier: row.identifier,
+            residentCount: Number(row.residentCount),
+        }));
+    }
+
+    private _toListItemDto(townhouse: Townhouse, counts: TownhouseCounts): TownhouseListItemDto {
         return {
             id: townhouse.id,
             name: townhouse.name,
             slug: townhouse.slug,
             situation: townhouse.situation,
             createdAt: townhouse.createdAt,
-            houseCount: houses.length,
-            residentCount: houses.reduce((total, house) => total + (house.residents?.length ?? 0), 0),
-        };
-    }
-
-    private _toDetailsDto(townhouse: Townhouse): TownhouseDetailsDto {
-        return {
-            ...this._toListItemDto(townhouse),
-            houses: (townhouse.houses ?? []).map((house) => ({
-                id: house.id,
-                identifier: house.identifier,
-                residentCount: house.residents?.length ?? 0,
-            })),
+            houseCount: counts.houseCount,
+            residentCount: counts.residentCount,
         };
     }
 

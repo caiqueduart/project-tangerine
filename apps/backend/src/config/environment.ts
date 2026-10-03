@@ -15,6 +15,7 @@ export interface EnvironmentVariables extends DatabaseEnvironmentVariables {
     JWT_REFRESH_SECRET: string;
     JWT_TTL: number;
     JWT_REFRESH_TTL: number;
+    PROVISIONAL_PASSWORD_TTL_HOURS: number;
 }
 
 export function normalizeEnvironment(values: Record<string, unknown>): EnvironmentVariables {
@@ -52,6 +53,11 @@ export function normalizeEnvironment(values: Record<string, unknown>): Environme
         JWT_REFRESH_SECRET: refreshSecret,
         JWT_TTL: parsePositiveInteger(values.JWT_TTL, 'JWT_TTL', 900),
         JWT_REFRESH_TTL: parsePositiveInteger(values.JWT_REFRESH_TTL, 'JWT_REFRESH_TTL', 3600),
+        PROVISIONAL_PASSWORD_TTL_HOURS: parsePositiveInteger(
+            values.PROVISIONAL_PASSWORD_TTL_HOURS,
+            'PROVISIONAL_PASSWORD_TTL_HOURS',
+            72,
+        ),
     };
 }
 

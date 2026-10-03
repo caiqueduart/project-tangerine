@@ -11,7 +11,7 @@ export class LoginDto {
 
     @IsOptional()
     @IsString()
-    @MaxLength(100)
+    @MaxLength(30)
     @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
     townhouseSlug?: string;
 }

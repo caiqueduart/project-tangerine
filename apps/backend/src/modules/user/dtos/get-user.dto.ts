@@ -31,6 +31,8 @@ export class GetUserDto {
     email: string | null;
     situation: UserSituation;
     role: UserRole;
+    // Preenchido somente para usuários pendentes.
+    provisionalPasswordExpiresAt: Date | null;
     house: GetUserHouseDto | null;
     managerPermissions: GetUserManagerPermissionDto[];
 }

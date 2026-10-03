@@ -70,8 +70,17 @@ export class ManagerPermissionService {
         permission.revokedAt = null;
 
         try {
-            const savedPermission = await this._managerPermissionRepository.save(permission);
-            await this._userService.recordAudit(userId, UserAuditAction.MANAGER_PERMISSION_GRANTED, actor.userId);
+            const savedPermission = await this._managerPermissionRepository.manager.transaction(async (manager) => {
+                const saved = await manager.getRepository(ManagerPermission).save(permission);
+                await this._userService.recordAudit(
+                    userId,
+                    UserAuditAction.MANAGER_PERMISSION_GRANTED,
+                    actor.userId,
+                    manager,
+                );
+                return saved;
+            });
+
             return this._toDto(savedPermission);
         } catch (error) {
             if (error instanceof HttpException) throw error;
@@ -101,8 +110,15 @@ export class ManagerPermissionService {
         permission.revokedAt = new Date();
 
         try {
-            await this._managerPermissionRepository.save(permission);
-            await this._userService.recordAudit(userId, UserAuditAction.MANAGER_PERMISSION_REVOKED, actor.userId);
+            await this._managerPermissionRepository.manager.transaction(async (manager) => {
+                await manager.getRepository(ManagerPermission).save(permission);
+                await this._userService.recordAudit(
+                    userId,
+                    UserAuditAction.MANAGER_PERMISSION_REVOKED,
+                    actor.userId,
+                    manager,
+                );
+            });
         } catch (error) {
             if (error instanceof HttpException) throw error;
             throw new InternalServerErrorException('Erro ao remover permissão de gestor.');

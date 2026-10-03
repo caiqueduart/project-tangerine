@@ -1,37 +1,42 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { randomInt } from 'node:crypto';
 
-const FAMILIAR_WORDS = [
-    'Agua',
-    'Amor',
-    'Azul',
-    'Bola',
-    'Cafe',
-    'Casa',
-    'Doce',
-    'Flor',
-    'Fogo',
-    'Gato',
-    'Lago',
-    'Lima',
-    'Pato',
-    'Pera',
-    'Rosa',
-    'Suco',
-    'Vida',
-] as const;
-const UNAMBIGUOUS_DIGITS = ['2', '3', '4', '5', '6', '7', '8', '9'] as const;
+// Sem caracteres que se confundem ao ditar ou ler a senha (0/O/o, 1/I/l).
+const UNAMBIGUOUS_LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz';
+const UNAMBIGUOUS_DIGITS = '23456789';
+const ALPHABET = `${UNAMBIGUOUS_LETTERS}${UNAMBIGUOUS_DIGITS}`;
+const PASSWORD_LENGTH = 10;
 
 @Injectable()
 export class ProvisionalPasswordService {
-    generate(): string {
-        const word = this._randomItem(FAMILIAR_WORDS);
-        const digits = Array.from({ length: 4 }, () => this._randomItem(UNAMBIGUOUS_DIGITS)).join('');
+    constructor(private readonly _configService: ConfigService) {}
 
-        return `${word}${digits}`;
+    generate(): string {
+        const characters = [
+            this._randomItem(UNAMBIGUOUS_LETTERS),
+            this._randomItem(UNAMBIGUOUS_DIGITS),
+            ...Array.from({ length: PASSWORD_LENGTH - 2 }, () => this._randomItem(ALPHABET)),
+        ];
+
+        return this._shuffle(characters).join('');
     }
 
-    private _randomItem<T>(values: readonly T[]): T {
+    getExpirationDate(from = new Date()): Date {
+        const ttlHours = this._configService.getOrThrow<number>('PROVISIONAL_PASSWORD_TTL_HOURS');
+        return new Date(from.getTime() + ttlHours * 60 * 60 * 1000);
+    }
+
+    private _randomItem(values: string): string {
         return values[randomInt(values.length)];
+    }
+
+    private _shuffle(values: string[]): string[] {
+        for (let index = values.length - 1; index > 0; index -= 1) {
+            const swapIndex = randomInt(index + 1);
+            [values[index], values[swapIndex]] = [values[swapIndex], values[index]];
+        }
+
+        return values;
     }
 }

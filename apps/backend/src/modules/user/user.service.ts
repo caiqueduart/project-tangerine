@@ -15,6 +15,7 @@ import { TownhousePolicy } from '../authorization/policies/townhouse.policy';
 import { HashService } from '../common/services/hash.service';
 import { ProvisionalPasswordService } from '../common/services/provisional-password.service';
 import { House } from '../house/entities/house.entity';
+import { HouseService } from '../house/house.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { CreateUserResultDto, GetUserDetailsDto, GetUserDto, PaginatedUsersDto } from './dtos/get-user.dto';
 import { ProvisionalPasswordDto } from './dtos/password.dto';
@@ -56,6 +57,7 @@ export class UserService {
         private readonly _hashService: HashService,
         private readonly _provisionalPasswordService: ProvisionalPasswordService,
         private readonly _townhousePolicy: TownhousePolicy,
+        private readonly _houseService: HouseService,
     ) {}
 
     async bootstrapSystemAdmin(input: SystemAdminBootstrapInput): Promise<'created' | 'existing'> {
@@ -122,6 +124,7 @@ export class UserService {
                     phone: dto.phone.trim(),
                     situation: UserSituation.PENDING,
                     role: UserRole.USER,
+                    provisionalPasswordExpiresAt: this._provisionalPasswordService.getExpirationDate(),
                 });
                 const savedUser = await manager.save(newUser);
 
@@ -333,6 +336,7 @@ export class UserService {
 
         await this._userRepository.manager.transaction(async (manager) => {
             user.passwordHash = passwordHash;
+            user.provisionalPasswordExpiresAt = this._provisionalPasswordService.getExpirationDate();
             await manager.save(user);
             await this._saveAudit(manager, user.id, UserAuditAction.PASSWORD_CHANGED, actor.userId);
         });
@@ -352,6 +356,7 @@ export class UserService {
         return this._userRepository.manager.transaction(async (manager) => {
             user.passwordHash = passwordHash;
             user.situation = UserSituation.ACTIVE;
+            user.provisionalPasswordExpiresAt = null;
             await manager.save(user);
             await this._saveAudit(manager, user.id, UserAuditAction.PASSWORD_CHANGED, user.id);
             await this._saveAudit(manager, user.id, UserAuditAction.ACTIVATED, user.id);
@@ -416,14 +421,14 @@ export class UserService {
         return user;
     }
 
-    async recordAudit(userId: string, action: UserAuditAction, actorUserId: string): Promise<void> {
-        await this._userAuditRepository.save(
-            this._userAuditRepository.create({
-                userId,
-                action,
-                actorUserId,
-            }),
-        );
+    // Recebe o EntityManager de quem chama para gravar a auditoria na mesma transação da alteração auditada.
+    async recordAudit(
+        userId: string,
+        action: UserAuditAction,
+        actorUserId: string,
+        manager: EntityManager = this._userAuditRepository.manager,
+    ): Promise<void> {
+        await this._saveAudit(manager, userId, action, actorUserId);
     }
 
     private async _findOne(userId: string): Promise<User> {
@@ -499,13 +504,7 @@ export class UserService {
         actor: AuthenticatedActor,
     ): Promise<House> {
         this._townhousePolicy.assertCanManage(actor, residence.townhouseId);
-        const house = await manager.findOne(House, {
-            where: { id: residence.houseId, townhouse: { id: residence.townhouseId } },
-            relations: { townhouse: true },
-        });
-
-        if (!house) throw new NotFoundException('Casa não encontrada no condomínio informado.');
-        return house;
+        return this._houseService.findInTownhouse(residence.houseId, residence.townhouseId, manager);
     }
 
     private async _createResident(manager: EntityManager, user: User, house: House): Promise<Resident> {
@@ -572,6 +571,8 @@ export class UserService {
             email: user.email,
             situation: user.situation,
             role: user.role,
+            provisionalPasswordExpiresAt:
+                user.situation === UserSituation.PENDING ? (user.provisionalPasswordExpiresAt ?? null) : null,
             managerPermissions: (user.managerPermissions ?? [])
                 .filter((permission) => permission.situation === ManagerPermissionSituation.ACTIVE)
                 .map((permission) => ({

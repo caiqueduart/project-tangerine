@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
-const PASSWORD_PATTERN = /^(?=.*\p{L})(?=.*\p{N}).+$/u;
+export const PASSWORD_PATTERN = /^(?=.*\p{L})(?=.*\p{N}).+$/u;
 const PASSWORD_MESSAGE = 'A senha deve conter pelo menos uma letra e um número.';
 
 export class CompleteFirstAccessDto {
