@@ -7,14 +7,31 @@
     <mat-dialog-content class="manager-permission-dialog__content">
         <mat-form-field appearance="outline">
             <mat-label>Usuário</mat-label>
-            <mat-select formControlName="userId">
-                @for (user of users; track user.id) {
-                    <mat-option [value]="user.id">
+            <input
+                matInput
+                type="search"
+                placeholder="Busque por nome, telefone ou e-mail"
+                formControlName="user"
+                [matAutocomplete]="userAutocomplete"
+            />
+
+            @if (searching()) {
+                <mat-spinner matSuffix diameter="18" aria-label="Buscando usuários" />
+            }
+
+            <mat-autocomplete #userAutocomplete="matAutocomplete" [displayWith]="displayUser">
+                @for (user of candidates(); track user.id) {
+                    <mat-option [value]="user">
                         {{ user.firstName }} {{ user.lastName }} · {{ user.email || user.phone }}
                     </mat-option>
+                } @empty {
+                    @if (!searching()) {
+                        <mat-option disabled>Nenhum usuário ativo encontrado.</mat-option>
+                    }
                 }
-            </mat-select>
-            <mat-error>Selecione um usuário.</mat-error>
+            </mat-autocomplete>
+
+            <mat-error>Selecione um usuário da lista.</mat-error>
         </mat-form-field>
 
         <p class="manager-permission-dialog__notice">

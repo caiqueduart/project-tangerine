@@ -31,6 +31,7 @@ export interface AdminUser {
     readonly email: string | null;
     readonly situation: UserSituation;
     readonly role: UserRole;
+    readonly provisionalPasswordExpiresAt: string | null;
     readonly managerPermissions: readonly AdminUserManagerPermission[];
     readonly house: {
         readonly id: number;

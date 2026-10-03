@@ -97,6 +97,15 @@
         }
     }
 
+    &__expired {
+        color: var(--color-error);
+        font-weight: 700;
+    }
+
+    &__expiration-date {
+        color: var(--color-text-secondary);
+    }
+
     &__empty {
         color: var(--color-text-secondary);
         margin: 0;

@@ -4,7 +4,6 @@ import { finalize, Observable, shareReplay, tap } from 'rxjs';
 import { AUTH_API_ROUTES } from '../../config/routes/auth-routes.config';
 import { AuthSessionService } from './auth-session.service';
 import {
-    AccessToken,
     ChangePasswordPayload,
     CompleteFirstAccessPayload,
     LoginCredentials,
@@ -15,7 +14,7 @@ import {
 export class AuthService {
     private readonly _httpClient = inject(HttpClient);
     private readonly _authSessionService = inject(AuthSessionService);
-    private _refreshRequest: Observable<AccessToken> | null = null;
+    private _refreshRequest: Observable<LoginResponse> | null = null;
 
     login(credentials: LoginCredentials, townhouseSlug?: string): Observable<LoginResponse> {
         const payload: LoginCredentials = {
@@ -30,16 +29,16 @@ export class AuthService {
         );
     }
 
-    refreshAccessToken(): Observable<AccessToken> {
+    refreshAccessToken(): Observable<LoginResponse> {
         if (this._refreshRequest) {
             return this._refreshRequest;
         }
 
         this._refreshRequest = this._httpClient
-            .post<AccessToken>(AUTH_API_ROUTES.refresh, null, { withCredentials: true })
+            .post<LoginResponse>(AUTH_API_ROUTES.refresh, null, { withCredentials: true })
             .pipe(
-                tap(({ accessToken }) => {
-                    this._authSessionService.updateAccessToken(accessToken);
+                tap((response) => {
+                    this._authSessionService.refresh(response);
                 }),
                 finalize(() => {
                     this._refreshRequest = null;

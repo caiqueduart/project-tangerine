@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthenticationErrorCode } from '@repo/shared';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { TownhouseContextService } from '../../../core/townhouse/townhouse-context.service';
@@ -168,7 +169,17 @@ export class LoginPage {
         }
 
         if (error instanceof HttpErrorResponse && error.status === 401) {
+            const body = error.error as { code?: string; message?: string } | null;
+
+            if (body?.code === AuthenticationErrorCode.PROVISIONAL_PASSWORD_EXPIRED && body.message) {
+                return body.message;
+            }
+
             return 'Telefone, e-mail ou senha inválidos.';
+        }
+
+        if (error instanceof HttpErrorResponse && error.status === 429) {
+            return 'Muitas tentativas de acesso. Aguarde um minuto e tente novamente.';
         }
 
         if (error instanceof HttpErrorResponse && error.status === 0) {

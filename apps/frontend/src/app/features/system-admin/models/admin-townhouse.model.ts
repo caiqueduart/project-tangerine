@@ -39,8 +39,7 @@ export interface UpdateTownhousePayload extends Partial<TownhouseFormValue> {
     readonly situation?: TownhouseSituation;
 }
 
-export interface HouseFormValue {
-    readonly townhouseId: number;
+export interface UpdateHousePayload {
     readonly identifier: string;
 }
 

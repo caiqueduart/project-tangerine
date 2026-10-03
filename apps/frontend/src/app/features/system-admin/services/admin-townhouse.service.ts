@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { HOUSE_API_ROUTES } from '../../../core/config/routes/house-routes.config';
 import { TOWNHOUSE_API_ROUTES } from '../../../core/config/routes/townhouse-routes.config';
 import {
-    HouseFormValue,
     HousesBatchFormValue,
     SystemAdminHouse,
     SystemAdminHouseOption,
@@ -12,6 +11,7 @@ import {
     SystemAdminTownhouseListItem,
     SystemAdminTownhouseOption,
     TownhouseFormValue,
+    UpdateHousePayload,
     UpdateTownhousePayload,
 } from '../models/admin-townhouse.model';
 
@@ -53,7 +53,7 @@ export class AdminTownhouseService {
         return this._httpClient.post<SystemAdminHouse[]>(HOUSE_API_ROUTES.batch, payload);
     }
 
-    updateHouse(houseId: number, payload: HouseFormValue): Observable<SystemAdminHouse> {
+    updateHouse(houseId: number, payload: UpdateHousePayload): Observable<SystemAdminHouse> {
         return this._httpClient.patch<SystemAdminHouse>(HOUSE_API_ROUTES.byId(houseId), payload);
     }
 

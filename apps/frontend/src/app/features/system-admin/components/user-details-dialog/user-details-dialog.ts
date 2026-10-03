@@ -59,6 +59,24 @@ export class UserDetailsDialog {
         }[action];
     }
 
+    isExpired(expiresAt: string): boolean {
+        return new Date(expiresAt).getTime() <= Date.now();
+    }
+
+    remainingTime(expiresAt: string): string {
+        const totalMinutes = Math.max(1, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 60_000));
+        const days = Math.floor(totalMinutes / (24 * 60));
+        const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+        const minutes = totalMinutes % 60;
+        const parts = [
+            days && `${days} ${days === 1 ? 'dia' : 'dias'}`,
+            hours && `${hours} h`,
+            !days && minutes && `${minutes} min`,
+        ].filter(Boolean);
+
+        return parts.join(' e ');
+    }
+
     roleText(role: UserRole): string {
         return USER_ROLE_LABELS[role];
     }

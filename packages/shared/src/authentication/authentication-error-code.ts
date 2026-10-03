@@ -1,0 +1,3 @@
+export enum AuthenticationErrorCode {
+    PROVISIONAL_PASSWORD_EXPIRED = 'PROVISIONAL_PASSWORD_EXPIRED',
+}

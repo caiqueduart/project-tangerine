@@ -48,6 +48,28 @@
                     <dt>Papel global</dt>
                     <dd>{{ roleText(user.role) }}</dd>
                 </div>
+
+                @if (user.provisionalPasswordExpiresAt; as expiresAt) {
+                    <div>
+                        <dt>Senha provisória</dt>
+
+                        @if (isExpired(expiresAt)) {
+                            <dd class="user-details-dialog__expired">
+                                Expirada em
+                                <time [attr.datetime]="expiresAt">
+                                    {{ expiresAt | date: "dd/MM/yyyy 'às' HH:mm" : '-0300' }}
+                                </time>
+                            </dd>
+                        } @else {
+                            <dd>
+                                Expira em {{ remainingTime(expiresAt) }}
+                                <time class="user-details-dialog__expiration-date" [attr.datetime]="expiresAt">
+                                    ({{ expiresAt | date: "dd/MM/yyyy 'às' HH:mm" : '-0300' }})
+                                </time>
+                            </dd>
+                        }
+                    </div>
+                }
             </dl>
         </section>
 

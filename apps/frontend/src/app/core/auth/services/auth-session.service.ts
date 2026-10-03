@@ -39,8 +39,12 @@ export class AuthSessionService {
         this._session.set(response.session);
     }
 
-    updateAccessToken(accessToken: string): void {
-        localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    // Mantém o condomínio do contexto atual e atualiza papel, casa e gestão vindos do backend.
+    refresh(response: LoginResponse): void {
+        localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
+        localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(response.session));
+
+        this._session.set(response.session);
     }
 
     hasValidAccessToken(): boolean {

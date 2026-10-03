@@ -262,17 +262,8 @@
                             <p>Permissões administrativas válidas exclusivamente para este condomínio.</p>
                         </div>
 
-                        <button
-                            mat-flat-button
-                            type="button"
-                            [disabled]="loadingManagerCandidates()"
-                            (click)="openAddManagerDialog()"
-                        >
-                            @if (loadingManagerCandidates()) {
-                                <mat-spinner diameter="18" aria-label="Carregando usuários" />
-                            } @else {
-                                <mat-icon>person_add</mat-icon>
-                            }
+                        <button mat-flat-button type="button" (click)="openAddManagerDialog()">
+                            <mat-icon>person_add</mat-icon>
                             Adicionar gestor
                         </button>
                     </div>

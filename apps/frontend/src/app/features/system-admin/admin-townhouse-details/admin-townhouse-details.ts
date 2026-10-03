@@ -77,7 +77,6 @@ export class AdminTownhouseDetails {
     readonly loading = signal(true);
     readonly loadingUsers = signal(false);
     readonly loadingManagers = signal(false);
-    readonly loadingManagerCandidates = signal(false);
     readonly regeneratingUserId = signal<string | null>(null);
     readonly managers = signal<readonly AdminManagerPermission[]>([]);
     readonly users = signal<readonly AdminUser[]>([]);
@@ -300,7 +299,7 @@ export class AdminTownhouseDetails {
                     return;
                 }
 
-                this._townhouseService.updateHouse(house.id, { townhouseId: townhouse.id, identifier }).subscribe({
+                this._townhouseService.updateHouse(house.id, { identifier }).subscribe({
                     next: () => {
                         this._snackbar.success('Casa atualizada.');
                         this.loadTownhouse();
@@ -422,46 +421,26 @@ export class AdminTownhouseDetails {
     }
 
     openAddManagerDialog(): void {
-        if (this.loadingManagerCandidates()) return;
-        this.loadingManagerCandidates.set(true);
+        const excludedUserIds = this.managers().map((permission) => permission.userId);
 
-        this._userService
-            .getAll({ page: 1, pageSize: 1000, situation: 'ACTIVE' })
-            .pipe(finalize(() => this.loadingManagerCandidates.set(false)))
-            .subscribe({
-                next: ({ items: users }) => {
-                    const managerUserIds = new Set(this.managers().map((permission) => permission.userId));
-                    const candidates = users.filter(
-                        (user) => user.situation === 'ACTIVE' && !managerUserIds.has(user.id),
-                    );
+        this._dialog
+            .open(ManagerPermissionDialog, {
+                width: '540px',
+                maxWidth: 'calc(100vw - 32px)',
+                data: { excludedUserIds } satisfies ManagerPermissionDialogData,
+            })
+            .afterClosed()
+            .subscribe((userId) => {
+                if (!userId) return;
 
-                    if (!candidates.length) {
-                        this._snackbar.error('Não há usuários ativos disponíveis para receber esta permissão.');
-                        return;
-                    }
-
-                    this._dialog
-                        .open(ManagerPermissionDialog, {
-                            width: '540px',
-                            maxWidth: 'calc(100vw - 32px)',
-                            data: { users: candidates } satisfies ManagerPermissionDialogData,
-                        })
-                        .afterClosed()
-                        .subscribe((userId) => {
-                            if (!userId) return;
-
-                            this._managerPermissionService.grant(this._townhouseId, userId).subscribe({
-                                next: () => {
-                                    this._snackbar.success('Permissão de gestor concedida.');
-                                    this.loadManagers();
-                                },
-                                error: (error: HttpErrorResponse) =>
-                                    this._showError(error, 'Não foi possível conceder a permissão de gestor.'),
-                            });
-                        });
-                },
-                error: (error: HttpErrorResponse) =>
-                    this._showError(error, 'Não foi possível carregar os usuários disponíveis.'),
+                this._managerPermissionService.grant(this._townhouseId, userId).subscribe({
+                    next: () => {
+                        this._snackbar.success('Permissão de gestor concedida.');
+                        this.loadManagers();
+                    },
+                    error: (error: HttpErrorResponse) =>
+                        this._showError(error, 'Não foi possível conceder a permissão de gestor.'),
+                });
             });
     }
 
