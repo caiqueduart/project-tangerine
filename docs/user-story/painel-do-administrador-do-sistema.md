@@ -66,7 +66,8 @@ Precondições:
 Critérios de aceite:
 
 - O administrador deve informar o nome e o identificador de acesso do condomínio (slug).
-- O identificador de acesso deve ser único na plataforma.
+- O identificador de acesso deve ser único na plataforma, ter no máximo 30 caracteres e conter somente letras
+  minúsculas, números e hífens.
 - O sistema deve validar os campos obrigatórios antes de concluir o cadastro.
 - O condomínio deve ser criado sem moradores, gestores, ou casas vinculados automaticamente.
 - Após o cadastro, o administrador deve conseguir acessar os detalhes do condomínio e continuar sua configuração.
@@ -101,7 +102,8 @@ Precondições:
 Critérios de aceite:
 
 - O administrador deve conseguir alterar o nome e o identificador de acesso do condomínio.
-- O identificador de acesso deve continuar sendo único na plataforma.
+- O identificador de acesso deve continuar sendo único na plataforma e respeitar as mesmas regras de formato do
+  cadastro.
 - A alteração não deve remover casas, usuários, contribuições ou documentos relacionados ao condomínio.
 - O sistema deve registrar os dados alterados, o administrador responsável e a data e hora da ação.
 - Uma falha na alteração não deve deixar o condomínio com dados parcialmente atualizados.
@@ -141,6 +143,8 @@ Critérios de aceite:
 - O sistema deve indicar identificações inválidas ou duplicadas antes de concluir o cadastro em lote.
 - Nenhuma casa deve ser vinculada a outro condomínio por engano.
 - Após o cadastro, as casas devem ficar disponíveis para vínculos de moradores no condomínio correto.
+- Na edição de uma casa, somente a identificação pode ser alterada; a casa não pode ser transferida para outro
+  condomínio.
 
 ### US-SIS-009 - Designar um gestor de condomínio
 
@@ -154,6 +158,8 @@ Precondições:
 Critérios de aceite:
 
 - O administrador deve conseguir selecionar o usuário e o condomínio da permissão.
+- A seleção do usuário deve permitir buscá-lo por nome, telefone ou e-mail entre os usuários ativos, sem carregar
+  todos os usuários da plataforma de uma vez.
 - A permissão deve valer somente para o condomínio selecionado.
 - O sistema deve permitir mais de um gestor ativo no mesmo condomínio.
 - Após a concessão, o usuário deve conseguir acessar o painel administrativo do condomínio.
@@ -193,6 +199,8 @@ Critérios de aceite:
 - O sistema deve indicar quando o usuário possui permissão de gestor ou de administrador do sistema.
 - O administrador deve conseguir localizar usuários por nome, telefone ou e-mail.
 - O administrador deve conseguir acessar os detalhes de um usuário listado.
+- Nos detalhes de um usuário pendente, o sistema deve exibir o tempo restante de validade da senha provisória ou a
+  data em que ela expirou.
 - Dados pessoais devem ser exibidos apenas na medida necessária para a gestão operacional.
 
 ### US-SIS-012 - Pré-cadastrar um usuário
@@ -215,8 +223,9 @@ Critérios de aceite:
 - Quando houver vínculo residencial, o sistema deve registrar sua data e hora de criação.
 - O sistema não deve permitir duplicidade de telefone ou e-mail.
 - O sistema deve gerar a senha provisória, sem permitir que o administrador a defina manualmente.
-- A senha provisória deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número, e usar uma
-  combinação familiar, simples de comunicar e digitar, sem dados pessoais do usuário.
+- A senha provisória deve ter dez caracteres aleatórios, incluindo ao menos uma letra e um número, sem caracteres
+  visualmente ambíguos nem dados pessoais do usuário.
+- A senha provisória deve valer por 72 horas a partir do pré-cadastro.
 - O sistema deve armazenar somente o hash da senha provisória no mesmo campo usado pela senha comum.
 - O usuário deve ser criado com situação pendente.
 - A senha provisória deve ser exibida ao administrador somente no resultado da criação para comunicação manual ao
@@ -242,7 +251,7 @@ Critérios de aceite:
 - A nova senha provisória deve seguir as mesmas regras de formação e armazenamento usadas no pré-cadastro.
 - O novo hash deve substituir o hash anterior no mesmo campo, invalidando imediatamente a senha provisória anterior.
 - A situação do usuário deve permanecer pendente.
-- A senha provisória não deve possuir prazo de validade.
+- A nova senha provisória deve reiniciar o prazo de validade de 72 horas a partir da regeneração.
 - O sistema deve exibir a nova senha ao administrador somente no resultado da regeneração para comunicação manual ao
   usuário.
 - O sistema deve registrar a alteração de senha, o administrador responsável e a data e hora, sem armazenar a senha nem

@@ -124,11 +124,14 @@ Funcionalidades previstas:
 - Diferenciação entre acesso comum de morador e permissões administrativas adicionais.
 - Encerramento de sessão.
 
-No pré-cadastro, o sistema deve gerar uma senha provisória que respeite as regras das senhas comuns, combine letras e
-números e seja fácil de comunicar e digitar. A senha não deve expirar por tempo e deve ser armazenada somente como hash,
+No pré-cadastro, o sistema deve gerar uma senha provisória aleatória que respeite as regras das senhas comuns, combine
+letras e números e seja fácil de comunicar e digitar. A senha vale por 72 horas e deve ser armazenada somente como hash,
 no mesmo campo da senha comum. O usuário pendente pode entrar com essa senha apenas para definir uma nova senha; a troca
 substitui o hash anterior e ativa o cadastro. Enquanto o usuário permanecer pendente, qualquer administrador autorizado
-em seu escopo pode gerar outra senha provisória, que substitui imediatamente a anterior.
+em seu escopo pode gerar outra senha provisória, que substitui imediatamente a anterior e reinicia o prazo de validade.
+
+O login deve limitar tentativas repetidas por telefone ou e-mail e por endereço de rede, para dificultar a descoberta de
+senhas por tentativa e erro.
 
 Para o MVP, a entrega da senha provisória é responsabilidade do administrador que realizou o cadastro ou a regeneração.
 O envio automático por WhatsApp ou e-mail permanece fora do escopo.

@@ -16,6 +16,9 @@ Critérios de aceite:
 - O sistema deve impedir o login de usuários inativos ou bloqueados.
 - O sistema deve carregar apenas as informações permitidas para a casa vinculada ao morador.
 - Caso as credenciais estejam incorretas, o sistema deve exibir uma mensagem simples, sem informar se o erro foi no telefone, no e-mail ou na senha.
+- O sistema deve limitar tentativas repetidas de login: até cinco por minuto para o mesmo telefone ou e-mail a partir do
+  mesmo endereço de rede e até vinte por minuto por endereço de rede.
+- Ao atingir o limite, o sistema deve pedir que o usuário aguarde um minuto antes de tentar novamente.
 
 ### US-AUT-002 - Acessar área administrativa do condomínio
 
@@ -51,7 +54,9 @@ ativação do meu acesso.
 Critérios de aceite:
 
 - O usuário pendente deve conseguir autenticar com o telefone ou e-mail cadastrado e a senha provisória válida.
-- A senha provisória não deve possuir prazo de validade.
+- A senha provisória deve valer por 72 horas a partir do pré-cadastro ou da última regeneração.
+- Com a senha provisória expirada, o sistema deve recusar o login e orientar o usuário a solicitar uma nova senha ao
+  gestor. Essa mensagem só deve aparecer quando a senha informada estiver correta.
 - O sistema deve impedir o acesso do usuário pendente às demais áreas e operações até que ele defina uma nova senha.
 - O bloqueio das demais operações deve ser aplicado pelo backend, independentemente do redirecionamento realizado pelo
   frontend.

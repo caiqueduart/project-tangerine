@@ -1,59 +1,34 @@
-# Frontend
+# Frontend Tangerine
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.19.
+Aplicação Angular com Angular Material, integrada ao workspace `@repo/shared`.
 
-## Development server
+## Desenvolvimento
 
-To start a local development server, run:
+Na raiz do monorepo, suba backend e frontend juntos:
 
-```bash
-ng serve
+```sh
+npm run dev
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Para subir somente o frontend:
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```sh
+npm run dev --workspace frontend
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+A aplicação fica em `http://localhost:4200` e consome a API em `http://localhost:3000`, definida em
+`src/environments/environment.ts`. Em produção, a API é acessada pelo caminho relativo `/api`.
 
-```bash
-ng generate --help
+As áreas principais são:
+
+- `/admin`: painel do administrador do sistema.
+- `/<identificador-do-condominio>`: login e espaço do morador de cada condomínio.
+
+## Verificação
+
+```sh
+npm run build --workspace frontend
+npm run test --workspace frontend -- --watch=false
 ```
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+As convenções de código, estilos e layout estão no [AGENTS.md](../../AGENTS.md) da raiz.

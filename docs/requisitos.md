@@ -240,9 +240,9 @@ sem disponibilizar solicitação pública de cadastro.
 
 ### RF-050 - Geração de senha provisória
 
-No pré-cadastro, o sistema deve gerar uma senha provisória sem permitir que o administrador a defina manualmente. A senha
-deve respeitar as regras das senhas comuns e usar uma combinação familiar, simples de comunicar e digitar, sem dados
-pessoais do usuário.
+No pré-cadastro, o sistema deve gerar uma senha provisória aleatória sem permitir que o administrador a defina
+manualmente. A senha deve respeitar as regras das senhas comuns, ser simples de comunicar e digitar, não conter dados
+pessoais do usuário e valer por tempo limitado.
 
 ### RF-051 - Ativação no primeiro acesso
 
@@ -252,8 +252,8 @@ deve substituir o hash anterior e alterar a situação do usuário para ativo na
 ### RF-052 - Regeneração de senha provisória
 
 O sistema deve permitir que qualquer administrador autorizado gere uma nova senha provisória somente para usuários
-pendentes dentro do seu escopo. A nova senha deve substituir imediatamente a anterior e não deve possuir prazo de
-validade.
+pendentes dentro do seu escopo. A nova senha deve substituir imediatamente a anterior e reiniciar o prazo de validade a
+partir do momento da regeneração.
 
 ### RF-053 - Auditoria de senha e situação
 
@@ -433,14 +433,37 @@ qualquer usuário pendente.
 
 ### RN-043 - Formação da senha provisória
 
-A senha provisória deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número. Sua composição deve
-usar elementos familiares, evitar símbolos difíceis e caracteres visualmente ambíguos e não utilizar nome, telefone,
-e-mail, condomínio, casa ou outros dados pessoais do usuário.
+A senha provisória deve ter dez caracteres gerados aleatoriamente, incluindo ao menos uma letra e um número, e respeitar
+as regras das senhas comuns. Sua composição deve evitar símbolos e caracteres visualmente ambíguos, como `0`, `O`, `1`,
+`I` e `l`, e não utilizar nome, telefone, e-mail, condomínio, casa ou outros dados pessoais do usuário.
 
 ### RN-044 - Comunicação manual da senha provisória
 
 O envio automático da senha provisória por WhatsApp ou e-mail não faz parte do MVP. A entrega das credenciais é
 responsabilidade do administrador que realizou o pré-cadastro ou a regeneração.
+
+### RN-045 - Validade da senha provisória
+
+A senha provisória deve valer por 72 horas a partir do pré-cadastro ou da última regeneração. Após esse prazo, o login
+com a senha correta deve ser recusado com uma mensagem orientando o usuário a solicitar nova senha ao gestor. A
+verificação do prazo deve ocorrer somente depois da validação da senha, para não revelar a existência da conta. A área
+administrativa deve exibir, nos detalhes do usuário pendente, o tempo restante ou a data em que a senha expirou.
+
+### RN-046 - Limite de tentativas de login
+
+O sistema deve limitar as tentativas de login a cinco por minuto para o mesmo telefone ou e-mail a partir do mesmo
+endereço de rede, e a vinte por minuto por endereço de rede. Ao atingir o limite, deve informar que o usuário aguarde um
+minuto antes de tentar novamente.
+
+### RN-047 - Casa pertence a um único condomínio
+
+Uma casa não pode ser transferida para outro condomínio. Na edição de uma casa, somente sua identificação pode ser
+alterada.
+
+### RN-048 - Identificador de acesso do condomínio
+
+O identificador de acesso do condomínio (slug) deve ser único na plataforma, ter no máximo 30 caracteres e conter
+somente letras minúsculas, números e hífens.
 
 ## Regra de Transição dos Dados Existentes
 

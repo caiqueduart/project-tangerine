@@ -85,6 +85,7 @@ Precondições:
 Critérios de aceite:
 
 - O gestor deve conseguir alterar a identificação da casa.
+- A casa não pode ser transferida para outro condomínio; somente a identificação é editável.
 - O sistema deve continuar exigindo que a identificação seja única dentro do condomínio.
 - A alteração não deve remover moradores, comprovantes, pagamentos ou contribuições relacionados à casa.
 - O sistema deve registrar quem realizou a alteração e quando ela ocorreu.
@@ -124,8 +125,9 @@ Critérios de aceite:
 - A seleção de uma casa do condomínio administrado deve ser obrigatória.
 - O sistema não deve permitir duplicidade de telefone ou e-mail.
 - O sistema deve gerar a senha provisória, sem permitir que o gestor a defina manualmente.
-- A senha provisória deve conter pelo menos oito caracteres, incluindo ao menos uma letra e um número, e usar uma
-  combinação familiar, simples de comunicar e digitar, sem dados pessoais do morador.
+- A senha provisória deve ter dez caracteres aleatórios, incluindo ao menos uma letra e um número, sem caracteres
+  visualmente ambíguos nem dados pessoais do morador.
+- A senha provisória deve valer por 72 horas a partir do pré-cadastro.
 - O sistema deve armazenar somente o hash da senha provisória no mesmo campo usado pela senha comum.
 - Após o pré-cadastro, o morador e seu vínculo residencial devem ser criados com situação pendente.
 - A senha provisória deve ser exibida ao gestor somente no resultado da criação para que ele a comunique manualmente ao
@@ -153,7 +155,7 @@ Critérios de aceite:
 - A nova senha provisória deve seguir as mesmas regras de formação e armazenamento usadas no pré-cadastro.
 - O novo hash deve substituir o hash anterior no mesmo campo, invalidando imediatamente a senha provisória anterior.
 - A situação do morador deve permanecer pendente.
-- A senha provisória não deve possuir prazo de validade.
+- A nova senha provisória deve reiniciar o prazo de validade de 72 horas a partir da regeneração.
 - O sistema deve exibir a nova senha ao gestor somente no resultado da regeneração para comunicação manual ao morador.
 - O sistema deve registrar a alteração de senha, o gestor responsável e a data e hora, sem armazenar a senha nem seu hash
   no histórico.
